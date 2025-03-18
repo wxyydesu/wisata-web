@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('obyek_wisatas', function (Blueprint $table) {
+        Schema::create('penginapans', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_wisata', 255);
-            $table->text('deskripsi_wisata');
-            $table->unsignedBigInteger('id_kategori_wisata');
-            $table->foreignId('id_kategori_wisata')->references('id')->on('kategori_wisatas')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('nama_penginapan', 255)->unique();
+            $table->text('deskripsi');
             $table->text('fasilitas');
             $table->text('foto1')->nullable();
             $table->text('foto2')->nullable();
@@ -32,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('obyek_wisatas');
+        Schema::dropIfExists('penginapans');
     }
 };

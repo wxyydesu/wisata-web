@@ -10,6 +10,7 @@ class KategoriWisata extends Model
     use HasFactory;
 
     protected $table = 'kategori_wisata';
+    
     protected $fillable = ['kategori_wisata'];
 
     public function obyekWisata()

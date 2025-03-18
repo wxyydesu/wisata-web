@@ -10,7 +10,16 @@ class PaketWisata extends Model
     use HasFactory;
 
     protected $table = 'paket_wisata';
-    protected $fillable = ['nama_paket', 'deskripsi', 'fasilitas', 'harga_per_pack', 'foto1', 'foto2', 'foto3', 'foto4', 'foto5'];
+    
+    protected $fillable = [
+        'deskripsi',
+        'harga_per_pack',
+        'foto1',
+        'foto2',
+        'foto3',
+        'foto4',
+        'foto5'
+    ];
 
     public function reservasi()
     {

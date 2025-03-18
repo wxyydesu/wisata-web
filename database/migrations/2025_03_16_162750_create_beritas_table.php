@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('beritas', function (Blueprint $table) {
             $table->id();
-            $table->string('judul', 255);
+            $table->string('judul', 255)->unique();
             $table->text('berita');
             $table->dateTime('tgl_post');
-            $table->unsignedBigInteger('id_kategori_berita');
-            $table->foreignId('id_kategori_berita')->references('id')->on('kategori_beritas')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('id_kategori_berita'); // Hapus duplikatnya
             $table->text('foto')->nullable();
             $table->timestamps();
+    
+            // Foreign key constraint
+            $table->foreign('id_kategori_berita')->references('id')->on('kategori_beritas')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

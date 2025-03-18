@@ -10,5 +10,15 @@ class Penginapan extends Model
     use HasFactory;
 
     protected $table = 'penginapan';
-    protected $fillable = ['nama_penginapan', 'deskripsi', 'fasilitas', 'foto1', 'foto2', 'foto3', 'foto4', 'foto5'];
+    
+    protected $fillable = [
+        'nama_penginapan',
+        'deskripsi',
+        'fasilitas',
+        'foto1',
+        'foto2',
+        'foto3',
+        'foto4',
+        'foto5'
+    ];
 }

@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('reservasis', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_pelanggan');
-            $table->foreignId('id_pelanggan')->references('id')->on('pelanggans')->onDelete('cascade')->onUpdate('cascade');
-            $table->unsignedBigInteger('id_paket');
-            $table->foreignId('id_paket')->references('id')->on('paket_wisatas')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('id_pelanggan')->constrained('pelanggans')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('id_paket')->constrained('paket_wisatas')->onDelete('cascade')->onUpdate('cascade');
             $table->dateTime('tgl_reservasi');
             $table->integer('harga');
             $table->integer('jumlah_peserta');
@@ -24,7 +22,7 @@ return new class extends Migration
             $table->float('nilai_diskon')->nullable();
             $table->bigInteger('total_bayar');
             $table->text('file_bukti_tf')->nullable();
-            $table->enum('status_reservasi', ['pesan', 'dibayar', 'selesai'])->default('pesan');
+            $table->enum('status_reservasi', ['pesan', 'dibayar', 'selesai'])->default('pesan'); // Perbaikan default enum
             $table->timestamps();
         });
     }
