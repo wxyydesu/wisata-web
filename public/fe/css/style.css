@@ -138,7 +138,7 @@ body a{
 .sb-search {
 	position: absolute;
 	top:7px;
-	right:0px;
+	right:10px;
 	width: 0%;
 	min-width: 45px;
 	height: 45px;
@@ -2030,4 +2030,71 @@ h4.m_11 {
 	float: none;
 	margin: 10px 0;
  }
+}
+
+/* Auth buttons styling */
+.auth_buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.auth_buttons .btn {
+    padding: 8px 15px;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.auth_buttons .btn-primary {
+    background: #000;
+    color: #fff;
+}
+
+.auth_buttons .btn-primary:hover {
+    background: #555;
+}
+
+.auth_buttons .btn-secondary {
+    background: #555;
+    color: #fff;
+}
+
+.auth_buttons .btn-secondary:hover {
+    background: #000;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .header_right {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .auth_buttons .btn {
+        font-size: 0.75em;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header_right {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .auth_buttons {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth_buttons .btn {
+        font-size: 0.7em;
+        padding: 5px 8px;
+    }
 }

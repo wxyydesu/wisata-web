@@ -20,8 +20,6 @@ class AuthController extends Controller
           return view("auth.register");
      }              
 
-
-    // Handle user registration
     // Handle user registration
     public function registerUser(Request $request)
     {
@@ -52,7 +50,7 @@ class AuthController extends Controller
             Auth::login($user);
             $request->session()->put('loginId', $user->id);
 
-            return redirect()->route('home.index')->with('success', 'Registrasi berhasil!');
+            return redirect()->route('login')->with('success', 'Registrasi berhasil!');
         } else {
             return back()->with('fail', 'Terjadi kesalahan.');
         }
