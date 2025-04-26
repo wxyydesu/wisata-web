@@ -116,10 +116,21 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 				   </ul>
 				   <!-- Add Login and Sign Up buttons -->
 				   <div class="auth_buttons" style="display: flex; gap: 10px;">
-					   <a href="login.html" class="btn btn-primary">Login</a>
-					   <a href="signup.html" class="btn btn-secondary">Sign Up</a>
+					@if(session('loginId'))
+						<?php
+							// Ambil data pengguna berdasarkan ID yang ada di session
+							$user = \App\Models\User::find(session('loginId'));
+						?>
+						<form action="{{route('logout')}}" method="POST">					
+							@csrf
+								<button type="submit" class="btn">Logout</button>
+						</form>
+						@else
+						<button onCLick="window.location.href='{{route('login')}}'" class="btn btn-primary">Login</button>
+						<button onCLick="window.location.href='{{route('register')}}'" class="btn">Sign Up</button>
+					@endif	
 				   </div>
-		           <div class="clear"></div>
+		        <div class="clear"></div>
 	       </div>
 	      </div>
 		 </div>

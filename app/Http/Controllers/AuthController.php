@@ -26,7 +26,9 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:5|max:12',
+            'no_hp' => 'required|unique:users,no_hp',
+            'password' => 'required|min:8|max:12',
+            'level' => 'required|in:admin,bendahara,pemilik,pelanggan'
         ]);
 
         $user = new User();
@@ -34,25 +36,30 @@ class AuthController extends Controller
         $user->email = $request->email;
         $user->no_hp = $request->no_hp;
         $user->password = Hash::make($request->password);
-        $user->level = 'pelanggan';
+        $user->level = $request->level;
 
         if ($user->save()) {
-
             // ✅ Simpan data ke tabel pelanggan
-            $pelanggan = new Pelanggan();
-            $pelanggan->id_user = $user->id;
-            $pelanggan->nama_lengkap = $user->name;
-            $pelanggan->no_hp = $user->no_hp; // default / bisa dari input request juga
-            $pelanggan->alamat = '-';
-            $pelanggan->save();
+            // $pelanggan = new Pelanggan();
+            // $pelanggan->id_user = $user->id;
+            // $pelanggan->nama_lengkap = $user->name;
+            // $pelanggan->no_hp = $user->no_hp;
+            // $pelanggan->alamat = '-';
+            // $pelanggan->save();
 
-            // ✅ Login langsung
             Auth::login($user);
             $request->session()->put('loginId', $user->id);
-
-            return redirect()->route('login')->with('success', 'Registrasi berhasil!');
+            switch (Auth::user()->level) {
+                case 'admin':
+                return redirect()->intended('/admin')->with('success', 'Registrasi berhasil!');
+            case 'bendahara':
+                return redirect()->intended('/bendahara')->with('success', 'Registrasi berhasil!');
+            case 'owner':
+                return redirect()->intended('/pemilik')->with('success', 'Registrasi berhasil!');
+            }
         } else {
-            return back()->with('fail', 'Terjadi kesalahan.');
+            return back()->withErrors(['email' => 'Email atau Password Salah.']);
+            return back()->withErrors('password', 'Password minimal 8 karakter.');
         }
     }
 
@@ -61,50 +68,40 @@ class AuthController extends Controller
     public function loginUser(Request $request)
     {
         // Validate credentials
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:5',
+            'password' => 'required|min:8',
         ]);
-    
+
         $user = User::where('email','=', $request->email)->first();
-          if($user){
-               if(Hash::check($request->password, $user->password)) {
-                    $request->session()->put('loginId', $user->id);
-                    
-                    // Redirect berdasarkan level user
-                    switch($user->level) {
-                        case 'admin':
-                            return redirect()->route('be.admin.index');
-                        case 'kurir':
-                            return redirect()->route('fe.home.index');
-                        case 'owner':
-                            return redirect()->route('fe.home.index');
-                        case 'pelanggan':
-                            return redirect()->route('fe.home.index');
-                        default:
-                            return redirect()->route('fe.home.index');
-                    }
-               }else{
-                    return back()->with('fail','Password not matches.'); 
-               }
-          }else{
-               return back()->with('fail','This email is not registered.');
-          }
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            $request->session()->put('loginId', $user->id);
+
+            // Redirect based on user role
+            switch (Auth::user()->level) {
+                case 'admin':
+                return redirect()->intended('/admin');
+            case 'bendahara':
+                return redirect()->intended('/bendahara');
+            case 'owner':
+                return redirect()->intended('/pemilik');
+            }
+        }
+
+        return back()->withErrors(['email' => 'Email atau password salah']);
     }
+
     // Handle logout
     public function logout(Request $request)
     {
-        // Clear user session data
+        Auth::logout();
+
         $request->session()->forget('loginId');
-        
-        // Invalidate the session
         $request->session()->invalidate();
-        
-        // Regenerate CSRF token
         $request->session()->regenerateToken();
-        
-        // Redirect to login page instead of home
-        return redirect()->route('login')->with('success', 'Logged out successfully');
+
+        return redirect()->back();
     }
 
     /**

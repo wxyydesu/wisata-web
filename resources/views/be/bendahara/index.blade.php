@@ -1,0 +1,1 @@
+@extends('be.master')

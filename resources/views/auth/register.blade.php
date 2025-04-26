@@ -61,23 +61,22 @@
                     @endif
                   </div>
                   <div class="form-group">
-                    <input name="no_hp" type="no_hp" class="form-control form-control-lg" id="no_hp" placeholder="Phone Number" required value="{{ old('no_hp') }}">
+                    <input name="no_hp" type="no_hp" class="form-control form-control-lg" id="no_hp" placeholder="Phone Number" required>
                     @if ($errors->has('no_hp'))
                         <span class="invalid-feedback" style="display: block;" role="alert">
                             <strong>{{ $errors->first('no_hp') }}</strong>
                         </span>
                     @endif
                   </div>
-                  {{-- <div class="form-group">
-                    <select class="form-select form-select-lg" id="exampleFormControlSelect2">
-                      <option>Country</option>
-                      <option>United States of America</option>
-                      <option>United Kingdom</option>
-                      <option>India</option>
-                      <option>Germany</option>
-                      <option>Argentina</option>
+                  <div class="form-group">
+                    <select class="form-select form-select-lg" id="level" name="level" placeholder="Role" required>
+                      <option selected>Select Role</option>
+                      <option value="admin">Admin</option>
+                      <option value="bendahara">Bendahara</option>
+                      <option value="pemilik">Owner</option>
+                      <option value="pelanggan">Pelanggan</option>
                     </select>
-                  </div> --}}
+                  </div>
                   <div class="form-group">
                     <input name="password" type="password" class="form-control form-control-lg" id="password" placeholder="Password">
                     @if ($errors->has('password'))
@@ -107,7 +106,7 @@
                     <button type="submit" class="btn btn-block btn-primary btn-lg fw-medium auth-form-btn">SIGN UP</button>
                     {{-- <a class="btn btn-block btn-primary btn-lg fw-medium auth-form-btn" href="{{ route('login') }}">SIGN UP</a> --}}
                   </div>
-                  <div class="text-center mt-4 fw-light"> Already have an account? <a href="{{ route('login') }}" class="text-primary">Login</a>
+                  <div class="text-center mt-4 fw-light"> Already have an account? <a href="{{ url('/login') }}" class="text-primary">Login</a>
                   </div>
                 </form>
                 

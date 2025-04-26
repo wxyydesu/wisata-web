@@ -1,15 +1,18 @@
-<?php
+ <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Middleware\CheckUserLevel;
+use App\Http\Middleware\CheckPelanggan;
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::resource('pelanggan', App\Http\Controllers\PelangganController::class);
-Route::resource('users', App\Http\Controllers\UsersController::class);
-Route::resource('karyawan', App\Http\Controllers\KaryawanController::class);
+
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
+
 Route::resource('obyek-wisata', App\Http\Controllers\ObyekWisataController::class);
 Route::resource('paket-wisata', App\Http\Controllers\PaketWisataController::class);
 Route::resource('kategori-wisata', App\Http\Controllers\KategoriWisataController::class);
@@ -19,12 +22,38 @@ Route::resource('reservasi', App\Http\Controllers\ReservasiController::class);
 
 
 // Registrasi (Hanya untuk Pelanggan)
-Route::get('/register', [App\Http\Controllers\AuthController::class, 'register'])->middleware('guest')->name('register');
-Route::post('/register', [App\Http\Controllers\AuthController::class, 'registerUser'])->middleware('guest')->name('register-user');
-
-// Login
-Route::get('/login', [App\Http\Controllers\AuthController::class, 'login'])->middleware('guest')->name('login');
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'loginUser'])->middleware('guest')->name('login-user');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login');
+    Route::post('/login', [App\Http\Controllers\AuthController::class, 'loginUser'])->name('login-user');
+    Route::get('/register', [App\Http\Controllers\AuthController::class, 'register'])->name('register');
+    Route::post('/register', [App\Http\Controllers\AuthController::class, 'registerUser'])->name('register-user');
+});                    
 
 // Logout (Hanya bisa diakses oleh user yang sudah login)
 Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::get('/dashboard', function () {
+    $user = Auth::user();
+
+    if ($user->level === 'admin') {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->level === 'bendahara') {
+        return redirect()->route('bendahara.dashboard');
+    } elseif ($user->level === 'pemilik') {
+        return redirect()->route('owner.dashboard');
+    }
+
+    return redirect()->route('logout')->withErrors('Unauthorized access.');
+})->middleware('auth')->name('dashboard');
+
+Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])
+    ->middleware(['auth',  CheckUserLevel::class . ':admin']);
+
+Route::get('/bendahara', [App\Http\Controllers\BendaharaController::class, 'index'])
+    ->middleware(['auth', CheckUserLevel::class . ':bendahara']);
+
+Route::get('/owner', [App\Http\Controllers\OwnerController::class, 'index'])
+    ->middleware(['auth', CheckUserLevel::class . ':owner']);
+
+Route::get('/profilepelanggan', [App\Http\Controllers\PelangganController::class, 'profilePelanggan'])
+    ->middleware(['auth', CheckPelanggan::class]);

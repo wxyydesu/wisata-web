@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
-class UsersController extends Controller
+class AdminController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('be.manage.index', [
-            'title' => 'Home',
-            $users = User::all()
+        return view('be.admin.index', [
+            'title' => 'Admin'
         ]);
     }
 
@@ -24,7 +22,7 @@ class UsersController extends Controller
      */
     public function create()
     {
-        return view('be.manage.create');
+        //
     }
 
     /**

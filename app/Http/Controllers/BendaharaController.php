@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
-class UsersController extends Controller
+class BendaharaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('be.manage.index', [
-            'title' => 'Home',
-            $users = User::all()
-        ]);
+        {
+            return view('be.bendahara.index', [
+                'title' => 'Bendahara'
+            ]);
+        }
     }
 
     /**
@@ -24,7 +23,7 @@ class UsersController extends Controller
      */
     public function create()
     {
-        return view('be.manage.create');
+        //
     }
 
     /**

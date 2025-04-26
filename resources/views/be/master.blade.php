@@ -54,13 +54,16 @@
       <a class="navbar-brand ms-2" href="#">Dashboard</a>
       <div class="dropdown">
         <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          <i class="bi bi-person-circle"></i> Admin
+          <i class="bi bi-person-circle"></i> {{ auth()->user()->name }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="#">Profile</a></li>
           <li><a class="dropdown-item" href="#">Settings</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#">Logout</a></li>
+          <li><form action="{{ route('logout') }}" method="POST" style="display: inline;">
+            @csrf
+            <button type="submit" class="dropdown-item">Logout</button>
+          </form></li>
         </ul>
       </div>
     </div>
@@ -68,62 +71,25 @@
 
   <!-- Sidebar -->
   <div class="sidebar bg-dark text-white" id="sidebar">
-    <a href="#"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
-    <a href="#"><i class="bi bi-people me-2"></i> Users</a>
-    <a href="#"><i class="bi bi-bar-chart me-2"></i> Reports</a>
-    <a href="#"><i class="bi bi-gear me-2"></i> Settings</a>
-  </div>
+    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active show' : '' }}">
+        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+    </a>
+    <a href="{{ route('user.manage') }}" class="{{ request()->routeIs('user.manage') ? 'active show' : '' }}">
+        <i class="bi bi-people-fill me-2"></i> User Manage
+    </a>
+    <a href="{{ route('users') }}" class="{{ request()->routeIs('users') ? 'active show' : '' }}">
+        <i class="bi bi-people me-2"></i> Users
+    </a>
+    <a href="{{ route('reports') }}" class="{{ request()->routeIs('reports') ? 'active show' : '' }}">
+        <i class="bi bi-bar-chart me-2"></i> Reports
+    </a>
+    <a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active show' : '' }}">
+        <i class="bi bi-gear me-2"></i> Settings
+    </a>
+</div>
 
   <!-- Content -->
-  <div class="content">
-    <div class="pt-4 mt-4">
-      <h2>Welcome Back, Admin!</h2>
-      <div class="row mt-4">
-        <div class="col-md-3">
-          <div class="card text-bg-primary mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Users</h5>
-              <p class="card-text fs-4">1,240</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-bg-success mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Sales</h5>
-              <p class="card-text fs-4">$35,000</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-bg-warning mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Visitors</h5>
-              <p class="card-text fs-4">4,520</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-bg-danger mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Orders</h5>
-              <p class="card-text fs-4">980</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent Activity or Chart Section -->
-      <div class="card mt-4">
-        <div class="card-header">
-          Recent Activity
-        </div>
-        <div class="card-body">
-          <p class="card-text">This is where you can place recent activity logs, tables, or charts.</p>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
