@@ -1,4 +1,4 @@
- <?php
+<?php
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -50,10 +50,18 @@ Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])
     ->middleware(['auth',  CheckUserLevel::class . ':admin']);
 
 Route::get('/bendahara', [App\Http\Controllers\BendaharaController::class, 'index'])
-    ->middleware(['auth', CheckUserLevel::class . ':bendahara']);
+    ->middleware(['auth', CheckUserLevel::class . ':bendahara'])
+    ->name('bendahara.dashboard');
 
 Route::get('/owner', [App\Http\Controllers\OwnerController::class, 'index'])
     ->middleware(['auth', CheckUserLevel::class . ':owner']);
 
 Route::get('/profilepelanggan', [App\Http\Controllers\PelangganController::class, 'profilePelanggan'])
     ->middleware(['auth', CheckPelanggan::class]);
+
+
+Route::prefix('admin')->middleware(['auth', CheckUserLevel::class . ':admin'])->group(function () {
+    Route::resource('user-manage', App\Http\Controllers\UsersController::class)->names([
+        'index' => 'user.manage',
+    ]);
+});

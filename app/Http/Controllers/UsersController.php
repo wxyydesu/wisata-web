@@ -13,18 +13,22 @@ class UsersController extends Controller
      */
     public function index()
     {
+        $users = User::all(); // <- Ditaruh di atas
         return view('be.manage.index', [
-            'title' => 'Home',
-            $users = User::all()
+            'title' => 'User Management',
+            'users' => $users, // <- Ini, kasih key 'users' dan value $users
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view('be.manage.create');
+        return view('be.manage.create', [
+            'title' => 'Create User'
+        ]);
     }
 
     /**
@@ -32,7 +36,21 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8',
+            'level' => 'required|in:admin,bendahara,pemilik,pelanggan',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'level' => $request->level,
+        ]);
+
+        return redirect()->route('user.manage')->with('success', 'User created successfully.');
     }
 
     /**
@@ -46,24 +64,38 @@ class UsersController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(User $user)
     {
-        //
+        return view('be.manage.edit', ['user' => $user]);
+
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'level' => 'required|in:admin,bendahara,pemilik,pelanggan',
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'level' => $request->level,
+        ]);
+
+        return redirect()->route('user.manage')->with('success', 'User updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return redirect()->route('user.manage')->with('success', 'User deleted successfully.');
     }
 }

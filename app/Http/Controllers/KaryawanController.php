@@ -11,7 +11,9 @@ class KaryawanController extends Controller
      */
     public function index()
     {
-        //
+        return view('fe.home.index', [
+            'title' => 'Home'
+        ]);
     }
 
     /**

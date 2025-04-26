@@ -12,8 +12,8 @@ class OwnerController extends Controller
     public function index()
     {
         {
-            return view('be.owner.index', [
-                'title' => 'Owner'
+            return view('fe.home.index', [
+                'title' => 'Home'
             ]);
         }
     }

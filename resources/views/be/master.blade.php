@@ -71,25 +71,32 @@
 
   <!-- Sidebar -->
   <div class="sidebar bg-dark text-white" id="sidebar">
-    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active show' : '' }}">
+    @php
+        $user = Auth::user();
+        $routePrefix = $user->level;
+    @endphp
+    <a href="{{ url("/$routePrefix") }}" class="{{ request()->routeIs('dashboard') ? 'active show' : '' }}">
         <i class="bi bi-speedometer2 me-2"></i> Dashboard
     </a>
     <a href="{{ route('user.manage') }}" class="{{ request()->routeIs('user.manage') ? 'active show' : '' }}">
         <i class="bi bi-people-fill me-2"></i> User Manage
     </a>
-    <a href="{{ route('users') }}" class="{{ request()->routeIs('users') ? 'active show' : '' }}">
+    <a href="" class="{{ request()->routeIs('users') ? 'active show' : '' }}">
         <i class="bi bi-people me-2"></i> Users
     </a>
-    <a href="{{ route('reports') }}" class="{{ request()->routeIs('reports') ? 'active show' : '' }}">
+    <a href="" class="{{ request()->routeIs('reports') ? 'active show' : '' }}">
         <i class="bi bi-bar-chart me-2"></i> Reports
     </a>
-    <a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active show' : '' }}">
+    <a href="" class="{{ request()->routeIs('settings') ? 'active show' : '' }}">
         <i class="bi bi-gear me-2"></i> Settings
     </a>
 </div>
 
   <!-- Content -->
-  
+  <div class="content">
+    @yield('content')
+  </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>

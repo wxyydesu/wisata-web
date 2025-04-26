@@ -80,12 +80,10 @@ class AuthController extends Controller
 
             // Redirect based on user role
             switch (Auth::user()->level) {
-                case 'admin':
+            case 'admin':
                 return redirect()->intended('/admin');
-            case 'bendahara':
-                return redirect()->intended('/bendahara');
-            case 'owner':
-                return redirect()->intended('/pemilik');
+            default:
+                return redirect('/home');
             }
         }
 
