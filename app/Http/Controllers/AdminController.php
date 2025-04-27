@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -12,8 +13,21 @@ class AdminController extends Controller
      */
     public function index()
     {
+        $now = Carbon::now();
+
+        $greeting = '';
+
+        if ($now->hour >= 5 && $now->hour < 12) {
+            $greeting = 'Good Morning';
+        } elseif ($now->hour >= 12 && $now->hour < 18) {
+            $greeting = 'Good Evening';
+        } else {
+            $greeting = 'Good Night';
+        }
+
         return view('be.admin.index', [
-            'title' => 'Admin'
+            'title' => 'Admin',
+            'greeting' => $greeting,
         ]);
     }
 

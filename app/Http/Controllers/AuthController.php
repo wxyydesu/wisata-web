@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Pelanggan;
+use App\Models\Karyawan;
 
 class AuthController extends Controller
 {
@@ -24,30 +25,42 @@ class AuthController extends Controller
     public function registerUser(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'no_hp' => 'required|unique:users,no_hp',
-            'password' => 'required|min:8|max:12',
-            'level' => 'required|in:admin,bendahara,pemilik,pelanggan'
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6|confirmed',
+            'level' => 'required|in:admin,bendahara,pelanggan,pemilik',
+            'nama' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:15',
+            'alamat' => 'nullable|string',
         ]);
 
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->no_hp = $request->no_hp;
-        $user->password = Hash::make($request->password);
-        $user->level = $request->level;
+        $user = User::create([
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'level' => $request->level,
+            'aktif' => 1,
+        ]);
+    
+        if ($request->level == 'pelanggan') {
+            // Insert ke tabel pelanggan
+            Pelanggan::create([
+                'id_user' => $user->id,
+                'nama_lengkap' => $request->nama,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat,
+            ]);
+        } else {
+            // Insert ke tabel karyawan
+            Karyawan::create([
+                'id_user' => $user->id,
+                'nama_karyawan' => $request->nama,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat,
+                'jabatan' => $request->level,
+            ]);
+        }
 
         if ($user->save()) {
-            // ✅ Simpan data ke tabel pelanggan
-            // $pelanggan = new Pelanggan();
-            // $pelanggan->id_user = $user->id;
-            // $pelanggan->nama_lengkap = $user->name;
-            // $pelanggan->no_hp = $user->no_hp;
-            // $pelanggan->alamat = '-';
-            // $pelanggan->save();
-
-            Auth::login($user);
+            // Auth::login($user);
             $request->session()->put('loginId', $user->id);
             switch (Auth::user()->level) {
                 case 'admin':

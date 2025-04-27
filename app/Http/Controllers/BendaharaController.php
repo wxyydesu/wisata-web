@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class BendaharaController extends Controller
 {
@@ -12,8 +13,21 @@ class BendaharaController extends Controller
     public function index()
     {
         {
+            $now = Carbon::now();
+
+            $greeting = '';
+
+            if ($now->hour >= 5 && $now->hour < 12) {
+                $greeting = 'Good Morning';
+            } elseif ($now->hour >= 12 && $now->hour < 18) {
+                $greeting = 'Good Evening';
+            } else {
+                $greeting = 'Good Night';
+            }
+
             return view('be.bendahara.index', [
-                'title' => 'Bendahara'
+                'title' => 'Bendahara',
+                'greeting' => $greeting,
             ]);
         }
     }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class UsersController extends Controller
 {
@@ -13,10 +16,23 @@ class UsersController extends Controller
      */
     public function index()
     {
-        $users = User::all(); // <- Ditaruh di atas
+        $users = User::all();
+        $now = Carbon::now();
+
+        $greeting = '';
+
+        if ($now->hour >= 5 && $now->hour < 12) {
+            $greeting = 'Good Morning';
+        } elseif ($now->hour >= 12 && $now->hour < 18) {
+            $greeting = 'Good Evening';
+        } else {
+            $greeting = 'Good Night';
+        }
         return view('be.manage.index', [
             'title' => 'User Management',
-            'users' => $users, // <- Ini, kasih key 'users' dan value $users
+            'users' => $users,
+            'greeting' => $greeting,
+            'datas' => User::all(),
         ]);
     }
 
@@ -26,8 +42,20 @@ class UsersController extends Controller
      */
     public function create()
     {
+        $now = Carbon::now();
+
+        $greeting = '';
+
+        if ($now->hour >= 5 && $now->hour < 12) {
+            $greeting = 'Good Morning';
+        } elseif ($now->hour >= 12 && $now->hour < 18) {
+            $greeting = 'Good Evening';
+        } else {
+            $greeting = 'Good Night';
+        }
         return view('be.manage.create', [
-            'title' => 'Create User'
+            'title' => 'Create User',
+            'greeting' => $greeting,
         ]);
     }
 
@@ -39,6 +67,7 @@ class UsersController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users',
+            'no_hp' => 'required|unique:users,no_hp',
             'password' => 'required|min:8',
             'level' => 'required|in:admin,bendahara,pemilik,pelanggan',
         ]);
@@ -46,6 +75,7 @@ class UsersController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'no_hp' => $request->no_hp,
             'password' => Hash::make($request->password),
             'level' => $request->level,
         ]);
@@ -66,8 +96,11 @@ class UsersController extends Controller
      */
     public function edit(User $user)
     {
-        return view('be.manage.edit', ['user' => $user]);
-
+        return view('be.manage.edit', [
+            'user' => $user,
+            'title' => 'Edit User',
+            'data' => $user,
+        ]);
     }
 
     /**
@@ -95,7 +128,11 @@ class UsersController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
-        return redirect()->route('user.manage')->with('success', 'User deleted successfully.');
+        try {
+            $user->delete();
+            return redirect()->route('user.manage')->with('success', 'User deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('user.manage')->with('error', 'Failed to delete user: ' . $e->getMessage());
+        }
     }
 }

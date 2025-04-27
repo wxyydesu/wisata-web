@@ -11,7 +11,7 @@ use App\Http\Middleware\CheckPelanggan;
 
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::resource('obyek-wisata', App\Http\Controllers\ObyekWisataController::class);
 Route::resource('paket-wisata', App\Http\Controllers\PaketWisataController::class);
@@ -37,31 +37,40 @@ Route::get('/dashboard', function () {
 
     if ($user->level === 'admin') {
         return redirect()->route('admin.dashboard');
-    } elseif ($user->level === 'bendahara') {
+    }
+    if ($user->level === 'bendahara') {
         return redirect()->route('bendahara.dashboard');
-    } elseif ($user->level === 'pemilik') {
-        return redirect()->route('owner.dashboard');
     }
 
-    return redirect()->route('logout')->withErrors('Unauthorized access.');
+    return redirect()->back()->withErrors('Unauthorized access.');
 })->middleware('auth')->name('dashboard');
 
 Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])
-    ->middleware(['auth',  CheckUserLevel::class . ':admin']);
+    ->middleware(['auth',  CheckUserLevel::class . ':admin'])
+    ->name('admin.dashboard');
 
 Route::get('/bendahara', [App\Http\Controllers\BendaharaController::class, 'index'])
     ->middleware(['auth', CheckUserLevel::class . ':bendahara'])
     ->name('bendahara.dashboard');
 
 Route::get('/owner', [App\Http\Controllers\OwnerController::class, 'index'])
-    ->middleware(['auth', CheckUserLevel::class . ':owner']);
+    ->middleware(['auth', CheckUserLevel::class . ':owner'])
+    ->name('owner');
 
 Route::get('/profilepelanggan', [App\Http\Controllers\PelangganController::class, 'profilePelanggan'])
     ->middleware(['auth', CheckPelanggan::class]);
 
-
-Route::prefix('admin')->middleware(['auth', CheckUserLevel::class . ':admin'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::resource('user-manage', App\Http\Controllers\UsersController::class)->names([
         'index' => 'user.manage',
+        'create' => 'user.create',
+        'edit' => 'user.edit',
+        'destroy' => 'user.destroy',
+        'store' => 'user.store',
+        'update' => 'user.update',
     ]);
 });
+    
+// Route::prefix('admin')->middleware(['auth', CheckUserLevel::class . ':admin'])->group(function () {
+    
+// });

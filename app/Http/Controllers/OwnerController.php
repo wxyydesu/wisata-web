@@ -13,7 +13,7 @@ class OwnerController extends Controller
     {
         {
             return view('fe.home.index', [
-                'title' => 'Home'
+                'title' => 'Owner'
             ]);
         }
     }
