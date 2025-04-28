@@ -37,11 +37,11 @@
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($datas as $nmr => $data)
+                                    @foreach ($users as $nmr => $data)
                                     <tr>
                                         <th scope="row">{{ $nmr + 1 }}.</th>
                                         <td class="py-1">
-                                            @if ($data['photo'] != null)
+                                            @if (!empty($data['photo']))
                                                 <img src="{{ asset('storage/' . $data['photo']) }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
                                             @else
                                                 <img src="{{ asset('images/default.png') }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
@@ -70,13 +70,13 @@
 
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('user.edit', $data) }}" class="btn btn-dark btn-sm">
+                                                <a href="{{ route('user.edit', $data->id) }}" class="btn btn-dark btn-sm">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </a>
-                                                <form action="{{ route('user.destroy', $data) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?')" style="display: inline;">
+                                                <form action="{{ route('user.destroy', $data->id) }}" method="POST" id="deleteForm{{ $data->id }}" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-fw">
+                                                    <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $data->id }})">
                                                         <i class="fas fa-trash-alt me-1"></i>Delete
                                                     </button>
                                                 </form>

@@ -50,6 +50,15 @@
                     @endif
                 </div>
                 <div class="form-group">
+                    <label for="password_confirmation">Confirm Password</label>
+                    <input type="password" class="form-control" id="password_confirmation" placeholder="Confirm Password" name="password_confirmation" required>
+                    @if ($errors->has('password_confirmation'))
+                        <span class="invalid-feedback" style="display: block;" role="alert">
+                            <strong>{{ $errors->first('password_confirmation') }}</strong>
+                        </span>
+                    @endif
+                </div>                
+                <div class="form-group">
                 <label for="exampleSelectGender">Role</label>
                 <select class="form-select" id="exampleSelectGender" name="level">
                     <option selected>Select Role</option>

@@ -205,6 +205,27 @@
       <!-- page-body-wrapper ends -->
     </div>
     <!-- container-scroller -->
+    <!-- SweetAlert 2 -->
+    <script>
+        function deleteConfirm(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form after confirmation
+                    document.getElementById('deleteForm' + id).submit();
+                }
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- plugins:js -->
     <script src="{{ asset('be/assets/vendors/js/vendor.bundle.base.js') }}"></script>
     <script src="{{ asset('be/assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
