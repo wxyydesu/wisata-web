@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Pelanggan;
+use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -65,23 +67,43 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'no_hp' => 'required|unique:users,no_hp',
-            'password' => 'required|min:8',
-            'level' => 'required|in:admin,bendahara,pemilik,pelanggan',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6|confirmed',
+            'level' => 'required|in:admin,bendahara,pelanggan,owner',
+            'nama' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:15',
+            'alamat' => 'nullable|string',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'no_hp' => $request->no_hp,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->password),  
             'level' => $request->level,
+            'aktif' => 1,
         ]);
 
-        return redirect()->route('user.manage')->with('success', 'User created successfully.');
+        if ($request->level == 'pelanggan') {
+            Pelanggan::create([
+                'id_user' => $user->id,
+                'nama_lengkap' => $request->nama,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat,
+            ]);
+        } else {
+            Karyawan::create([
+                'id_user' => $user->id,
+                'nama_karyawan' => $request->nama,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat,
+                'jabatan' => $request->level,
+            ]);
+        }
+
+        return redirect('user-manage')->with('success', 'User berhasil ditambahkan.');
     }
+
 
     /**
      * Display the specified resource.
@@ -106,33 +128,66 @@ class UsersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user_manage)
     {
+        $user = User::findOrFail($user_manage);
+
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'level' => 'required|in:admin,bendahara,pemilik,pelanggan',
+            'email' => 'required|email|unique:users,email,' . $user_manage->id,
+            'password' => 'nullable|min:6|confirmed',
+            'level' => 'required|in:admin,bendahara,pelanggan,owner',
+            'name' => 'required|string|max:255',
+            'no_hp' => 'required|string|max:15',
+            'alamat' => 'nullable|string',
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'level' => $request->level,
-        ]);
+        $user->email = $request->email;
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->level = $request->level;
+        $user->save();
 
-        return redirect()->route('user.manage')->with('success', 'User updated successfully.');
+        // Update Pelanggan atau Karyawan
+        if ($user->level == 'pelanggan') {
+            $pelanggan = Pelanggan::where('id_user', $user->id)->first();
+            if ($pelanggan) {
+                $pelanggan->update([
+                    'nama_lengkap' => $request->name,
+                    'no_hp' => $request->no_hp,
+                    'alamat' => $request->alamat,
+                ]);
+            }
+        } else {
+            $karyawan = Karyawan::where('id_user', $user->id)->first();
+            if ($karyawan) {
+                $karyawan->update([
+                    'nama_karyawan' => $request->name,
+                    'no_hp' => $request->no_hp,
+                    'alamat' => $request->alamat,
+                    'jabatan' => $request->level,
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'User berhasil diupdate.');
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(string $id)
     {
-        try {
-            $user->delete();
-            return redirect()->route('user.manage')->with('success', 'User deleted successfully.');
-        } catch (\Exception $e) {
-            return redirect()->route('user.manage')->with('error', 'Failed to delete user: ' . $e->getMessage());
-        }
+        $user = User::findOrFail($id);
+
+        // Hapus data terkait di Pelanggan atau Karyawan
+        Pelanggan::where('id_user', $user->id)->delete();
+        Karyawan::where('id_user', $user->id)->delete();
+
+        $user->delete();
+
+        return redirect()->back()->with('success', 'User berhasil dihapus.');
     }
+
 }

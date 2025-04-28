@@ -27,6 +27,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">No</th>
+                                        <th scope="col">Photo</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Phone Number</th>
                                         <th scope="col">Role</th>
@@ -39,10 +40,16 @@
                                     @foreach ($datas as $nmr => $data)
                                     <tr>
                                         <th scope="row">{{ $nmr + 1 }}.</th>
-
+                                        <td class="py-1">
+                                            @if ($data['photo'] != null)
+                                                <img src="{{ asset('storage/' . $data['photo']) }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
+                                            @else
+                                                <img src="{{ asset('images/default.png') }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
+                                            @endif
+                                        </td>
                                         <td class="py-1">
                                             @if (strlen($data['name']) > 10)
-                                                <img src="{{ asset('assets/images/faces/face1.jpg') }}" alt="image" class="me-2" width="30" height="30" />
+                                                
                                                 {{ substr($data['name'], 0, 10) . '...' }}
                                             @else
                                                 {{ $data['name'] }}

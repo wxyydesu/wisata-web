@@ -25,16 +25,18 @@ class AuthController extends Controller
     public function registerUser(Request $request)
     {
         $request->validate([
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-            'level' => 'required|in:admin,bendahara,pelanggan,pemilik',
-            'nama' => 'required|string|max:255',
+            'password' => 'required|min:6',
+            'level' => 'required|in:admin,bendahara,pelanggan,owner',
             'no_hp' => 'required|string|max:15',
-            'alamat' => 'nullable|string',
+            'alamat' => 'string',
         ]);
 
         $user = User::create([
+            'name' => $request->name,
             'email' => $request->email,
+            'no_hp' => $request->no_hp,
             'password' => Hash::make($request->password),
             'level' => $request->level,
             'aktif' => 1,
@@ -44,7 +46,7 @@ class AuthController extends Controller
             // Insert ke tabel pelanggan
             Pelanggan::create([
                 'id_user' => $user->id,
-                'nama_lengkap' => $request->nama,
+                'nama_lengkap' => $request->name,
                 'no_hp' => $request->no_hp,
                 'alamat' => $request->alamat,
             ]);
@@ -52,28 +54,31 @@ class AuthController extends Controller
             // Insert ke tabel karyawan
             Karyawan::create([
                 'id_user' => $user->id,
-                'nama_karyawan' => $request->nama,
+                'nama_karyawan' => $request->name,
                 'no_hp' => $request->no_hp,
                 'alamat' => $request->alamat,
                 'jabatan' => $request->level,
             ]);
         }
 
-        if ($user->save()) {
-            // Auth::login($user);
-            $request->session()->put('loginId', $user->id);
-            switch (Auth::user()->level) {
-                case 'admin':
+        Auth::login($user);
+        $request->session()->put('loginId', $user->id);
+
+        switch (Auth::user()->level) {
+            case 'admin':
                 return redirect()->intended('/admin')->with('success', 'Registrasi berhasil!');
             case 'bendahara':
                 return redirect()->intended('/bendahara')->with('success', 'Registrasi berhasil!');
             case 'owner':
-                return redirect()->intended('/pemilik')->with('success', 'Registrasi berhasil!');
-            }
-        } else {
-            return back()->withErrors(['email' => 'Email atau Password Salah.']);
-            return back()->withErrors('password', 'Password minimal 8 karakter.');
+                return redirect()->intended('/owner')->with('success', 'Registrasi berhasil!');
+            case 'pelanggan':
+                return redirect('/home')->with('success', 'Registrasi berhasil!');
+            default:
+                return redirect('/')->with('success', 'Registrasi berhasil!');
         }
+        return back()->withErrors(['email' => 'Email atau Password Salah.']);
+        return back()->withErrors('password', 'Password minimal 8 karakter.');
+
     }
 
 
@@ -83,7 +88,7 @@ class AuthController extends Controller
         // Validate credentials
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:8',
+            'password' => 'required|min:6',
         ]);
 
         $user = User::where('email','=', $request->email)->first();

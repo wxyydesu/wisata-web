@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('alamat');
             $table->string('no_hp', 15);
             $table->enum('jabatan', ['admin', 'administrasi', 'bendahara', 'pemilik']);
+            $table->timestamps();
             $table->unsignedBigInteger('id_user');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });

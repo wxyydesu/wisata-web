@@ -138,40 +138,8 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 	</div>
 	<div class="banner">
 	<!-- start slider -->
-       <div id="fwslider">
-         <div class="slider_container">
-            <div class="slide"> 
-                <!-- Slide image -->
-               <img src="{{asset('fe/images/slider1.jpg')}}" class="img-responsive" alt=""/>
-                <!-- /Slide image -->
-                <!-- Texts container -->
-                <div class="slide_content">
-                    <div class="slide_content_wrap">
-                        <!-- Text title -->
-                        <h1 class="title">Run Over<br>Everything</h1>
-                        <!-- /Text title -->
-                        <div class="button"><a href="#">See Details</a></div>
-                    </div>
-                </div>
-               <!-- /Texts container -->
-            </div>
-            <!-- /Duplicate to create more slides -->
-            <div class="slide">
-               <img src="{{asset('fe/images/slider2.jpg')}}" class="img-responsive" alt=""/>
-                <div class="slide_content">
-                    <div class="slide_content_wrap">
-                        <h1 class="title">Run Over<br>Everything</h1>
-                       	<div class="button"><a href="#">See Details</a></div>
-                    </div>
-                </div>
-            </div>
-            <!--/slide -->
-        </div>
-        <div class="timers"></div>
-        <div class="slidePrev"><span></span></div>
-        <div class="slideNext"><span></span></div>
-       </div>
-       <!--/slider -->
+       @yield('slider')
+    <!--/slider -->
       </div>
 	  <div class="main">
 		<div class="content-top">
@@ -241,7 +209,7 @@ License URL: http://creativecommons.org/licenses/by/3.0/
                         <h2>Hover Style #9</h2>
                         <p>Lorem ipsum dolor sit amet, consectetuer adipiscing.</p>
                       </div>
-                   </a> </div
+                   </a> </div>
                   </div>
                   <h4 class="m_4"><a href="#">nostrud exerci ullamcorper</a></h4>
                   <p class="m_5">claritatem insitam</p>

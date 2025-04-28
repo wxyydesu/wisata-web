@@ -73,7 +73,7 @@
                       <option selected>Select Role</option>
                       <option value="admin">Admin</option>
                       <option value="bendahara">Bendahara</option>
-                      <option value="pemilik">Owner</option>
+                      <option value="owner">Owner</option>
                       <option value="pelanggan">Pelanggan</option>
                     </select>
                   </div>
