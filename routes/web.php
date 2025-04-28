@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
         'update' => 'user.update',
     ]);
 });
+Route::put('user-manage/{user}', [App\Http\Controllers\UsersController::class, 'update'])->name('user.update');
     
 // Route::prefix('admin')->middleware(['auth', CheckUserLevel::class . ':admin'])->group(function () {
     

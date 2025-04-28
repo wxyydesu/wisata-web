@@ -33,7 +33,7 @@
                 </div>
                 <div class="form-group">
                     <label for="exampleInputPhone1">Phone Number</label>
-                    <input type="text" name="no_hp" class="form-control" id="exampleInputPhone1" placeholder="Phone Number">
+                    <input type="text" name="no_hp" class="form-control" id="exampleInputPhone1" placeholder="Phone Number" required>
                     @if ($errors->has('no_hp'))
                         <span class="invalid-feedback" style="display: block;" role="alert">
                             <strong>{{ $errors->first('no_hp') }}</strong>
@@ -60,8 +60,8 @@
                 </div>                
                 <div class="form-group">
                 <label for="exampleSelectGender">Role</label>
-                <select class="form-select" id="exampleSelectGender" name="level">
-                    <option selected>Select Role</option>
+                <select class="form-select" id="exampleSelectGender" name="level" required>
+                    <option selected disabled>Select Role</option>
                       <option value="admin">Admin</option>
                       <option value="bendahara">Bendahara</option>
                       <option value="owner">Owner</option>
@@ -70,13 +70,7 @@
                 </div>
                 <div class="form-group">
                 <label>Image Profile Upload</label>
-                <input type="file" name="image" class="file-upload-default">
-                <div class="input-group col-xs-12">
-                    <input type="text" class="form-control file-upload-info" disabled placeholder="Upload Image">
-                    <span class="input-group-append">
-                    <button class="file-upload-browse btn btn-primary" type="button" name="image">Upload</button>
-                    </span>
-                </div>
+                <input type="file" name="foto" class="form-control">
                 </div>
                 <div class="form-group">
                     <label for="exampleInputCity1">Address</label>
