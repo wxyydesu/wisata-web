@@ -25,7 +25,7 @@ class AdminController extends Controller
             $greeting = 'Good Night';
         }
 
-        return view('be.admin.index', [
+        return view('be.users.admin.index', [
             'title' => 'Admin',
             'greeting' => $greeting,
         ]);

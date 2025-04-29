@@ -2,63 +2,117 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ObyekWisata;
+use App\Models\KategoriWisata;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ObyekWisataController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $obyekWisatas = ObyekWisata::with('kategoriWisata')->get();
+        $greeting = $this->getGreeting();
+        
+        return view('be.objek_wisata.index', [
+            'title' => 'Objek Wisata Management',
+            'obyekWisatas' => $obyekWisatas,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $kategoris = KategoriWisata::all();
+        $greeting = $this->getGreeting();
+        
+        return view('be.objek_wisata.create', [
+            'title' => 'Create Objek Wisata',
+            'kategoris' => $kategoris,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nama_wisata' => 'required|string|max:255',
+            'deskripsi_wisata' => 'required|string',
+            'id_kategori_wisata' => 'required|exists:kategori_wisata,id',
+            'fasilitas' => 'required|string',
+            'foto1' => 'nullable|string',
+            'foto2' => 'nullable|string',
+            'foto3' => 'nullable|string',
+            'foto4' => 'nullable|string',
+            'foto5' => 'nullable|string'
+        ]);
+
+        ObyekWisata::create($validated);
+
+        return redirect()->route('objek-wisata.index')->with('success', 'Objek Wisata created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(ObyekWisata $obyekWisata)
     {
-        //
+        $greeting = $this->getGreeting();
+        
+        return view('be.objek_wisata.show', [
+            'title' => 'Detail Objek Wisata',
+            'obyekWisata' => $obyekWisata,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(ObyekWisata $obyekWisata)
     {
-        //
+        $kategoris = KategoriWisata::all();
+        $greeting = $this->getGreeting();
+        
+        return view('be.objek_wisata.edit', [
+            'title' => 'Edit Objek Wisata',
+            'obyekWisata' => $obyekWisata,
+            'kategoris' => $kategoris,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, ObyekWisata $obyekWisata)
     {
-        //
+        $validated = $request->validate([
+            'nama_wisata' => 'required|string|max:255',
+            'deskripsi_wisata' => 'required|string',
+            'id_kategori_wisata' => 'required|exists:kategori_wisata,id',
+            'fasilitas' => 'required|string',
+            'foto1' => 'nullable|string',
+            'foto2' => 'nullable|string',
+            'foto3' => 'nullable|string',
+            'foto4' => 'nullable|string',
+            'foto5' => 'nullable|string'
+        ]);
+
+        $obyekWisata->update($validated);
+
+        return redirect()->route('objek-wisata.index')->with('success', 'Objek Wisata updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(ObyekWisata $obyekWisata)
     {
-        //
+        $obyekWisata->delete();
+        return redirect()->route('objek-wisata.index')->with('success', 'Objek Wisata deleted successfully.');
+    }
+
+    private function getGreeting()
+    {
+        $hour = now()->hour;
+        
+        if ($hour < 12) {
+            return 'Selamat Pagi';
+        } elseif ($hour < 15) {
+            return 'Selamat Siang';
+        } elseif ($hour < 18) {
+            return 'Selamat Sore';
+        } else {
+            return 'Selamat Malam';
+        }
     }
 }

@@ -8,8 +8,8 @@
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="d-flex justify-content-end mb-3">
-            <a href="{{ route('user_create') }}" class="btn btn-primary">
-                <i class="fa fa-plus-circle me-2"></i>Add User
+            <a href="{{ route('reservasi_create') }}" class="btn btn-primary">
+                <i class="fa fa-plus-circle me-2"></i>Add Reservasi
             </a>
         </div>
 
@@ -17,9 +17,9 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Users Management</h4>
+                        <h4 class="card-title">Reservasi Management</h4>
                         <p class="card-description">
-                            User Table <code>Add | Edit | Remove</code>
+                            Reservasi Table <code>Add | Edit | Remove</code>
                         </p>
 
                         <div class="table-responsive">
@@ -37,7 +37,7 @@
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($users as $nmr => $data)
+                                    @foreach ($reservasis as $nmr => $data)
                                     <tr>
                                         <th scope="row">{{ $nmr + 1 }}.</th>
 
@@ -66,7 +66,7 @@
                                             {{ ucfirst($data['level']) }}
                                             @if ($data['level'] === 'admin' || $data['level'] === 'bendahara' || $data['level'] === 'owner')
                                                 @php
-                                                    $jabatan = \App\Models\Karyawan::where('id_user', $data->id)->first()?->jabatan;
+                                                    $jabatan = \App\Models\Karyawan::where('reservasi', $data->id)->first()?->jabatan;
                                                 @endphp
                                                 @if ($jabatan)
                                                     <br><small class="text-muted">(Jabatan: {{ ucfirst($jabatan) }})</small>
@@ -81,10 +81,10 @@
 
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('user_edit', $data->id) }}" class="btn btn-dark btn-sm">
+                                                <a href="{{ route('reservasi.edit', $data->id) }}" class="btn btn-dark btn-sm">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </a>
-                                                <form action="{{ route('user_destroy', $data->id) }}" method="POST" id="deleteForm{{ $data->id }}" style="display: inline;">
+                                                <form action="{{ route('reservasi_destroy', $data->id) }}" method="POST" id="deleteForm{{ $data->id }}" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $data->id }})">

@@ -12,7 +12,7 @@
             <h4 class="card-title">Tambah User</h4>
             <p class="card-description">Form Tambah Data User</p>
 
-            <form class="forms-sample" method="POST" action="{{ route('user_store') }}" enctype="multipart/form-data">
+            <form class="forms-sample" method="POST" action="{{ route('user.store') }}" enctype="multipart/form-data">
                 @csrf
 
                 {{-- Nama --}}

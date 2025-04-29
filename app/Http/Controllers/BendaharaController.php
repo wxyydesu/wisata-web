@@ -25,7 +25,7 @@ class BendaharaController extends Controller
                 $greeting = 'Good Night';
             }
 
-            return view('be.bendahara.index', [
+            return view('be.users.bendahara.index', [
                 'title' => 'Bendahara',
                 'greeting' => $greeting,
             ]);

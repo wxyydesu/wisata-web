@@ -2,63 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Berita;
+use App\Models\KategoriBerita;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class BeritaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $beritas = Berita::with('kategoriBerita')->get();
+        $greeting = $this->getGreeting();
+        
+        return view('be.berita.index', [
+            'title' => 'Berita Management',
+            'beritas' => $beritas,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $kategoris = KategoriBerita::all();
+        $greeting = $this->getGreeting();
+        
+        return view('be.berita.create', [
+            'title' => 'Create Berita',
+            'kategoris' => $kategoris,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'ludul' => 'required|string|max:255',
+            'berita' => 'required|string',
+            'post' => 'required|date',
+            'id_kategori_bertia' => 'required|exists:kategori_bertia,id',
+            'foto' => 'nullable|string'
+        ]);
+
+        Berita::create($validated);
+
+        return redirect()->route('berita.index')->with('success', 'Berita created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Berita $berita)
     {
-        //
+        $greeting = $this->getGreeting();
+        
+        return view('be.berita.show', [
+            'title' => 'Detail Berita',
+            'berita' => $berita,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Berita $berita)
     {
-        //
+        $kategoris = KategoriBerita::all();
+        $greeting = $this->getGreeting();
+        
+        return view('be.berita.edit', [
+            'title' => 'Edit Berita',
+            'berita' => $berita,
+            'kategoris' => $kategoris,
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Berita $berita)
     {
-        //
+        $validated = $request->validate([
+            'ludul' => 'required|string|max:255',
+            'berita' => 'required|string',
+            'post' => 'required|date',
+            'id_kategori_bertia' => 'required|exists:kategori_bertia,id',
+            'foto' => 'nullable|string'
+        ]);
+
+        $berita->update($validated);
+
+        return redirect()->route('berita.index')->with('success', 'Berita updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Berita $berita)
     {
-        //
+        $berita->delete();
+        return redirect()->route('berita.index')->with('success', 'Berita deleted successfully.');
+    }
+
+    private function getGreeting()
+    {
+        $hour = now()->hour;
+        
+        if ($hour < 12) {
+            return 'Selamat Pagi';
+        } elseif ($hour < 15) {
+            return 'Selamat Siang';
+        } elseif ($hour < 18) {
+            return 'Selamat Sore';
+        } else {
+            return 'Selamat Malam';
+        }
     }
 }

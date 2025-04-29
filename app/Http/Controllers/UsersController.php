@@ -93,7 +93,7 @@ class UsersController extends Controller
             ]);
         }
 
-        return redirect()->route('user.manage')->with('success', 'User created successfully.');
+        return redirect()->route('user_manage')->with('success', 'User created successfully.');
     }
 
 
@@ -132,7 +132,7 @@ class UsersController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('user.manage')->with('success', 'User updated successfully.');
+        return redirect()->route('user_manage')->with('success', 'User updated successfully.');
     }
 
     public function destroy($id)
@@ -148,7 +148,7 @@ class UsersController extends Controller
 
         $user->delete();
 
-        return redirect()->route('user.manage')->with('success', 'User deleted successfully.');
+        return redirect()->route('user_manage')->with('success', 'User deleted successfully.');
     }
 
     private function getGreeting()
