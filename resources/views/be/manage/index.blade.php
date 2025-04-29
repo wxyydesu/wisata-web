@@ -27,7 +27,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">No</th>
-                                        <th scope="col">Photo</th>
+                                        {{-- <th scope="col">Photo</th> --}}
                                         <th scope="col">Name</th>
                                         <th scope="col">Phone Number</th>
                                         <th scope="col">Role</th>
@@ -40,13 +40,15 @@
                                     @foreach ($users as $nmr => $data)
                                     <tr>
                                         <th scope="row">{{ $nmr + 1 }}.</th>
-                                        <td class="py-1">
-                                            @if (!empty($data['photo']))
-                                                <img src="{{ asset('storage/' . $data['photo']) }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
+
+                                        {{-- <td class="py-1">
+                                            @if (!empty($data['foto']))
+                                                <img src="{{ asset('storage/' . $data['foto']) }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
                                             @else
                                                 <img src="{{ asset('images/default.png') }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
                                             @endif
-                                        </td>
+                                        </td> --}}
+                                        
                                         <td class="py-1">
                                             @if (strlen($data['name']) > 10)
                                                 
@@ -65,7 +67,7 @@
                                         </td>
 
                                         <td>
-                                            {{ strlen($data['alamat']) > 5 ? substr($data['alamat'], 0, 5) . '...' : $data['alamat'] }}
+                                            {{ !empty($data['alamat']) ? (strlen($data['alamat']) > 5 ? substr($data['alamat'], 0, 5) . '...' : $data['alamat']) : 'Not Available' }}
                                         </td>
 
                                         <td>

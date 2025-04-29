@@ -14,7 +14,10 @@
                         <h4 class="card-title">{{ isset($user) ? 'Edit User' : 'Create User' }}</h4>
                         <p class="card-description">{{ isset($user) ? 'Update user information' : 'Fill the form to create a new user' }}</p>
 
-                        <form class="forms-sample" method="POST" action="{{ route('user.update', $user->id) }}" enctype="multipart/form-data">
+                        <form class="forms-sample" 
+                              method="POST" 
+                              action="{{ route('user.update', $user->id) }}" 
+                              enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -25,7 +28,7 @@
                                        id="nama" 
                                        name="name" 
                                        placeholder="Name" 
-                                       value="{{ old('name', $user->name) }}" 
+                                       value="{{ old('name', $user->name ?? '') }}" 
                                        required>
                             </div>
 
@@ -36,7 +39,7 @@
                                        id="email" 
                                        name="email" 
                                        placeholder="Email" 
-                                       value="{{ old('email', $user->email) }}" 
+                                       value="{{ old('email', $user->email ?? '') }}" 
                                        required>
                             </div>
 
@@ -47,29 +50,36 @@
                                        id="no_hp" 
                                        name="no_hp" 
                                        placeholder="Phone Number" 
-                                       value="{{ old('no_hp', $user->no_hp) }}" 
+                                       value="{{ old('no_hp', $user->no_hp ?? '') }}" 
                                        required>
                             </div>
 
-                            <div class="form-group" >
-                                <label for="level">Role</label>
-                                <select class="form-control" 
-                                        id="level" 
-                                        name="level" 
-                                        required>
-                                    <option value="admin" {{ $user->level == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="bendahara" {{ $user->level == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                                    <option value="owner" {{ $user->level == 'owner' ? 'selected' : '' }}>Owner</option>
-                                    <option value="pelanggan" {{ $user->level == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
+                            <div class="form-group">
+                                <label for="exampleSelectGender">Role</label>
+                                <select class="form-select" id="level" name="level" onchange="toggleJabatan()" required>
+                                    <option selected disabled>Select Role</option>
+                                    <option value="admin" {{ old('level', $user->level ?? '') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="bendahara" {{ old('level', $user->level ?? '') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
+                                    <option value="owner" {{ old('level', $user->level ?? '') == 'owner' ? 'selected' : '' }}>Owner</option>
+                                    <option value="karyawan" {{ old('level', $user->level ?? '') == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                                    <option value="pelanggan"{{ old('level', $user->level ?? '') == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
                                 </select>
+                                @error('level')
+                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                @enderror
                             </div>
 
-                            <div class="form-group">
-                                <label for="foto">Image Profile Upload</label>
-                                <input type="file" 
-                                       class="form-control" 
-                                       id="foto" 
-                                       name="foto">
+                            <div class="form-group" id="jabatan-wrapper" style="display:none;">
+                                <label for="jabatan">Jabatan</label>
+                                <select class="form-select" name="jabatan" id="jabatan">
+                                    <option selected disabled>Select Jabatan</option>
+                                    <option value="administrasi" {{ old('jabatan') == 'administrasi' ? 'selected' : '' }}>Administrasi</option>
+                                    <option value="bendahara" {{ old('jabatan') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
+                                    <option value="pemilik" {{ old('jabatan') == 'pemilik' ? 'selected' : '' }}>Pemilik</option>
+                                </select>
+                                @error('jabatan')
+                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                @enderror
                             </div>
 
                             <div class="form-group">
@@ -79,13 +89,28 @@
                                        id="alamat" 
                                        name="alamat" 
                                        placeholder="Address" 
-                                       value="{{ old('alamat', $user->alamat) }}" 
-                                       required>
+                                       value="{{ old('alamat', $user->alamat ?? '') }}">
                             </div>
 
-                            <button type="submit" class="btn btn-primary me-2">
-                                Update
-                            </button>
+                            <div class="form-group">
+                                <label for="foto">Image Profile Upload</label>
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="foto" 
+                                       name="foto">
+
+                                @if(!empty($user->foto))
+                                    <div class="mt-2">
+                                        <img src="{{ asset('storage/' . $user->foto) }}" 
+                                             alt="User Profile" 
+                                             width="100" 
+                                             height="100" 
+                                             style="object-fit: cover; border-radius: 8px;">
+                                    </div>
+                                @endif
+                            </div>
+
+                            <button type="submit" class="btn btn-primary me-2">Update</button>
                             <button type="button" class="btn btn-light" onclick="window.history.back()">Cancel</button>
 
                         </form>
@@ -96,4 +121,20 @@
         </div>
     </div>
 </div>
+<script>
+    function toggleJabatan() {
+        const level = document.getElementById('level').value;
+        const jabatanWrapper = document.getElementById('jabatan-wrapper');
+        if (level === 'karyawan') {
+            jabatanWrapper.style.display = 'block';
+        } else {
+            jabatanWrapper.style.display = 'none';
+        }
+    }
+    
+    // Biar pas reload/edit tetep bener tampilin jabatannya
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleJabatan();
+    });
+    </script>
 @endsection
