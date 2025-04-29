@@ -7,7 +7,6 @@ use App\Models\Pelanggan;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class UsersController extends Controller
@@ -40,31 +39,63 @@ class UsersController extends Controller
             'email' => 'required|email|unique:users,email',
             'no_hp' => 'required|string|max:15|unique:users,no_hp',
             'password' => 'required|min:6|confirmed',
-            'level' => 'required|in:admin,bendahara,owner,pelanggan,karyawan', // added karyawan here
-            'jabatan' => 'required_if:level,admin,bendahara,owner|nullable|string|in:administrasi,bendahara,pemilik',
+            'level' => 'required|in:admin,bendahara,owner,pelanggan,karyawan',
+            'jabatan' => 'required_if:level,karyawan|nullable|string|in:administrasi,bendahara,pemilik',
             'alamat' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        
 
-        $fotoPath = null;
+        $originalLevel = $request->level;
+        $finalLevel = $originalLevel;
 
-        if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('uploads/profile', 'public');
+        // Jika karyawan, mapping jabatan ke level enum user
+        if ($originalLevel === 'karyawan') {
+            $mapping = [
+                'administrasi' => 'admin',
+                'bendahara' => 'bendahara',
+                'pemilik' => 'owner',
+            ];
+
+            if (!isset($mapping[$request->jabatan])) {
+                return back()->withErrors(['jabatan' => 'Jabatan tidak valid untuk karyawan']);
+            }
+
+            $finalLevel = $mapping[$request->jabatan];
         }
 
+        // Buat user dengan level hasil mapping
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'no_hp' => $request->no_hp,
             'alamat' => $request->alamat,
             'password' => Hash::make($request->password),
-            'level' => $request->level,
-            'foto' => $fotoPath,
+            'level' => $finalLevel,
         ]);
+
+        // Buat entri pelanggan jika level asli adalah pelanggan
+        if ($originalLevel === 'pelanggan') {
+            Pelanggan::create([
+                'id_user' => $user->id,
+                'nama_lengkap' => $request->name,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat ?? '',
+            ]);
+        }
+
+        // Buat entri karyawan jika level asli adalah karyawan
+        if ($originalLevel === 'karyawan') {
+            Karyawan::create([
+                'id_user' => $user->id,
+                'nama_karyawan' => $request->name,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat ?? '',
+                'jabatan' => $request->jabatan,
+            ]);
+        }
 
         return redirect()->route('user.manage')->with('success', 'User created successfully.');
     }
+
 
     public function edit($id)
     {
@@ -86,10 +117,9 @@ class UsersController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'no_hp' => 'required|string|max:15|unique:users,no_hp,' . $user->id,
-            'jabatan' => 'required_if:level,admin,bendahara,owner|nullable|string|in:administrasi,bendahara,pemilik',
             'level' => 'required|in:admin,bendahara,owner,pelanggan,karyawan',
             'alamat' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'jabatan' => 'required_if:level,admin,bendahara,owner,karyawan|nullable|string|in:administrasi,bendahara,pemilik,staff,kasir',
         ]);
 
         $data = [
@@ -100,16 +130,6 @@ class UsersController extends Controller
             'alamat' => $request->alamat,
         ];
 
-        if ($request->hasFile('foto')) {
-            // Hapus foto lama kalau ada
-            if ($user->foto && Storage::disk('public')->exists($user->foto)) {
-                Storage::disk('public')->delete($user->foto);
-            }
-
-            $fotoPath = $request->file('foto')->store('uploads/profile', 'public');
-            $data['foto'] = $fotoPath;
-        }
-
         $user->update($data);
 
         return redirect()->route('user.manage')->with('success', 'User updated successfully.');
@@ -119,12 +139,6 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Hapus foto profile kalau ada
-        if ($user->foto && Storage::disk('public')->exists($user->foto)) {
-            Storage::disk('public')->delete($user->foto);
-        }
-
-        // Hapus data relasi
         if ($user->pelanggan) {
             $user->pelanggan->delete();
         }

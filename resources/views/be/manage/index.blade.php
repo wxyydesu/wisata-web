@@ -63,8 +63,17 @@
                                         </td>
 
                                         <td>
-                                            {{ strlen($data['level']) > 5 ? substr($data['level'], 0, 5) . '...' : $data['level'] }}
+                                            {{ ucfirst($data['level']) }}
+                                            @if ($data['level'] === 'admin' || $data['level'] === 'bendahara' || $data['level'] === 'owner')
+                                                @php
+                                                    $jabatan = \App\Models\Karyawan::where('id_user', $data->id)->first()?->jabatan;
+                                                @endphp
+                                                @if ($jabatan)
+                                                    <br><small class="text-muted">(Jabatan: {{ ucfirst($jabatan) }})</small>
+                                                @endif
+                                            @endif
                                         </td>
+                                        
 
                                         <td>
                                             {{ !empty($data['alamat']) ? (strlen($data['alamat']) > 5 ? substr($data['alamat'], 0, 5) . '...' : $data['alamat']) : 'Not Available' }}
