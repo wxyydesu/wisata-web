@@ -11,12 +11,12 @@ class ObyekWisataController extends Controller
 {
     public function index()
     {
-        $obyekWisatas = ObyekWisata::with('kategoriWisata')->get();
+        $objekWisatas = ObyekWisata::with('kategoriWisata')->get(); // Changed variable name to $objekWisatas
         $greeting = $this->getGreeting();
         
-        return view('be.objek_wisata.index', [
+        return view('be.objekWisata.index', [
             'title' => 'Objek Wisata Management',
-            'obyekWisatas' => $obyekWisatas,
+            'objekWisatas' => $objekWisatas, // Changed key to 'objekWisatas'
             'greeting' => $greeting
         ]);
     }
@@ -26,7 +26,7 @@ class ObyekWisataController extends Controller
         $kategoris = KategoriWisata::all();
         $greeting = $this->getGreeting();
         
-        return view('be.objek_wisata.create', [
+        return view('be.objekWisata.create', [
             'title' => 'Create Objek Wisata',
             'kategoris' => $kategoris,
             'greeting' => $greeting
@@ -56,7 +56,7 @@ class ObyekWisataController extends Controller
     {
         $greeting = $this->getGreeting();
         
-        return view('be.objek_wisata.show', [
+        return view('be.objekWisata.show', [
             'title' => 'Detail Objek Wisata',
             'obyekWisata' => $obyekWisata,
             'greeting' => $greeting

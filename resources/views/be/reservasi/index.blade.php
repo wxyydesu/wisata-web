@@ -9,7 +9,7 @@
     <div class="content-wrapper">
         <div class="d-flex justify-content-end mb-3">
             <a href="{{ route('reservasi_create') }}" class="btn btn-primary">
-                <i class="fa fa-plus-circle me-2"></i>Add Reservasi
+                <i class="fa fa-plus-circle me-2"></i>Tambah Reservasi
             </a>
         </div>
 
@@ -17,9 +17,9 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Reservasi Management</h4>
+                        <h4 class="card-title">Manajemen Reservasi</h4>
                         <p class="card-description">
-                            Reservasi Table <code>Add | Edit | Remove</code>
+                            Tabel Reservasi <code>Tambah | Edit | Hapus</code>
                         </p>
 
                         <div class="table-responsive">
@@ -27,68 +27,61 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">No</th>
-                                        {{-- <th scope="col">Photo</th> --}}
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Phone Number</th>
-                                        <th scope="col">Role</th>
-                                        <th scope="col">Address</th>
-                                        <th scope="col">Action</th>
+                                        <th scope="col">Pelanggan</th>
+                                        <th scope="col">Paket Wisata</th>
+                                        <th scope="col">Tanggal Reservasi</th>
+                                        <th scope="col">Jumlah Peserta</th>
+                                        <th scope="col">Total Bayar</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Aksi</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($reservasis as $nmr => $data)
+                                    @foreach ($reservasis as $index => $reservasi)
                                     <tr>
-                                        <th scope="row">{{ $nmr + 1 }}.</th>
-
-                                        {{-- <td class="py-1">
-                                            @if (!empty($data['foto']))
-                                                <img src="{{ asset('storage/' . $data['foto']) }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
-                                            @else
-                                                <img src="{{ asset('images/default.png') }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
-                                            @endif
-                                        </td> --}}
+                                        <th scope="row">{{ $index + 1 }}</th>
                                         
-                                        <td class="py-1">
-                                            @if (strlen($data['name']) > 10)
-                                                
-                                                {{ substr($data['name'], 0, 10) . '...' }}
-                                            @else
-                                                {{ $data['name'] }}
-                                            @endif
-                                        </td>
-
                                         <td>
-                                            {{ strlen($data['no_hp']) > 5 ? substr($data['no_hp'], 0, 5) . '...' : $data['no_hp'] }}
-                                        </td>
-
-                                        <td>
-                                            {{ ucfirst($data['level']) }}
-                                            @if ($data['level'] === 'admin' || $data['level'] === 'bendahara' || $data['level'] === 'owner')
-                                                @php
-                                                    $jabatan = \App\Models\Karyawan::where('reservasi', $data->id)->first()?->jabatan;
-                                                @endphp
-                                                @if ($jabatan)
-                                                    <br><small class="text-muted">(Jabatan: {{ ucfirst($jabatan) }})</small>
-                                                @endif
-                                            @endif
+                                            {{ $reservasi->pelanggan->nama_lengkap ?? 'N/A' }}
+                                            <br>
+                                            <small class="text-muted">{{ $reservasi->pelanggan->no_hp ?? '' }}</small>
                                         </td>
                                         
-
+                                        <td>{{ $reservasi->paketWisata->nama_paket ?? 'N/A' }}</td>
+                                        
+                                        <td>{{ $reservasi->reservasi_wisata->format('d M Y') }}</td>
+                                        
+                                        <td>{{ $reservasi->jumlah_peserta }} orang</td>
+                                        
+                                        <td>Rp {{ number_format($reservasi->total_bayar, 0, ',', '.') }}</td>
+                                        
                                         <td>
-                                            {{ !empty($data['alamat']) ? (strlen($data['alamat']) > 5 ? substr($data['alamat'], 0, 5) . '...' : $data['alamat']) : 'Not Available' }}
+                                            @php
+                                                $badgeClass = [
+                                                    'pesan' => 'warning',
+                                                    'dibayar' => 'success',
+                                                    'selesai' => 'primary'
+                                                ][$reservasi->status_reservasi_wisata];
+                                            @endphp
+                                            <span class="badge badge-{{ $badgeClass }}">
+                                                {{ ucfirst($reservasi->status_reservasi_wisata) }}
+                                            </span>
                                         </td>
 
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('reservasi.edit', $data->id) }}" class="btn btn-dark btn-sm">
-                                                    <i class="fa fa-pencil-square-o"></i> Edit
+                                                <a href="{{ route('reservasi_edit', $reservasi->id) }}" class="btn btn-sm btn-warning">
+                                                    <i class="fa fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('reservasi_destroy', $data->id) }}" method="POST" id="deleteForm{{ $data->id }}" style="display: inline;">
+                                                <a href="{{ route('reservasi_show', $reservasi->id) }}" class="btn btn-sm btn-info">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <form action="{{ route('reservasi_destroy', $reservasi->id) }}" method="POST" style="display: inline-block;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $data->id }})">
-                                                        <i class="fas fa-trash-alt me-1"></i>Delete
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus reservasi ini?')">
+                                                        <i class="fa fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </div>
@@ -98,6 +91,12 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        @if($reservasis->isEmpty())
+                            <div class="alert alert-info text-center mt-3">
+                                Tidak ada data reservasi tersedia
+                            </div>
+                        @endif
 
                     </div> <!-- card-body -->
                 </div> <!-- card -->

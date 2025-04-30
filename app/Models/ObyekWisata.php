@@ -9,7 +9,7 @@ class ObyekWisata extends Model
 {
     use HasFactory;
 
-    protected $table = 'obyek_wisata';
+    protected $table = 'obyek_wisatas';
     
     protected $fillable = [
         'nama_wisata',
