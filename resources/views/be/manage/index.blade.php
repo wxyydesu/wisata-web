@@ -27,8 +27,9 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">No</th>
-                                        {{-- <th scope="col">Photo</th> --}}
+                                        <th scope="col">Photo</th>
                                         <th scope="col">Name</th>
+                                        <th scope="col">Email</th>
                                         <th scope="col">Phone Number</th>
                                         <th scope="col">Role</th>
                                         <th scope="col">Address</th>
@@ -40,28 +41,42 @@
                                     @foreach ($users as $nmr => $data)
                                     <tr>
                                         <th scope="row">{{ $nmr + 1 }}.</th>
-
-                                        {{-- <td class="py-1">
-                                            @if (!empty($data['foto']))
-                                                <img src="{{ asset('storage/' . $data['foto']) }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
+                                
+                                        {{-- Foto --}}
+                                        <td class="py-1">
+                                            @if($data->level == 'pelanggan' && $data->pelanggan && $data->pelanggan->foto)
+                                                <img src="{{ asset('storage/' . $data->pelanggan->foto) }}" alt="Pelanggan Foto" width="40">
+                                            @elseif($data->level == 'karyawan' && $data->karyawan && $data->karyawan->foto)
+                                                <img src="{{ asset('storage/' . $data->karyawan->foto) }}" alt="Karyawan Foto" width="40">
                                             @else
-                                                <img src="{{ asset('images/default.png') }}" alt="image" style="width: 50px; height: 50px; border-radius: 50%;">
+                                                -
                                             @endif
-                                        </td> --}}
-                                        
+                                        </td>
+                                
+                                        {{-- Nama --}}
                                         <td class="py-1">
                                             @if (strlen($data['name']) > 10)
-                                                
                                                 {{ substr($data['name'], 0, 10) . '...' }}
                                             @else
                                                 {{ $data['name'] }}
                                             @endif
                                         </td>
 
+                                        {{-- Nama --}}
+                                        <td class="py-1">
+                                            @if (strlen($data['email']) > 10)
+                                                {{ substr($data['email'], 0, 10) . '...' }}
+                                            @else
+                                                {{ $data['email'] }}
+                                            @endif
+                                        </td>
+                                
+                                        {{-- Nomor HP --}}
                                         <td>
                                             {{ strlen($data['no_hp']) > 5 ? substr($data['no_hp'], 0, 5) . '...' : $data['no_hp'] }}
                                         </td>
-
+                                
+                                        {{-- Role --}}
                                         <td>
                                             {{ ucfirst($data['level']) }}
                                             @if ($data['level'] === 'admin' || $data['level'] === 'bendahara' || $data['level'] === 'owner')
@@ -73,12 +88,19 @@
                                                 @endif
                                             @endif
                                         </td>
-                                        
-
+                                
+                                        {{-- Alamat --}}
                                         <td>
-                                            {{ !empty($data['alamat']) ? (strlen($data['alamat']) > 5 ? substr($data['alamat'], 0, 5) . '...' : $data['alamat']) : 'Not Available' }}
+                                            @if($data->level == 'pelanggan' && $data->pelanggan)
+                                                {{ strlen($data->pelanggan->alamat) > 5 ? substr($data->pelanggan->alamat, 0, 5) . '...' : $data->pelanggan->alamat }}
+                                            @elseif($data->level == 'karyawan' && $data->karyawan)
+                                                {{ strlen($data->karyawan->alamat) > 5 ? substr($data->karyawan->alamat, 0, 5) . '...' : $data->karyawan->alamat }}
+                                            @else
+                                                Not Available
+                                            @endif
                                         </td>
-
+                                
+                                        {{-- Aksi --}}
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('user_edit', $data->id) }}" class="btn btn-dark btn-sm">
@@ -94,7 +116,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    @endforeach 
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>

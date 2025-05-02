@@ -25,9 +25,9 @@ class CheckUserLevel
                     case 'pemilik':
                         return redirect('/pemilik');
                     case 'pelanggan':
-                        return redirect('/pelanggan');
+                        return redirect('/');
                     default:
-                        return redirect('/home'); // Default fallback
+                        return redirect('/'); // Default fallback
                 }
             }
         }

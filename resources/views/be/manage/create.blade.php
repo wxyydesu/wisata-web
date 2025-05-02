@@ -15,100 +15,96 @@
             <form class="forms-sample" method="POST" action="{{ route('user_store') }}" enctype="multipart/form-data">
                 @csrf
 
-                {{-- Nama --}}
+                {{-- Basic Info --}}
                 <div class="form-group">
-                    <label for="exampleInputName1">Name</label>
-                    <input type="text" class="form-control" id="exampleInputName1" placeholder="Name" name="name" required value="{{ old('name') }}">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Name" name="name" required value="{{ old('name') }}">
                     @error('name')
                         <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
 
-                {{-- Email --}}
                 <div class="form-group">
-                    <label for="exampleInputEmail3">Email address</label>
-                    <input type="email" class="form-control" id="exampleInputEmail3" placeholder="Email" name="email" required value="{{ old('email') }}">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Email" name="email" required value="{{ old('email') }}">
                     @error('email')
                         <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
 
-                {{-- No HP --}}
                 <div class="form-group">
-                    <label for="exampleInputPhone1">Phone Number</label>
-                    <input type="text" name="no_hp" class="form-control" id="exampleInputPhone1" placeholder="Phone Number" required value="{{ old('no_hp') }}">
-                    @error('no_hp')
-                        <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-
-                {{-- Password --}}
-                <div class="form-group">
-                    <label for="exampleInputPassword4">Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword4" placeholder="Password" name="password" required>
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
                     @error('password')
                         <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
 
-                {{-- Confirm Password --}}
                 <div class="form-group">
-                    <label for="password_confirmation">Confirm Password</label>
-                    <input type="password" class="form-control" id="password_confirmation" placeholder="Confirm Password" name="password_confirmation" required>
-                    @error('password_confirmation')
-                        <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+                    <label for="aktif">Status</label>
+                    <select name="aktif" class="form-control" id="aktif" required>
+                        <option value="1" {{ old('aktif') == '1' ? 'selected' : '' }}>Aktif</option>
+                        <option value="0" {{ old('aktif') == '0' ? 'selected' : '' }}>Non-Aktif</option>
+                    </select>
                 </div>
 
-                {{-- Role --}}
+                {{-- Role Selection --}}
                 <div class="form-group">
-                    <label for="exampleSelectGender">Role</label>
-                    <select class="form-select" id="level" name="level" onchange="toggleJabatan()" required>
-                        <option selected disabled>Select Role</option>
+                    <label for="level">Role</label>
+                    <select name="level" class="form-control" id="level" required onchange="toggleForm()">
                         <option value="admin" {{ old('level') == 'admin' ? 'selected' : '' }}>Admin</option>
                         <option value="bendahara" {{ old('level') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                        <option value="owner" {{ old('level') == 'owner' ? 'selected' : '' }}>Owner</option>
-                        <option value="karyawan" {{ old('level') == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                        <option value="pemilik" {{ old('level') == 'pemilik' ? 'selected' : '' }}>Pemilik</option>
                         <option value="pelanggan" {{ old('level') == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
                     </select>
-                    @error('level')
-                        <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
                 </div>
 
-                {{-- Jabatan (Muncul kalau admin, bendahara, owner) --}}
-                <div class="form-group" id="jabatan-wrapper" style="display:none;">
-                    <label for="jabatan">Jabatan</label>
-                    <select class="form-select" name="jabatan" id="jabatan">
-                        <option selected disabled>Select Jabatan</option>
-                        <option value="administrasi" {{ old('jabatan') == 'administrasi' ? 'selected' : '' }}>Administrasi</option>
-                        <option value="bendahara" {{ old('jabatan') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                        <option value="pemilik" {{ old('jabatan') == 'pemilik' ? 'selected' : '' }}>Pemilik</option>
-                    </select>
-                    @error('jabatan')
-                        <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+                {{-- Karyawan Fields --}}
+                <div id="karyawan-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="nama_karyawan">Nama Karyawan</label>
+                        <input type="text" class="form-control" id="nama_karyawan" name="nama_karyawan" value="{{ old('nama_karyawan') }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="no_hp_karyawan">No HP</label>
+                        <input type="text" class="form-control" id="no_hp_karyawan" name="no_hp_karyawan" value="{{ old('no_hp_karyawan') }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="alamat_karyawan">Alamat</label>
+                        <input type="text" class="form-control" id="alamat_karyawan" name="alamat_karyawan" value="{{ old('alamat_karyawan') }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="jabatan">Jabatan</label>
+                        <select name="jabatan" class="form-control" id="jabatan">
+                            <option value="administrasi" {{ old('jabatan') == 'administrasi' ? 'selected' : '' }}>Administrasi</option>
+                            <option value="bendahara" {{ old('jabatan') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
+                            <option value="pemilik" {{ old('jabatan') == 'pemilik' ? 'selected' : '' }}>Pemilik</option>
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Pelanggan Fields --}}
+                <div id="pelanggan-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="nama_lengkap">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" value="{{ old('nama_lengkap') }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="no_hp_pelanggan">No HP</label>
+                        <input type="text" class="form-control" id="no_hp_pelanggan" name="no_hp_pelanggan" value="{{ old('no_hp_pelanggan') }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="alamat_pelanggan">Alamat</label>
+                        <input type="text" class="form-control" id="alamat_pelanggan" name="alamat_pelanggan" value="{{ old('alamat_pelanggan') }}">
+                    </div>
                 </div>
 
                 {{-- Foto --}}
                 <div class="form-group">
-                    <label>Image Profile Upload</label>
-                    <input type="file" name="foto" class="form-control">
-                    @error('foto')
-                        <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
+                    <label>Foto Profil</label>
+                    <input type="file" name="foto" class="form-control" accept="image/*">
                 </div>
 
-                {{-- Alamat --}}
-                <div class="form-group">
-                    <label for="exampleInputCity1">Address</label>
-                    <input type="text" class="form-control" id="exampleInputCity1" placeholder="Location" name="alamat" required value="{{ old('alamat') }}">
-                    @error('alamat')
-                        <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-
-                {{-- Submit --}}
                 <button type="submit" class="btn btn-primary me-2">Submit</button>
                 <button type="button" class="btn btn-light" onclick="window.history.back()">Cancel</button>
             </form>
@@ -120,20 +116,23 @@
 </div>
 
 <script>
-function toggleJabatan() {
+function toggleForm() {
     const level = document.getElementById('level').value;
-    const jabatanWrapper = document.getElementById('jabatan-wrapper');
-    if (level === 'karyawan') {
-        jabatanWrapper.style.display = 'block';
+    const karyawanFields = document.getElementById('karyawan-fields');
+    const pelangganFields = document.getElementById('pelanggan-fields');
+    
+    if (level === 'pelanggan') {
+        pelangganFields.style.display = 'block';
+        karyawanFields.style.display = 'none';
     } else {
-        jabatanWrapper.style.display = 'none';
+        pelangganFields.style.display = 'none';
+        karyawanFields.style.display = 'block';
     }
 }
 
-// Biar pas reload/edit tetep bener tampilin jabatannya
+// Initialize form on load
 document.addEventListener('DOMContentLoaded', function() {
-    toggleJabatan();
+    toggleForm();
 });
 </script>
-
 @endsection

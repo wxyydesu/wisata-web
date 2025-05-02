@@ -16,7 +16,7 @@
 
                         <form class="forms-sample" 
                               method="POST" 
-                              action="{{ route('user.update', $user->id) }}" 
+                              action="{{ route('user_update', $user->id) }}" 
                               enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -89,25 +89,26 @@
                                        id="alamat" 
                                        name="alamat" 
                                        placeholder="Address" 
-                                       value="{{ old('alamat', $user->alamat ?? '') }}">
+                                       value="{{ old('alamat', $user->level == 'pelanggan' ? ($user->pelanggan->alamat ?? '') : ($user->karyawan->alamat ?? '')) }}">
                             </div>
+
+                            <!-- Tambahkan field hidden untuk nama lengkap/karyawan -->
+                            @if($user->level == 'pelanggan')
+                                <input type="hidden" name="nama_lengkap" value="{{ $user->pelanggan->nama_lengkap ?? '' }}">
+                            @else
+                                <input type="hidden" name="nama_karyawan" value="{{ $user->karyawan->nama_karyawan ?? '' }}">
+                            @endif
 
                             <div class="form-group">
                                 <label for="foto">Image Profile Upload</label>
-                                <input type="file" 
-                                       class="form-control" 
-                                       id="foto" 
-                                       name="foto">
-
-                                @if(!empty($user->foto))
+                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
                                     <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $user->foto) }}" 
-                                             alt="User Profile" 
-                                             width="100" 
-                                             height="100" 
-                                             style="object-fit: cover; border-radius: 8px;">
+                                        @if($user->level == 'pelanggan' && $user->pelanggan && $user->pelanggan->foto)
+                                            <img src="{{ asset('storage/' . $user->pelanggan->foto) }}" alt="User Profile" width="100" height="100" style="object-fit: cover; border-radius: 8px;">
+                                        @elseif($user->karyawan && $user->karyawan->foto)
+                                            <img src="{{ asset('storage/' . $user->karyawan->foto) }}" alt="User Profile" width="100" height="100" style="object-fit: cover; border-radius: 8px;">
+                                        @endif
                                     </div>
-                                @endif
                             </div>
 
                             <button type="submit" class="btn btn-primary me-2">Update</button>

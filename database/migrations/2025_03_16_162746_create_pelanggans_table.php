@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama_lengkap', 255);
             $table->string('no_hp', 15);
             $table->text('alamat');
+            $table->text('foto')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('id_user');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
