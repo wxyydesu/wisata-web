@@ -11,131 +11,119 @@
             <div class="col-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">{{ isset($user) ? 'Edit User' : 'Create User' }}</h4>
-                        <p class="card-description">{{ isset($user) ? 'Update user information' : 'Fill the form to create a new user' }}</p>
+                        <h4 class="card-title">{{ $greeting }}, Edit User</h4>
+                        <p class="card-description">Form Edit Data User</p>
 
-                        <form class="forms-sample" 
-                              method="POST" 
-                              action="{{ route('user_update', $user->id) }}" 
-                              enctype="multipart/form-data">
+                        <form class="forms-sample" method="POST" action="{{ route('user_update', $user->id) }}" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
+                            {{-- Basic Info --}}
                             <div class="form-group">
-                                <label for="nama">Name</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="nama" 
-                                       name="name" 
-                                       placeholder="Name" 
-                                       value="{{ old('name', $user->name ?? '') }}" 
-                                       required>
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" placeholder="Name" name="name" required value="{{ old('name', $user->name) }}">
+                                @error('name')
+                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="email">Email address</label>
-                                <input type="email" 
-                                       class="form-control" 
-                                       id="email" 
-                                       name="email" 
-                                       placeholder="Email" 
-                                       value="{{ old('email', $user->email ?? '') }}" 
-                                       required>
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" placeholder="Email" name="email" required value="{{ old('email', $user->email) }}">
+                                @error('email')
+                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="no_hp">Phone Number</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="no_hp" 
-                                       name="no_hp" 
-                                       placeholder="Phone Number" 
-                                       value="{{ old('no_hp', $user->no_hp ?? '') }}" 
-                                       required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="exampleSelectGender">Role</label>
-                                <select class="form-select" id="level" name="level" onchange="toggleJabatan()" required>
-                                    <option selected disabled>Select Role</option>
-                                    <option value="admin" {{ old('level', $user->level ?? '') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="bendahara" {{ old('level', $user->level ?? '') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                                    <option value="owner" {{ old('level', $user->level ?? '') == 'owner' ? 'selected' : '' }}>Owner</option>
-                                    <option value="karyawan" {{ old('level', $user->level ?? '') == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
-                                    <option value="pelanggan"{{ old('level', $user->level ?? '') == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
+                                <label for="level">Role</label>
+                                <select name="level" class="form-control @error('level') is-invalid @enderror" id="level" required onchange="toggleForm()">
+                                    <option value="" disabled>Pilih Role</option>
+                                    <option value="admin" {{ old('level', $user->level) == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="bendahara" {{ old('level', $user->level) == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
+                                    <option value="owner" {{ old('level', $user->level) == 'owner' ? 'selected' : '' }}>Owner</option>
+                                    <option value="karyawan" {{ old('level', $user->level) == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                                    <option value="pelanggan" {{ old('level', $user->level) == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
                                 </select>
                                 @error('level')
                                     <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
                                 @enderror
                             </div>
-
-                            <div class="form-group" id="jabatan-wrapper" style="display:none;">
-                                <label for="jabatan">Jabatan</label>
-                                <select class="form-select" name="jabatan" id="jabatan">
-                                    <option selected disabled>Select Jabatan</option>
-                                    <option value="administrasi" {{ old('jabatan') == 'administrasi' ? 'selected' : '' }}>Administrasi</option>
-                                    <option value="bendahara" {{ old('jabatan') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                                    <option value="pemilik" {{ old('jabatan') == 'pemilik' ? 'selected' : '' }}>Pemilik</option>
-                                </select>
-                                @error('jabatan')
+                            
+                            <div class="form-group">
+                                <label for="alamat">Alamat</label>
+                                <input type="text" class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" value="{{ old('alamat', $user->pelanggan->alamat ?? ($user->karyawan->alamat ?? '')) }}">
+                                @error('alamat')
                                     <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
                                 @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="alamat">Address</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="alamat" 
-                                       name="alamat" 
-                                       placeholder="Address" 
-                                       value="{{ old('alamat', $user->level == 'pelanggan' ? ($user->pelanggan->alamat ?? '') : ($user->karyawan->alamat ?? '')) }}">
+                                <label for="aktif">Status</label>
+                                <select name="aktif" class="form-control @error('aktif') is-invalid @enderror" id="aktif" required>
+                                    <option value="1" {{ old('aktif', $user->aktif) == '1' ? 'selected' : '' }}>Active</option>
+                                    <option value="0" {{ old('aktif', $user->aktif) == '0' ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                                @error('aktif')
+                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                @enderror
                             </div>
 
-                            <!-- Tambahkan field hidden untuk nama lengkap/karyawan -->
-                            @if($user->level == 'pelanggan')
-                                <input type="hidden" name="nama_lengkap" value="{{ $user->pelanggan->nama_lengkap ?? '' }}">
-                            @else
-                                <input type="hidden" name="nama_karyawan" value="{{ $user->karyawan->nama_karyawan ?? '' }}">
-                            @endif
-
+                            {{-- Foto --}}
                             <div class="form-group">
-                                <label for="foto">Image Profile Upload</label>
-                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
+                                <label>Foto Profil</label>
+                                <input type="file" name="foto" class="form-control @error('foto') is-invalid @enderror" accept="image/*">
+                                @error('foto')
+                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                @enderror
+                                <small class="text-muted">Format: JPG, JPEG, PNG (Max: 2MB)</small>
+                                
+                                {{-- Tampilkan foto saat ini jika ada --}}
+                                @if($user->pelanggan && $user->pelanggan->foto)
                                     <div class="mt-2">
-                                        @if($user->level == 'pelanggan' && $user->pelanggan && $user->pelanggan->foto)
-                                            <img src="{{ asset('storage/' . $user->pelanggan->foto) }}" alt="User Profile" width="100" height="100" style="object-fit: cover; border-radius: 8px;">
-                                        @elseif($user->karyawan && $user->karyawan->foto)
-                                            <img src="{{ asset('storage/' . $user->karyawan->foto) }}" alt="User Profile" width="100" height="100" style="object-fit: cover; border-radius: 8px;">
-                                        @endif
+                                        <img src="{{ asset('storage/' . $user->pelanggan->foto) }}" width="100" class="img-thumbnail">
+                                        <p class="text-muted">Current Photo</p>
                                     </div>
+                                @elseif($user->karyawan && $user->karyawan->foto)
+                                    <div class="mt-2">
+                                        <img src="{{ asset('storage/' . $user->karyawan->foto) }}" width="100" class="img-thumbnail">
+                                        <p class="text-muted">Current Photo</p>
+                                    </div>
+                                @endif
                             </div>
 
                             <button type="submit" class="btn btn-primary me-2">Update</button>
                             <button type="button" class="btn btn-light" onclick="window.history.back()">Cancel</button>
-
                         </form>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
-    function toggleJabatan() {
-        const level = document.getElementById('level').value;
-        const jabatanWrapper = document.getElementById('jabatan-wrapper');
-        if (level === 'karyawan') {
-            jabatanWrapper.style.display = 'block';
-        } else {
-            jabatanWrapper.style.display = 'none';
-        }
-    }
+function toggleForm() {
+    const level = document.getElementById('level').value;
+    const karyawanFields = document.getElementById('karyawan-fields');
+    const pelangganFields = document.getElementById('pelanggan-fields');
     
-    // Biar pas reload/edit tetep bener tampilin jabatannya
-    document.addEventListener('DOMContentLoaded', function() {
-        toggleJabatan();
-    });
-    </script>
+    // Hide all first
+    karyawanFields.style.display = 'none';
+    pelangganFields.style.display = 'none';
+
+    // Show based on selection
+    if (level === 'pelanggan') {
+        document.getElementById('nama_lengkap').required = true;
+        document.getElementById('nama_karyawan').required = false;
+        document.getElementById('jabatan').required = false;
+        pelangganFields.style.display = 'block';
+    } else if (['admin', 'bendahara', 'owner', 'karyawan'].includes(level)) {
+        document.getElementById('nama_karyawan').required = true;
+        document.getElementById('jabatan').required = true;
+        document.getElementById('nama_lengkap').required = false;
+        karyawanFields.style.display = 'block';
+    }
+}
+</script>
 @endsection

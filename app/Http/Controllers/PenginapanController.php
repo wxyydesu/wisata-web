@@ -10,7 +10,7 @@ class PenginapanController extends Controller
 {
     public function index()
     {
-        $penginapans = Penginapan::all();
+        $penginapans = Penginapan::query()->paginate(10);
         $greeting = $this->getGreeting();
         
         return view('be.penginapan.index', [
@@ -36,16 +36,32 @@ class PenginapanController extends Controller
             'nama_penginapan' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'fasilitas' => 'required|string',
-            'foto1' => 'nullable|string',
-            'foto2' => 'nullable|string',
-            'foto3' => 'nullable|string',
-            'foto4' => 'nullable|string',
-            'foto5' => 'nullable|string'
+            'foto1' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto2' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto4' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto5' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        Penginapan::create($validated);
+        // Map form fields to database columns
+        $data = [
+            'nama_penginapan' => $validated['nama_penginapan'], // Map to correct column
+            'deskripsi' => $validated['deskripsi'],
+            'fasilitas' => $validated['fasilitas']
+        ];
 
-        return redirect()->route('penginapan.index')->with('success', 'Penginapan created successfully.');
+        // Handle file uploads
+        for ($i = 1; $i <= 5; $i++) {
+            $field = 'foto'.$i;
+            if ($request->hasFile($field)) {
+                $path = $request->file($field)->store('penginapan_images', 'public');
+                $data[$field] = $path;
+            }
+        }
+
+        Penginapan::create($data);
+
+        return redirect()->route('penginapan_manage')->with('success', 'Penginapan created successfully.');
     }
 
     public function show(Penginapan $penginapan)
@@ -85,13 +101,13 @@ class PenginapanController extends Controller
 
         $penginapan->update($validated);
 
-        return redirect()->route('penginapan.index')->with('success', 'Penginapan updated successfully.');
+        return redirect()->route('penginapan_manage')->with('success', 'Penginapan updated successfully.');
     }
 
     public function destroy(Penginapan $penginapan)
     {
         $penginapan->delete();
-        return redirect()->route('penginapan.index')->with('success', 'Penginapan deleted successfully.');
+        return redirect()->route('penginapan_manage')->with('success', 'Penginapan deleted successfully.');
     }
 
     private function getGreeting()

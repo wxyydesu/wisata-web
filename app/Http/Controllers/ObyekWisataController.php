@@ -11,12 +11,12 @@ class ObyekWisataController extends Controller
 {
     public function index()
     {
-        $objekWisatas = ObyekWisata::with('kategoriWisata')->get(); // Changed variable name to $objekWisatas
+        $objekWisatas = ObyekWisata::with('kategori_wisatas')->paginate(10);
         $greeting = $this->getGreeting();
         
         return view('be.objekWisata.index', [
             'title' => 'Objek Wisata Management',
-            'objekWisatas' => $objekWisatas, // Changed key to 'objekWisatas'
+            'objekWisatas' => $objekWisatas,
             'greeting' => $greeting
         ]);
     }
@@ -106,13 +106,11 @@ class ObyekWisataController extends Controller
         $hour = now()->hour;
         
         if ($hour < 12) {
-            return 'Selamat Pagi';
+            return 'Good Morning';
         } elseif ($hour < 15) {
-            return 'Selamat Siang';
-        } elseif ($hour < 18) {
-            return 'Selamat Sore';
+            return 'Good Afternoon';
         } else {
-            return 'Selamat Malam';
+            return 'Good Evening';
         }
     }
 }

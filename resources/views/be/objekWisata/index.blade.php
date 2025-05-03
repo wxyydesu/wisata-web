@@ -1,7 +1,7 @@
 @extends('be.master')
 
 @section('sidebar')
-  @include('be.sidebar')
+    @include('be.sidebar')
 @endsection
 
 @section('content')
@@ -28,42 +28,42 @@
                                     <tr>
                                         <th scope="col">No</th>
                                         <th scope="col">Gambar</th>
-                                        <th scope="col">Nama</th>
+                                        <th scope="col">Nama Wisata</th>
                                         <th scope="col">Kategori</th>
-                                        <th scope="col">Lokasi</th>
-                                        <th scope="col">Harga Tiket</th>
+                                        <th scope="col">Deskripsi</th>
+                                        <th scope="col">Fasilitas</th>
                                         <th scope="col">Aksi</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($obyekWisatas as $index => $wisata) <!-- Changed from $objekWisatas to $obyekWisatas -->
+                                    @foreach ($objekWisatas as $index => $wisata)
                                     <tr>
                                         <th scope="row">{{ $index + 1 }}.</th>
                                         <td class="py-1">
-                                            @if ($wisata->gambar)
-                                                <img src="{{ asset('storage/' . $wisata->gambar) }}" alt="Gambar Wisata" style="width: 50px; height: 50px; object-fit: cover;">
+                                            @if ($wisata->foto1)
+                                                <img src="{{ asset('storage/' . $wisata->foto1) }}" alt="Gambar Wisata" style="width: 50px; height: 50px; object-fit: cover;">
                                             @else
                                                 <img src="{{ asset('images/default-wisata.png') }}" alt="Gambar Default" style="width: 50px; height: 50px; object-fit: cover;">
                                             @endif
                                         </td>
-                                        <td>{{ Str::limit($wisata->nama, 20) }}</td>
-                                        <td>{{ $wisata->kategori }}</td>
-                                        <td>{{ Str::limit($wisata->lokasi, 20) }}</td>
-                                        <td>Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }}</td>
+                                        <td>{{ Str::limit($wisata->nama_wisata, 20) }}</td>
+                                        <td>{{ $wisata->kategoriWisata->nama_kategori ?? '-' }}</td>
+                                        <td>{{ Str::limit($wisata->deskripsi_wisata, 30) }}</td>
+                                        <td>{{ Str::limit($wisata->fasilitas, 30) }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('objek_wisata_edit', $wisata->id) }}" class="btn btn-sm btn-warning">
+                                                <a href="{{ route('objek-wisata.edit', $wisata->id) }}" class="btn btn-sm btn-warning">
                                                     <i class="fa fa-pencil"></i> Edit
                                                 </a>
-                                                <form action="{{ route('objek_wisata_destroy', $wisata->id) }}" method="POST" id="deleteForm{{ $wisata->id }}" style="display: inline;">
+                                                <form action="{{ route('objek-wisata.destroy', $wisata->id) }}" method="POST" id="deleteForm{{ $wisata->id }}" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete({{ $wisata->id }})">
                                                         <i class="fa fa-trash"></i> Hapus
                                                     </button>
                                                 </form>
-                                                <a href="{{ route('objek_wisata_show', $wisata->id) }}" class="btn btn-sm btn-info">
+                                                <a href="{{ route('objek-wisata.show', $wisata->id) }}" class="btn btn-sm btn-info">
                                                     <i class="fa fa-eye"></i> Detail
                                                 </a>
                                             </div>
@@ -77,6 +77,11 @@
                         <div class="mt-4">
                             {{ $objekWisatas->links() }}
                         </div>
+                        @if($objekWisatas->isEmpty())
+                        <div class="alert alert-info text-center mt-3">
+                            Tidak ada data penginapan tersedia
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

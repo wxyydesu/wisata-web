@@ -48,6 +48,11 @@
             <li class="nav-item"><a class="nav-link" href="{{ route('berita_manage') }}">Berita</a></li>
           </ul>
         </div>
+        <div class="collapse" id="form-elements">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"><a class="nav-link" href="{{ route('kategori_wisata_manage') }}">Kategori Wisata</a></li>
+          </ul>
+        </div>
       </li>
       @else
 

@@ -7,7 +7,8 @@
 @section('content')
 <div class="main-panel">
     <div class="content-wrapper">
-        <div class="d-flex justify-content-end mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title">{{ $greeting }}, here's your Users Management</h4>
             <a href="{{ route('user_create') }}" class="btn btn-primary">
                 <i class="fa fa-plus-circle me-2"></i>Add User
             </a>
@@ -33,6 +34,7 @@
                                         <th scope="col">Phone Number</th>
                                         <th scope="col">Role</th>
                                         <th scope="col">Address</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Action</th>
                                     </tr>
                                 </thead>
@@ -45,35 +47,27 @@
                                         {{-- Foto --}}
                                         <td class="py-1">
                                             @if($data->level == 'pelanggan' && $data->pelanggan && $data->pelanggan->foto)
-                                                <img src="{{ asset('storage/' . $data->pelanggan->foto) }}" alt="Pelanggan Foto" width="40">
+                                                <img src="{{ asset('storage/' . $data->pelanggan->foto) }}" alt="Pelanggan Foto" width="40" style="cursor:pointer" onclick="showImgPreview('{{ asset('storage/' . $data->pelanggan->foto) }}')">
                                             @elseif($data->level == 'karyawan' && $data->karyawan && $data->karyawan->foto)
-                                                <img src="{{ asset('storage/' . $data->karyawan->foto) }}" alt="Karyawan Foto" width="40">
+                                                <img src="{{ asset('storage/' . $data->karyawan->foto) }}" alt="Karyawan Foto" width="40" style="cursor:pointer" onclick="showImgPreview('{{ asset('storage/' . $data->karyawan->foto) }}')">
                                             @else
-                                                -
+                                                <img src="{{ asset('images/default-user.jpg') }}" alt="Anonymose" width="40">
                                             @endif
                                         </td>
                                 
                                         {{-- Nama --}}
                                         <td class="py-1">
-                                            @if (strlen($data['name']) > 10)
-                                                {{ substr($data['name'], 0, 10) . '...' }}
-                                            @else
-                                                {{ $data['name'] }}
-                                            @endif
+                                            {{ $data['name'] }}
                                         </td>
 
-                                        {{-- Nama --}}
+                                        {{-- Email --}}
                                         <td class="py-1">
-                                            @if (strlen($data['email']) > 10)
-                                                {{ substr($data['email'], 0, 10) . '...' }}
-                                            @else
-                                                {{ $data['email'] }}
-                                            @endif
+                                            {{ $data['email'] }}
                                         </td>
                                 
                                         {{-- Nomor HP --}}
                                         <td>
-                                            {{ strlen($data['no_hp']) > 5 ? substr($data['no_hp'], 0, 5) . '...' : $data['no_hp'] }}
+                                            {{ $data['no_hp'] ?? '-' }}
                                         </td>
                                 
                                         {{-- Role --}}
@@ -84,7 +78,7 @@
                                                     $jabatan = \App\Models\Karyawan::where('id_user', $data->id)->first()?->jabatan;
                                                 @endphp
                                                 @if ($jabatan)
-                                                    <br><small class="text-muted">(Jabatan: {{ ucfirst($jabatan) }})</small>
+                                                    <br><small class="text-muted">({{ ucfirst($jabatan) }})</small>
                                                 @endif
                                             @endif
                                         </td>
@@ -92,20 +86,28 @@
                                         {{-- Alamat --}}
                                         <td>
                                             @if($data->level == 'pelanggan' && $data->pelanggan)
-                                                {{ strlen($data->pelanggan->alamat) > 5 ? substr($data->pelanggan->alamat, 0, 5) . '...' : $data->pelanggan->alamat }}
+                                                {{ $data->pelanggan->alamat ?? '-' }}
                                             @elseif($data->level == 'karyawan' && $data->karyawan)
-                                                {{ strlen($data->karyawan->alamat) > 5 ? substr($data->karyawan->alamat, 0, 5) . '...' : $data->karyawan->alamat }}
+                                                {{ $data->karyawan->alamat ?? '-' }}
                                             @else
-                                                Not Available
+                                                -
+                                            @endif
+                                        </td>
+
+                                        <td class="py-1">
+                                            @if($data['aktif'])
+                                                <span class="badge badge-success">Active</span>
+                                            @else
+                                                <span class="badge badge-danger">Inactive</span>
                                             @endif
                                         </td>
                                 
                                         {{-- Aksi --}}
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('user_edit', $data->id) }}" class="btn btn-dark btn-sm">
+                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('user_edit', $data->id) }}'">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
-                                                </a>
+                                                </button>
                                                 <form action="{{ route('user_destroy', $data->id) }}" method="POST" id="deleteForm{{ $data->id }}" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
@@ -121,10 +123,62 @@
                             </table>
                         </div>
 
+                        @if($users->isEmpty())
+                            <div class="alert alert-info text-center mt-3">
+                                No users available
+                            </div>
+                        @endif
+
                     </div> <!-- card-body -->
                 </div> <!-- card -->
             </div> <!-- col -->
         </div> <!-- row -->
     </div> <!-- content-wrapper -->
 </div> <!-- main-panel -->
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imgPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="imgPreview" src="" alt="Preview" class="img-fluid">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showImgPreview(src) {
+    const previewImg = document.getElementById('imgPreview');
+    previewImg.src = src;
+    
+    // Initialize and show modal
+    const modal = new bootstrap.Modal(document.getElementById('imgPreviewModal'));
+    modal.show();
+}
+
+function deleteConfirm(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('deleteForm' + id).submit();
+        }
+    });
+}
+</script>
+
 @endsection
