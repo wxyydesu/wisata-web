@@ -13,12 +13,12 @@ use App\Http\Middleware\CheckPelanggan;
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::resource('obyek-wisata', App\Http\Controllers\ObyekWisataController::class);
-Route::resource('paket-wisata', App\Http\Controllers\PaketWisataController::class);
-Route::resource('kategori-wisata', App\Http\Controllers\KategoriWisataController::class);
-Route::resource('berita', App\Http\Controllers\BeritaController::class);
-Route::resource('penginapan', App\Http\Controllers\PenginapanController::class);
-Route::resource('reservasi', App\Http\Controllers\ReservasiController::class);
+// Route::resource('obyek-wisata', App\Http\Controllers\ObyekWisataController::class);
+// Route::resource('paket-wisata', App\Http\Controllers\PaketWisataController::class);
+// Route::resource('kategori-wisata', App\Http\Controllers\KategoriWisataController::class);
+// Route::resource('berita', App\Http\Controllers\BeritaController::class);
+// Route::resource('penginapan', App\Http\Controllers\PenginapanController::class);
+// Route::resource('reservasi', App\Http\Controllers\ReservasiController::class);
 
 
 // Registrasi (Hanya untuk Pelanggan)
@@ -118,15 +118,14 @@ Route::middleware('auth')->group(function () {
     ]);
 
     // Berita Routes
-    Route::resource('berita', App\Http\Controllers\BeritaController::class)->names([
-        'index' => 'berita_manage',
-        'create' => 'berita_create',
-        'store' => 'berita_store',
-        'show' => 'berita_show',
-        'edit' => 'berita_edit',
-        'update' => 'berita_update',
-        'destroy' => 'berita_destroy',
-    ]);
+    Route::prefix('news')->group(function () {
+        Route::get('/', [App\Http\Controllers\BeritaController::class, 'index'])->name('berita_manage');
+        Route::get('/create', [App\Http\Controllers\BeritaController::class, 'create'])->name('berita_create');
+        Route::post('/', [App\Http\Controllers\BeritaController::class, 'store'])->name('berita_store');
+        Route::get('/{id}/edit', [App\Http\Controllers\BeritaController::class, 'edit'])->name('berita_edit');
+        Route::put('/{id}', [App\Http\Controllers\BeritaController::class, 'update'])->name('berita_update');
+        Route::delete('/{id}', [App\Http\Controllers\BeritaController::class, 'destroy'])->name('berita_destroy');
+    });
 
     // Kategori Berita Routes
     Route::resource('kategori-berita', App\Http\Controllers\KategoriBeritaController::class)->except(['show'])->names([

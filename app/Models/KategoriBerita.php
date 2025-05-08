@@ -9,11 +9,13 @@ class KategoriBerita extends Model
 {
     use HasFactory;
 
-    protected $table = 'kategori_berita';
+    protected $table = 'kategori_beritas';
     
-    protected $fillable = ['kategori_berita'];
+    protected $fillable = [
+        'kategori_berita'
+    ];
 
-    public function berita()
+    public function beritas()
     {
         return $this->hasMany(Berita::class, 'id_kategori_berita');
     }

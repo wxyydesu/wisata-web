@@ -52,7 +52,7 @@
                                 <small class="form-text text-muted">Upload category icon (optional)</small>
                             </div> --}}
 
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="foto">Category Photo</label>
                                 <div class="input-group">
                                     <input type="file" name="foto" id="foto" class="form-control d-none">
@@ -64,11 +64,11 @@
                                     </div>
                                 </div>
                                 <div id="image-preview" class="mt-2"></div>
-                            </div>
+                            </div> --}}
 
                             <div class="form-group">
                                 <label for="deskripsi">Description</label>
-                                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3">{{ old('deskripsi') }}</textarea>
+                                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="20">{{ old('deskripsi') }}</textarea>
                             </div>
 
                             <div class="form-group">
@@ -89,7 +89,7 @@
     </div>
 </div>
 
-<script>
+{{-- <script>
 document.addEventListener('DOMContentLoaded', function() {
     const browseBtn = document.getElementById('browse-btn');
     const fileInput = document.getElementById('foto');
@@ -136,5 +136,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-</script>
+</script> --}}
 @endsection

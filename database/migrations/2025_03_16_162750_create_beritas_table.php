@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('judul', 255)->unique();
             $table->text('berita');
             $table->dateTime('tgl_post');
-            $table->unsignedBigInteger('id_kategori_berita'); // Hapus duplikatnya
+            $table->unsignedBigInteger('id_kategori_berita');
             $table->text('foto')->nullable();
             $table->timestamps();
     

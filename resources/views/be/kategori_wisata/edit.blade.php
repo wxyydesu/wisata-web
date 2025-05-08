@@ -68,7 +68,7 @@
                                 <small class="form-text text-muted">Upload a new icon (optional)</small>
                             </div> --}}
                             
-                            <div class="form-group">
+                            {{-- <div class="form-group">
                                 <label for="foto">Category Photo</label>
                                 <div class="input-group">
                                     <input type="file" name="foto" id="foto" class="form-control d-none">
@@ -82,7 +82,7 @@
                                 @if(($category->foto) || ($category->foto))
                                 <small class="text-muted">Current photo will be replaced if you upload a new one</small>
                                 @endif
-                            </div>
+                            </div> --}}
 
                             <div class="form-group">
                                 <label for="deskripsi">Description</label>
@@ -106,7 +106,7 @@
         </div>
     </div>
 </div>
-<script>
+{{-- <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Check if elements exist on the page
     const browseBtn = document.getElementById('browse-btn');
@@ -154,5 +154,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-</script>
+</script> --}}
 @endsection

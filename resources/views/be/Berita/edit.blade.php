@@ -1,140 +1,86 @@
 @extends('be.master')
 
 @section('sidebar')
-    @include('be.sidebar')
+  @include('be.sidebar')
 @endsection
 
 @section('content')
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
-            <div class="col-12 grid-margin stretch-card">
+            <div class="col-md-12 grid-margin">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">{{ isset($user) ? 'Edit User' : 'Create User' }}</h4>
-                        <p class="card-description">{{ isset($user) ? 'Update user information' : 'Fill the form to create a new user' }}</p>
-
-                        <form class="forms-sample" 
-                              method="POST" 
-                              action="{{ route('user.update', $user->id) }}" 
-                              enctype="multipart/form-data">
+                        <h4 class="card-title">{{ isset($news) ? 'Edit' : 'Create' }} News</h4>
+                        
+                        <form action="{{ isset($news) ? route('berita_update', $news->id) : route('berita_store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            @method('PUT')
-
+                            @if(isset($news))
+                                @method('PUT')
+                            @endif
+                            
                             <div class="form-group">
-                                <label for="nama">Name</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="nama" 
-                                       name="name" 
-                                       placeholder="Name" 
-                                       value="{{ old('name', $user->name ?? '') }}" 
-                                       required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email">Email address</label>
-                                <input type="email" 
-                                       class="form-control" 
-                                       id="email" 
-                                       name="email" 
-                                       placeholder="Email" 
-                                       value="{{ old('email', $user->email ?? '') }}" 
-                                       required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="no_hp">Phone Number</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="no_hp" 
-                                       name="no_hp" 
-                                       placeholder="Phone Number" 
-                                       value="{{ old('no_hp', $user->no_hp ?? '') }}" 
-                                       required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="exampleSelectGender">Role</label>
-                                <select class="form-select" id="level" name="level" onchange="toggleJabatan()" required>
-                                    <option selected disabled>Select Role</option>
-                                    <option value="admin" {{ old('level', $user->level ?? '') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="bendahara" {{ old('level', $user->level ?? '') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                                    <option value="owner" {{ old('level', $user->level ?? '') == 'owner' ? 'selected' : '' }}>Owner</option>
-                                    <option value="karyawan" {{ old('level', $user->level ?? '') == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
-                                    <option value="pelanggan"{{ old('level', $user->level ?? '') == 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
-                                </select>
-                                @error('level')
-                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                <label for="judul">Title</label>
+                                <input type="text" class="form-control" id="judul" name="judul" 
+                                       value="{{ old('judul', $news->judul ?? '') }}" required>
+                                @error('judul')
+                                    <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
-
-                            <div class="form-group" id="jabatan-wrapper" style="display:none;">
-                                <label for="jabatan">Jabatan</label>
-                                <select class="form-select" name="jabatan" id="jabatan">
-                                    <option selected disabled>Select Jabatan</option>
-                                    <option value="administrasi" {{ old('jabatan') == 'administrasi' ? 'selected' : '' }}>Administrasi</option>
-                                    <option value="bendahara" {{ old('jabatan') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                                    <option value="pemilik" {{ old('jabatan') == 'pemilik' ? 'selected' : '' }}>Pemilik</option>
+                            
+                            <div class="form-group">
+                                <label for="id_kategori_berita">Category</label>
+                                <select class="form-control" id="id_kategori_berita" name="id_kategori_berita" required>
+                                    <option value="">Select Category</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" 
+                                            {{ (old('id_kategori_berita', $news->id_kategori_berita ?? '') == $category->id) ? 'selected' : '' }}>
+                                            {{ $category->kategori_berita }}
+                                        </option>
+                                    @endforeach
                                 </select>
-                                @error('jabatan')
-                                    <span class="invalid-feedback" style="display: block;" role="alert"><strong>{{ $message }}</strong></span>
+                                @error('id_kategori_berita')
+                                    <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
-
+                            
                             <div class="form-group">
-                                <label for="alamat">Address</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="alamat" 
-                                       name="alamat" 
-                                       placeholder="Address" 
-                                       value="{{ old('alamat', $user->alamat ?? '') }}">
+                                <label for="tgl_post">Post Date</label>
+                                <input type="datetime-local" class="form-control" id="tgl_post" name="tgl_post" 
+                                       value="{{ old('tgl_post', isset($news->tgl_post) ? $news->tgl_post->format('Y-m-d\TH:i') : '') }}" required>
+                                @error('tgl_post')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
-
+                            
                             <div class="form-group">
-                                <label for="foto">Image Profile Upload</label>
-                                <input type="file" 
-                                       class="form-control" 
-                                       id="foto" 
-                                       name="foto">
-
-                                @if(!empty($user->foto))
+                                <label for="foto">Image</label>
+                                <input type="file" class="form-control" id="foto" name="foto" {{ !isset($news) ? 'required' : '' }}>
+                                @error('foto')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                                @if(isset($news) && $news->foto)
                                     <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $user->foto) }}" 
-                                             alt="User Profile" 
-                                             width="100" 
-                                             height="100" 
-                                             style="object-fit: cover; border-radius: 8px;">
+                                        <img src="{{ asset('storage/' . $news->foto) }}" width="100" class="img-thumbnail">
                                     </div>
                                 @endif
                             </div>
-
-                            <button type="submit" class="btn btn-primary me-2">Update</button>
-                            <button type="button" class="btn btn-light" onclick="window.history.back()">Cancel</button>
-
+                            
+                            <div class="form-group">
+                                <label for="berita">Content</label>
+                                <textarea class="form-control" id="berita" name="berita" rows="10" required>{{ old('berita', $news->berita ?? '') }}</textarea>
+                                @error('berita')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary me-2">Submit</button>
+                            <a href="{{ route('berita_manage') }}" class="btn btn-light">Cancel</a>
                         </form>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script>
-    function toggleJabatan() {
-        const level = document.getElementById('level').value;
-        const jabatanWrapper = document.getElementById('jabatan-wrapper');
-        if (level === 'karyawan') {
-            jabatanWrapper.style.display = 'block';
-        } else {
-            jabatanWrapper.style.display = 'none';
-        }
-    }
-    
-    // Biar pas reload/edit tetep bener tampilin jabatannya
-    document.addEventListener('DOMContentLoaded', function() {
-        toggleJabatan();
-    });
-    </script>
 @endsection

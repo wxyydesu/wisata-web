@@ -11,7 +11,11 @@ class KategoriWisata extends Model
 
     protected $table = 'kategori_wisatas';
     
-    protected $fillable = ['kategori_wisata'];
+    protected $fillable = [
+        'kategori_wisata',
+        'deskripsi',
+        'aktif',
+    ];
 
     public function obyekWisata()
     {

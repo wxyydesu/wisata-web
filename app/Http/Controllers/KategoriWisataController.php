@@ -29,21 +29,13 @@ class KategoriWisataController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'kategori_wisata' => 'required|string|max:255|unique:kategori_wisatas',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'deskripsi' => 'nullable|string',
             'aktif' => 'required|boolean'
         ]);
 
-        $data = $request->except('foto');
-
-        if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('public/kategori_wisata');
-            $data['foto'] = str_replace('public/', '', $path);
-        }
-
-        KategoriWisata::create($data);
+        KategoriWisata::create($validatedData);
 
         return redirect()->route('kategori_wisata_manage')
                          ->with('success', 'Category created successfully.');
@@ -63,26 +55,13 @@ class KategoriWisataController extends Controller
     {
         $category = KategoriWisata::findOrFail($id);
 
-        $request->validate([
+        $validatedData = $request->validate([
             'kategori_wisata' => 'required|string|max:255|unique:kategori_wisatas,kategori_wisata,'.$id,
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'deskripsi' => 'nullable|string',
             'aktif' => 'required|boolean'
         ]);
 
-        $data = $request->except('icon');
-
-        if ($request->hasFile('icon')) {
-            // Delete old icon if exists
-            if ($category->icon) {
-                Storage::delete('public/' . $category->icon);
-            }
-            
-            $path = $request->file('icon')->store('public/kategori_wisata');
-            $data['icon'] = str_replace('public/', '', $path);
-        }
-
-        $category->update($data);
+        $category->update($validatedData);
 
         return redirect()->route('kategori_wisata_manage')
                          ->with('success', 'Category updated successfully.');
@@ -91,12 +70,7 @@ class KategoriWisataController extends Controller
     public function destroy($id)
     {
         $category = KategoriWisata::findOrFail($id);
-
-        // Delete icon if exists
-        if ($category->icon) {
-            Storage::delete('public/' . $category->icon);
-        }
-
+        
         $category->delete();
 
         return redirect()->route('kategori_wisata_manage')

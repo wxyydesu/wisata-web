@@ -33,7 +33,6 @@
                                     <tr>
                                         <th scope="col">No</th>
                                         <th scope="col">Category Name</th>
-                                        <th scope="col">Icon</th>
                                         <th scope="col">Description</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Created At</th>
@@ -51,20 +50,20 @@
                                             {{ $category->kategori_wisata }}
                                         </td>
 
-                                        {{-- Icon --}}
-                                        <td>
-                                            @if($category->icon)
-                                                <img src="{{ asset('storage/' . $category->icon) }}" 
-                                                     alt="Category Icon" 
+                                        {{-- foto --}}
+                                        {{-- <td>
+                                            @if($category->foto)
+                                                <img src="{{ asset('storage/' . $category->foto) }}" 
+                                                     alt="Category foto" 
                                                      class="rounded-circle border"
                                                      width="40" 
                                                      height="40"
                                                      style="cursor:pointer; object-fit: cover;"
-                                                     onclick="showImgPreview('{{ asset('storage/' . $category->icon) }}')">
+                                                     onclick="showImgPreview('{{ asset('storage/' . $category->foto) }}')">
                                             @else
-                                                <span class="text-muted">No Icon</span>
+                                                <span class="text-muted">No foto</span>
                                             @endif
-                                        </td>
+                                        </td> --}}
                                 
                                         {{-- Deskripsi --}}
                                         <td>

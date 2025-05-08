@@ -5,106 +5,114 @@ namespace App\Http\Controllers;
 use App\Models\Berita;
 use App\Models\KategoriBerita;
 use Illuminate\Http\Request;
-use Carbon\Carbon;  
+use Illuminate\Support\Facades\Storage;
 
 class BeritaController extends Controller
 {
     public function index()
     {
-        $beritas = Berita::with('kategoriBerita')->get();
         $greeting = $this->getGreeting();
+        $news = Berita::with('kategoriBerita')->orderBy('tgl_post', 'desc')->get();
         
         return view('be.berita.index', [
-            'title' => 'Berita Management',
-            'beritas' => $beritas,
-            'greeting' => $greeting
+            'greeting' => $greeting,
+            'news' => $news
         ]);
     }
 
     public function create()
     {
-        $kategoris = KategoriBerita::all();
         $greeting = $this->getGreeting();
-        
+        $categories = KategoriBerita::all();
         return view('be.berita.create', [
-            'title' => 'Create Berita',
-            'kategoris' => $kategoris,
-            'greeting' => $greeting
+            'greeting' => $greeting,
+            'categories' => $categories
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'ludul' => 'required|string|max:255',
+        $validatedData = $request->validate([
+            'judul' => 'required|string|max:255',
             'berita' => 'required|string',
-            'post' => 'required|date',
-            'id_kategori_bertia' => 'required|exists:kategori_bertia,id',
-            'foto' => 'nullable|string'
+            'tgl_post' => 'required|date',
+            'id_kategori_berita' => 'required|exists:kategori_beritas,id',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Berita::create($validated);
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('berita_images', 'public');
+            $validatedData['foto'] = $path;
+        }
 
-        return redirect()->route('berita.index')->with('success', 'Berita created successfully.');
+        Berita::create($validatedData);
+
+        return redirect()->route('berita.index')
+                         ->with('success', 'Berita created successfully.');
     }
 
-    public function show(Berita $berita)
+    public function edit($id)
     {
         $greeting = $this->getGreeting();
-        
-        return view('be.berita.show', [
-            'title' => 'Detail Berita',
-            'berita' => $berita,
-            'greeting' => $greeting
-        ]);
-    }
-
-    public function edit(Berita $berita)
-    {
-        $kategoris = KategoriBerita::all();
-        $greeting = $this->getGreeting();
+        $berita = Berita::findOrFail($id);
+        $categories = KategoriBerita::all();
         
         return view('be.berita.edit', [
-            'title' => 'Edit Berita',
+            'greeting' => $greeting,
             'berita' => $berita,
-            'kategoris' => $kategoris,
-            'greeting' => $greeting
+            'categories' => $categories
         ]);
     }
 
-    public function update(Request $request, Berita $berita)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'ludul' => 'required|string|max:255',
+        $berita = Berita::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'judul' => 'required|string|max:255',
             'berita' => 'required|string',
-            'post' => 'required|date',
-            'id_kategori_bertia' => 'required|exists:kategori_bertia,id',
-            'foto' => 'nullable|string'
+            'tgl_post' => 'required|date',
+            'id_kategori_berita' => 'required|exists:kategori_beritas,id',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $berita->update($validated);
+        if ($request->hasFile('foto')) {
+            // Delete old image if exists
+            if ($berita->foto) {
+                Storage::disk('public')->delete($berita->foto);
+            }
+            
+            $path = $request->file('foto')->store('berita_images', 'public');
+            $validatedData['foto'] = $path;
+        }
 
-        return redirect()->route('berita.index')->with('success', 'Berita updated successfully.');
+        $berita->update($validatedData);
+
+        return redirect()->route('berita.index')
+                         ->with('success', 'Berita updated successfully.');
     }
 
-    public function destroy(Berita $berita)
+    public function destroy($id)
     {
+        $berita = Berita::findOrFail($id);
+        
+        // Delete image if exists
+        if ($berita->foto) {
+            Storage::disk('public')->delete($berita->foto);
+        }
+        
         $berita->delete();
-        return redirect()->route('berita.index')->with('success', 'Berita deleted successfully.');
+
+        return redirect()->route('berita.index')
+                         ->with('success', 'Berita deleted successfully.');
     }
 
     private function getGreeting()
     {
         $hour = now()->hour;
         
-        if ($hour < 12) {
-            return 'Selamat Pagi';
-        } elseif ($hour < 15) {
-            return 'Selamat Siang';
-        } elseif ($hour < 18) {
-            return 'Selamat Sore';
-        } else {
-            return 'Selamat Malam';
-        }
+        if ($hour < 12) return 'Good Morning';
+        if ($hour < 18) return 'Good Afternoon';
+        return 'Good Evening';
     }
 }
