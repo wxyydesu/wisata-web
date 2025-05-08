@@ -54,12 +54,12 @@ class BeritaController extends Controller
     public function edit($id)
     {
         $greeting = $this->getGreeting();
-        $berita = Berita::findOrFail($id);
+        $news = Berita::findOrFail($id);
         $categories = KategoriBerita::all();
         
         return view('be.berita.edit', [
             'greeting' => $greeting,
-            'berita' => $berita,
+            'news' => $news,
             'categories' => $categories
         ]);
     }
@@ -88,7 +88,7 @@ class BeritaController extends Controller
 
         $berita->update($validatedData);
 
-        return redirect()->route('berita.index')
+        return redirect()->route('berita_manage')
                          ->with('success', 'Berita updated successfully.');
     }
 
@@ -103,7 +103,7 @@ class BeritaController extends Controller
         
         $berita->delete();
 
-        return redirect()->route('berita.index')
+        return redirect()->route('berita_manage')
                          ->with('success', 'Berita deleted successfully.');
     }
 

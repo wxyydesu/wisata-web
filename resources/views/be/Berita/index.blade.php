@@ -36,6 +36,7 @@
                                         <th>Title</th>
                                         <th>Category</th>
                                         <th>Post Date</th>
+                                        <th>Content</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -57,12 +58,12 @@
                                         </td>
                                         <td>{{ Str::limit($item->judul, 50) }}</td>
                                         <td>
-                                            @if($item->kategori)
-                                                {{ $item->kategori->kategori_berita }}
+                                            @if($item->kategoriBerita)
+                                                {{ $item->kategoriBerita->kategori_berita }}
                                             @else
                                                 <span class="text-danger">Category Deleted</span>
                                             @endif
-                                        </td>
+                                        </td>   
                                         <td>
                                             @if($item->tgl_post)
                                                 {{ \Carbon\Carbon::parse($item->tgl_post)->format('d M Y') }}
@@ -71,10 +72,17 @@
                                             @endif
                                         </td>
                                         <td>
+                                            @if($item->berita)
+                                                {{ $item->berita }}
+                                            @else
+                                                <span class="text-muted">No content</span>
+                                            @endif
+                                        </td>
+                                        <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('berita_edit', $item->id) }}" class="btn btn-dark btn-sm">
+                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('berita_edit', $item->id) }}'">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
-                                                </a>
+                                                </button>
                                                 <form action="{{ route('berita_destroy', $item->id) }}" method="POST" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
