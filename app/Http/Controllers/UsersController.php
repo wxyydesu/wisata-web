@@ -1,169 +1,227 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Pelanggan;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class UsersController extends Controller
 {
     public function index()
-    {
-        $greeting = $this->getGreeting();
-        $users = User::with(['pelanggan', 'karyawan'])->get();
-        return view('be.manage.index', [
-            'users' => $users,
-            'greeting' => $greeting
-        ]);
-    }
+{
+    $users = User::with(['pelanggan', 'karyawan'])->latest()->paginate(10);
+    $greeting = $this->getGreeting();
+    
+    return view('be.manage.index', [
+        'users' => $users,
+        'greeting' => $greeting
+    ]);
+}
 
     public function create()
     {
         $greeting = $this->getGreeting();
         return view('be.manage.create', [
-            'greeting' => $greeting
-        ]);
-    }
-
-    public function edit($id)
-    {
-        $greeting = $this->getGreeting();
-        $user = User::with(['pelanggan', 'karyawan'])->findOrFail($id);
-        return view('be.manage.edit', [
-            'user' => $user,
-            'greeting' => $greeting
+            'greeting' => $greeting,
+            'levels' => ['admin', 'bendahara', 'owner', 'pelanggan'],
+            'jabatans' => ['administrasi', 'bendahara', 'pemilik']
         ]);
     }
 
     public function store(Request $request)
     {
-        // Base validation rules
-        $rules = [
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-            'password_confirmation' => 'required',
-            'level' => 'required|in:pelanggan,admin,bendahara,owner,karyawan',
-            'aktif' => 'required|boolean',
+        $request->validate([
             'name' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8',
             'no_hp' => 'required|string|max:15',
-        ];
+            'alamat' => 'required|string',
+            'level' => 'required|in:admin,bendahara,owner,pelanggan',
+            'aktif' => 'required|boolean',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'jabatan' => 'required_if:level,admin,bendahara,owner',
+            'nama_lengkap' => 'required_if:level,pelanggan'
+        ]);
 
-        // Additional validation based on level
-        if ($request->level == 'pelanggan') {
-            $rules['nama_lengkap'] = 'required|string|max:255';
-            $rules['alamat'] = 'required|string|max:500';
-        } else {
-            $rules['nama_karyawan'] = 'required|string|max:255';
-            $rules['alamat'] = 'required|string|max:500';
-            $rules['jabatan'] = 'required|in:administrasi,bendahara,pemilik,karyawan';
+        // Create User
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat,
+            'level' => $request->level,
+            'aktif' => $request->aktif
+        ]);
+
+        // Handle foto upload
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('profile-photos', 'public');
         }
 
-        $validated = $request->validate($rules);
-
-        try {
-            // Process photo upload
-            $fotoPath = $this->handlePhotoUpload($request);
-
-            // Create user
-            $user = User::create([
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'level' => $validated['level'],
-                'aktif' => $validated['aktif'],
-                'name' => $validated['name'],
-                'no_hp' => $validated['no_hp'],
+        // Create related record based on level
+        if ($request->level === 'pelanggan') {
+            Pelanggan::create([
+                'nama_lengkap' => $request->nama_lengkap,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat,
+                'foto' => $fotoPath,
+                'id_user' => $user->id
             ]);
-
-            // Create related record
-            $this->createRelatedRecord($user, $validated, $fotoPath);
-
-            return redirect()->route('user_manage')->with('success', 'User berhasil ditambahkan');
-
-        } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Gagal menambahkan user: '.$e->getMessage());
+        } else {
+            Karyawan::create([
+                'nama_karyawan' => $request->name,
+                'alamat' => $request->alamat,
+                'no_hp' => $request->no_hp,
+                'jabatan' => $request->jabatan,
+                'foto' => $fotoPath,
+                'id_user' => $user->id
+            ]);
         }
+
+        return redirect()->route('user_manage')->with('success', 'User created successfully.');
+    }
+
+    public function edit($id)
+    {
+        $user = User::with(['pelanggan', 'karyawan'])->findOrFail($id);
+        $greeting = $this->getGreeting();
+        
+        return view('be.manage.edit', [
+            'user' => $user,
+            'greeting' => $greeting,
+            'levels' => ['admin', 'bendahara', 'owner', 'pelanggan'],
+            'jabatans' => ['administrasi', 'bendahara', 'pemilik']
+        ]);
     }
 
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        // Base validation rules
-        $rules = [
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'level' => 'required|in:pelanggan,admin,bendahara,owner,karyawan',
-            'aktif' => 'required|boolean',
+        $request->validate([
             'name' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'no_hp' => 'required|string|max:15',
+            'alamat' => 'required|string',
+            'level' => 'required|in:admin,bendahara,owner,pelanggan',
+            'aktif' => 'required|boolean',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'jabatan' => 'required_if:level,admin,bendahara,owner',
+            'nama_lengkap' => 'required_if:level,pelanggan'
+        ]);
+
+        // Update User
+        $userData = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat,
+            'level' => $request->level,
+            'aktif' => $request->aktif
         ];
 
-        // Additional validation based on level
-        if ($request->level == 'pelanggan') {
-            $rules['nama_lengkap'] = 'required|string|max:255';
-            $rules['alamat'] = 'required|string|max:500';
+        if ($request->password) {
+            $userData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($userData);
+
+        // Handle foto upload
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            // Delete old photo if exists
+            if ($user->level === 'pelanggan' && $user->pelanggan && $user->pelanggan->foto) {
+                Storage::disk('public')->delete($user->pelanggan->foto);
+            } elseif ($user->karyawan && $user->karyawan->foto) {
+                Storage::disk('public')->delete($user->karyawan->foto);
+            }
+            
+            $fotoPath = $request->file('foto')->store('profile-photos', 'public');
+        }
+
+        // Update related record based on level
+        if ($request->level === 'pelanggan') {
+            $pelangganData = [
+                'nama_lengkap' => $request->nama_lengkap,
+                'no_hp' => $request->no_hp,
+                'alamat' => $request->alamat,
+                'id_user' => $user->id
+            ];
+
+            if ($fotoPath) {
+                $pelangganData['foto'] = $fotoPath;
+            }
+
+            if ($user->pelanggan) {
+                $user->pelanggan->update($pelangganData);
+            } else {
+                // Delete karyawan record if exists
+                if ($user->karyawan) {
+                    $user->karyawan->delete();
+                }
+                Pelanggan::create($pelangganData);
+            }
         } else {
-            $rules['nama_karyawan'] = 'required|string|max:255';
-            $rules['alamat'] = 'required|string|max:500';
-            $rules['jabatan'] = 'required|in:administrasi,bendahara,pemilik,karyawan';
+            $karyawanData = [
+                'nama_karyawan' => $request->name,
+                'alamat' => $request->alamat,
+                'no_hp' => $request->no_hp,
+                'jabatan' => $request->jabatan,
+                'id_user' => $user->id
+            ];
+
+            if ($fotoPath) {
+                $karyawanData['foto'] = $fotoPath;
+            }
+
+            if ($user->karyawan) {
+                $user->karyawan->update($karyawanData);
+            } else {
+                // Delete pelanggan record if exists
+                if ($user->pelanggan) {
+                    $user->pelanggan->delete();
+                }
+                Karyawan::create($karyawanData);
+            }
         }
 
-        $validated = $request->validate($rules);
-
-        try {
-            // Process photo upload
-            $fotoPath = $this->handlePhotoUpload($request, $user);
-
-            // Update user
-            $user->update([
-                'email' => $validated['email'],
-                'level' => $validated['level'],
-                'aktif' => $validated['aktif'],
-                'name' => $validated['name'],
-                'no_hp' => $validated['no_hp'],
-            ]);
-
-            // Update related record
-            $this->updateRelatedRecord($user, $validated, $fotoPath);
-
-            return redirect()->route('user_manage')->with('success', 'User berhasil diperbarui');
-
-        } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Gagal memperbarui user: '.$e->getMessage());
-        }
+        return redirect()->route('user_manage')->with('success', 'User updated successfully.');
     }
 
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-        // Hapus relasi jika perlu
+        $user = User::with(['pelanggan', 'karyawan'])->findOrFail($id);
+
+        // Delete related photo files
+        if ($user->pelanggan && $user->pelanggan->foto) {
+            Storage::disk('public')->delete($user->pelanggan->foto);
+        } elseif ($user->karyawan && $user->karyawan->foto) {
+            Storage::disk('public')->delete($user->karyawan->foto);
+        }
+
+        // Delete related records
         if ($user->pelanggan) {
-            if ($user->pelanggan->foto) {
-                Storage::disk('public')->delete($user->pelanggan->foto);
-            }
             $user->pelanggan->delete();
         }
         if ($user->karyawan) {
-            if ($user->karyawan->foto) {
-                Storage::disk('public')->delete($user->karyawan->foto);
-            }
             $user->karyawan->delete();
         }
+
+        // Delete user
         $user->delete();
-        return redirect()->route('user_manage')->with('success', 'User berhasil dihapus');
+
+        return redirect()->route('user_manage')->with('success', 'User deleted successfully.');
     }
-
-
-    // PRIVATE FUNCTION START
 
     private function getGreeting()
     {
-        $hour = Carbon::now()->hour;
+        $hour = now()->hour;
         
         if ($hour < 12) {
             return 'Good Morning';
@@ -171,87 +229,6 @@ class UsersController extends Controller
             return 'Good Afternoon';
         } else {
             return 'Good Evening';
-        }
-    }
-
-    private function handlePhotoUpload(Request $request, ?User $user = null): ?string
-    {
-        $fotoPath = null;
-        
-        if ($request->hasFile('foto')) {
-            // Delete old photo if exists
-            if ($user) {
-                if ($user->pelanggan && $user->pelanggan->foto) {
-                    Storage::disk('public')->delete($user->pelanggan->foto);
-                } elseif ($user->karyawan && $user->karyawan->foto) {
-                    Storage::disk('public')->delete($user->karyawan->foto);
-                }
-            }
-            
-            $fotoPath = $request->file('foto')->store('user_photos', 'public');
-        }
-        
-        return $fotoPath;
-    }
-
-    private function createRelatedRecord(User $user, array $validated, ?string $fotoPath): void
-    {
-        if ($validated['level'] == 'pelanggan') {
-            Pelanggan::create([
-                'nama_lengkap' => $validated['nama_lengkap'],
-                'no_hp' => $validated['no_hp'],
-                'alamat' => $validated['alamat'],
-                'foto' => $fotoPath,
-                'id_user' => $user->id
-            ]);
-        } else {
-            Karyawan::create([
-                'nama_karyawan' => $validated['nama_karyawan'],
-                'no_hp' => $validated['no_hp'],
-                'alamat' => $validated['alamat'],
-                'jabatan' => $validated['jabatan'],
-                'foto' => $fotoPath,
-                'id_user' => $user->id
-            ]);
-        }
-    }
-
-    private function updateRelatedRecord(User $user, array $validated, ?string $fotoPath): void
-    {
-        $updateData = [
-            'no_hp' => $validated['no_hp'],
-            'alamat' => $validated['alamat'],
-        ];
-
-        if ($fotoPath) {
-            $updateData['foto'] = $fotoPath;
-        }
-
-        if ($validated['level'] == 'pelanggan') {
-            $updateData['nama_lengkap'] = $validated['nama_lengkap'];
-            
-            if ($user->pelanggan) {
-                $user->pelanggan->update($updateData);
-            } else {
-                // If changing from karyawan to pelanggan
-                if ($user->karyawan) {
-                    $user->karyawan->delete();
-                }
-                Pelanggan::create(array_merge($updateData, ['id_user' => $user->id]));
-            }
-        } else {
-            $updateData['nama_karyawan'] = $validated['nama_karyawan'];
-            $updateData['jabatan'] = $validated['jabatan'];
-            
-            if ($user->karyawan) {
-                $user->karyawan->update($updateData);
-            } else {
-                // If changing from pelanggan to karyawan
-                if ($user->pelanggan) {
-                    $user->pelanggan->delete();
-                }
-                Karyawan::create(array_merge($updateData, ['id_user' => $user->id]));
-            }
         }
     }
 }

@@ -13,13 +13,15 @@ class AuthController extends Controller
 {
     // Show login form
     public function login()
-     {
-          return view("auth.login");
-     }
-     public function register()
-     {
-          return view("auth.register");
-     }              
+    {
+        return view("auth.login");
+    }
+
+    // Show registration form
+    public function register()
+    {
+        return view("auth.register");
+    }              
 
     // Handle user registration
     public function registerUser(Request $request)
@@ -30,29 +32,27 @@ class AuthController extends Controller
             'password' => 'required|min:6',
             'level' => 'required|in:admin,bendahara,pelanggan,owner',
             'no_hp' => 'required|string|max:15',
-            'alamat' => 'string',
+            'alamat' => 'nullable|string',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat ?? '',
             'password' => Hash::make($request->password),
             'level' => $request->level,
             'aktif' => 1,
         ]);
     
         if ($request->level == 'pelanggan') {
-            // Insert ke tabel pelanggan
             Pelanggan::create([
                 'id_user' => $user->id,
                 'nama_lengkap' => $request->name,
                 'no_hp' => $request->no_hp,
                 'alamat' => $request->alamat ?? '',
-
             ]);
         } else {
-
             $mappingLevelToJabatan = [
                 'admin' => 'administrasi',
                 'bendahara' => 'bendahara',
@@ -62,10 +62,9 @@ class AuthController extends Controller
             $jabatan = $mappingLevelToJabatan[$request->level] ?? null;
 
             if (!$jabatan) {
-                return back()->withErrors(['level' => 'Invalid role for karyawan.']);
+                return back()->with('error', 'Invalid role for karyawan.');
             }
 
-            // Insert ke tabel karyawan
             Karyawan::create([
                 'id_user' => $user->id,
                 'nama_karyawan' => $request->name,
@@ -78,7 +77,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->put('loginId', $user->id);
 
-        switch (Auth::user()->level) {
+        switch ($user->level) {
             case 'admin':
                 return redirect()->intended('/admin')->with('success', 'Registrasi berhasil!');
             case 'bendahara':
@@ -90,36 +89,45 @@ class AuthController extends Controller
             default:
                 return redirect('/')->with('success', 'Registrasi berhasil!');
         }
-        return back()->withErrors(['email' => 'Email atau Password Salah.']);
-        return back()->withErrors('password', 'Password minimal 8 karakter.');
-
     }
-
 
     // Handle login request
     public function loginUser(Request $request)
     {
-        // Validate credentials
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
 
-        $user = User::where('email','=', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email tidak terdaftar.'])->withInput();
+        }
+
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'Password salah.'])->withInput();
+        }
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $request->session()->put('loginId', $user->id);
 
-            // Redirect based on user role
-            switch (Auth::user()->level) {
-            case 'admin':
-                return redirect()->intended('/admin');
-            default:
-                return redirect('/home');
+            switch ($user->level) {
+                case 'admin':
+                    return redirect()->intended('/admin');
+                case 'bendahara':
+                    return redirect()->intended('/bendahara');
+                case 'owner':
+                    return redirect()->intended('/owner');
+                case 'pelanggan':
+                    return redirect()->intended('/home');
+                default:
+                    return redirect('/');
             }
         }
 
-        return back()->withErrors(['email' => 'Email atau password salah']);
+        return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
     }
 
     // Handle logout
@@ -130,54 +138,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->back();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect('/');
     }
 }

@@ -3,20 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\PaketWisata;
-use App\Models\ObyekWisata;
 
-class PaketWisataController extends Controller
+class CheckoutController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $paketWisata = PaketWisata::with('obyek')->get();
-        return view('paket-wisata.index', compact('paketWisata'));
+        //
     }
-
 
     /**
      * Show the form for creating a new resource.

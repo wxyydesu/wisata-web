@@ -57,12 +57,15 @@ Route::get('/owner', [App\Http\Controllers\OwnerController::class, 'index'])
     ->middleware(['auth', CheckUserLevel::class . ':owner'])
     ->name('owner');
 
-Route::get('/profilepelanggan', [App\Http\Controllers\PelangganController::class, 'profilePelanggan'])
-    ->middleware(['auth', CheckPelanggan::class]);
+// Route::get('/profilepelanggan', [App\Http\Controllers\PelangganController::class, 'profilePelanggan'])
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+});
 
 Route::middleware('auth')->group(function () {
     // Users Routes
-    Route::resource('user_manage', App\Http\Controllers\UsersController::class)->names([
+    Route::resource('user_manage', App\Http\Controllers\UsersController::class)->middleware(['auth', CheckUserLevel::class . ':admin'])->names([
         'index' => 'user_manage',
         'create' => 'user_create',
         'edit' => 'user_edit',
@@ -137,7 +140,23 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::put('user-manage/{user}', [App\Http\Controllers\UsersController::class, 'update'])->name('user.update');
-    
+
+
+// Cart Routes
+// Route::middleware(['auth'])->group(function () {
+//     Route::post('/cart/add/{paket}', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+//     Route::post('/cart/remove/{paket}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+//     Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+//     Route::post('/cart/clear', [App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
+//     Route::post('/cart/update/{paket}', [App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
+// });
+
+// Checkout Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success', [App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
+});
 // Route::prefix('admin')->middleware(['auth', CheckUserLevel::class . ':admin'])->group(function () {
     
 // });

@@ -69,16 +69,19 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('penginapan_edit', $penginapans) }}'">
+                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('penginapan_edit', $p->id) }}'">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </button>
-                                                <form action="{{ route('penginapan_destroy', $p->id) }}" method="POST" id="deleteForm{{ $p->id }}" style="display: inline;">
+                                                
+                                                <form action="{{ route('penginapan_destroy', $p->id) }}" method="POST" 
+                                                      onsubmit="return confirm('Yakin ingin menghapus?')">
                                                     @csrf 
                                                     @method('DELETE')
-                                                    <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $p->id }})">
+                                                    <button type="submit" class="btn btn-danger btn-fw">
                                                         <i class="fa fa-trash"></i> Hapus
                                                     </button>
                                                 </form>
+                                                
                                                 <button type="button" class="btn btn-success btn-sm" onClick="window.location.href='{{ route('penginapan_show', $p->id) }}'">
                                                     <i class="fa fa-eye"></i> Detail
                                                 </button>

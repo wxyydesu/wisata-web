@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255);
             $table->string('email')->unique();
+            $table->text('foto')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('no_hp', 15)->unique();
             $table->string('password');
+            $table->text('alamat');
             $table->enum('level', ['admin', 'bendahara', 'owner', 'pelanggan']);
             $table->boolean('aktif')->default(1);
             $table->rememberToken();

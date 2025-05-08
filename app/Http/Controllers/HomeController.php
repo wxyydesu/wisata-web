@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Pelanggan;
+use App\Models\Karyawan;
 
 class HomeController extends Controller
 {
@@ -11,8 +15,10 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $users = Auth::user();
         return view('fe.home.index', [
-            'title' => 'Home'
+            'title' => 'Home',
+            'user' => $users,
         ]);
     }
 

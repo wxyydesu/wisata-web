@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('kategori_wisatas', function (Blueprint $table) {
             $table->id();
             $table->string('kategori_wisata', 255)->unique();
+            $table->text('foto')->nullable();
+            $table->text('deskripsi');
             $table->timestamps();
         });
     }

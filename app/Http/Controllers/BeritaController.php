@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Berita;
 use App\Models\KategoriBerita;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Carbon\Carbon;  
 
 class BeritaController extends Controller
 {

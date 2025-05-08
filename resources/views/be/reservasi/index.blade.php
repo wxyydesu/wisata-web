@@ -22,6 +22,10 @@
                             Tabel Reservasi <code>Tambah | Edit | Hapus</code>
                         </p>
 
+                        @if(session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+                        
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>

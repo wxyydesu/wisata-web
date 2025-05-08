@@ -22,6 +22,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'foto',
+        'alamat',
         'email_verified_at',
         'no_hp',
         'password',
@@ -39,6 +41,15 @@ class User extends Authenticatable
     public function karyawan(): HasOne
     {
         return $this->hasOne(Karyawan::class, 'id_user', 'id');
+    }
+
+    public function pendingReservations()
+    {
+        if ($this->pelanggan) {
+            return $this->pelanggan->reservasis()->where('status_reservasi', 'pesan');
+        }
+        
+        return collect(); // Return empty collection jika bukan pelanggan
     }
 
     /**

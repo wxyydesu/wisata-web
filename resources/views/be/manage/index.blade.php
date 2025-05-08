@@ -22,6 +22,10 @@
                         <p class="card-description">
                             User Table <code>Add | Edit | Remove</code>
                         </p>
+                        
+                        @if(session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
 
                         <div class="table-responsive">
                             <table class="table table-striped">
@@ -45,14 +49,24 @@
                                         <th scope="row">{{ $nmr + 1 }}.</th>
                                 
                                         {{-- Foto --}}
-                                        <td class="py-1">
-                                            @if($data->level == 'pelanggan' && $data->pelanggan && $data->pelanggan->foto)
-                                                <img src="{{ asset('storage/' . $data->pelanggan->foto) }}" alt="Pelanggan Foto" width="40" style="cursor:pointer" onclick="showImgPreview('{{ asset('storage/' . $data->pelanggan->foto) }}')">
-                                            @elseif($data->level == 'karyawan' && $data->karyawan && $data->karyawan->foto)
-                                                <img src="{{ asset('storage/' . $data->karyawan->foto) }}" alt="Karyawan Foto" width="40" style="cursor:pointer" onclick="showImgPreview('{{ asset('storage/' . $data->karyawan->foto) }}')">
-                                            @else
-                                                <img src="{{ asset('images/default-user.jpg') }}" alt="Anonymose" width="40">
-                                            @endif
+                                        <td>
+                                            @php
+                                                $photo = null;
+                                                if ($data->level == 'pelanggan' && $data->pelanggan && $data->pelanggan->foto) {
+                                                    $photo = asset('storage/' . $data->pelanggan->foto);
+                                                } elseif ($data->karyawan && $data->karyawan->foto) {
+                                                    $photo = asset('storage/' . $data->karyawan->foto);
+                                                } else {
+                                                    $photo = asset('images/default-user.jpg');
+                                                }
+                                            @endphp
+                                            <img src="{{ $photo }}" 
+                                                 alt="User Photo" 
+                                                 class="rounded-circle border"
+                                                 width="40" 
+                                                 height="40"
+                                                 style="cursor:pointer; object-fit: cover;"
+                                                 onclick="showImgPreview('{{ $photo }}')">
                                         </td>
                                 
                                         {{-- Nama --}}
@@ -86,9 +100,9 @@
                                         {{-- Alamat --}}
                                         <td>
                                             @if($data->level == 'pelanggan' && $data->pelanggan)
-                                                {{ $data->pelanggan->alamat ?? '-' }}
-                                            @elseif($data->level == 'karyawan' && $data->karyawan)
-                                                {{ $data->karyawan->alamat ?? '-' }}
+                                                {{ Str::limit($data->pelanggan->alamat ?? '-', 20) }}
+                                            @elseif($data->karyawan)
+                                                {{ Str::limit($data->karyawan->alamat ?? '-', 20) }}
                                             @else
                                                 -
                                             @endif
