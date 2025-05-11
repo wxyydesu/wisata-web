@@ -30,6 +30,11 @@
         </a>
         <div class="collapse" id="form-elements">
           <ul class="nav flex-column sub-menu">
+            <li class="nav-item"><a class="nav-link" href="{{ route('paket_manage') }}">Paket</a></li>
+          </ul>
+        </div>
+        <div class="collapse" id="form-elements">
+          <ul class="nav flex-column sub-menu">
             <li class="nav-item"><a class="nav-link" href="{{ route('penginapan_manage') }}">Penginapan</a></li>
           </ul>
         </div>

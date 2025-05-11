@@ -16,30 +16,16 @@
             <!-- Left Side Menu -->
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="penginapanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Penginapan
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="penginapanDropdown">
-                        <li><a class="dropdown-item text-dark" href="#">Hotel</a></li>
-                        <li><a class="dropdown-item text-dark" href="#">Villa</a></li>
-                        <li><a class="dropdown-item text-dark" href="#">Homestay</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="wisataDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Objek Wisata
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="wisataDropdown">
-                        <li><a class="dropdown-item text-dark" href="#">Alam</a></li>
-                        <li><a class="dropdown-item text-dark" href="#">Budaya</a></li>
-                        <li><a class="dropdown-item text-dark" href="#">Kuliner</a></li>
-                    </ul>
+                    <a class="nav-link" href="{{ route('home') }}">Beranda</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Paket Wisata</a>
+                    <a class="nav-link" href="{{ route('package') }}">Paket Wisata</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('penginapan') }}">Penginapan</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('berita') }}">Berita</a>
                 </li>
             </ul>
             

@@ -65,9 +65,10 @@ class PenginapanController extends Controller
         return redirect()->route('penginapan_manage')->with('success', 'Penginapan created successfully.');
     }
 
-    public function show(Penginapan $penginapan)
-    {
+    public function show($id)
+    {  
         $greeting = $this->getGreeting();
+        $penginapan = Penginapan::findOrFail($id);
         
         return view('be.penginapan.show', [
             'title' => 'Detail Penginapan',

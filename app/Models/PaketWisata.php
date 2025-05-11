@@ -12,7 +12,9 @@ class PaketWisata extends Model
     protected $table = 'paket_wisatas';
     
     protected $fillable = [
+        'nama_paket',
         'deskripsi',
+        'fasilitas',
         'harga_per_pack',
         'foto1',
         'foto2',

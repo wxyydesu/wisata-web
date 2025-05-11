@@ -219,6 +219,19 @@ class UsersController extends Controller
         return redirect()->route('user_manage')->with('success', 'User deleted successfully.');
     }
 
+    public function show($id)
+    {
+        $user = User::with(['pelanggan', 'karyawan'])->findOrFail($id);
+        $greeting = $this->getGreeting();
+        
+        return view('be.manage.show', [
+            'user' => $user,
+            'greeting' => $greeting,
+            'levels' => ['admin', 'bendahara', 'owner', 'pelanggan'],
+            'jabatans' => ['administrasi', 'bendahara', 'pemilik']
+        ]);
+    }
+
     private function getGreeting()
     {
         $hour = now()->hour;

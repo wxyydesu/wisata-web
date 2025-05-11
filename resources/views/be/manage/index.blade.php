@@ -129,6 +129,9 @@
                                                         <i class="fas fa-trash-alt me-1"></i>Delete
                                                     </button>
                                                 </form>
+                                                <button type="button" class="btn btn-success btn-sm" onClick="window.location.href='{{ route('user_show', $data->id) }}'">
+                                                    <i class="fa fa-eye"></i> Detail
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

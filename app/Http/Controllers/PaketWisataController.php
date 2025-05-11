@@ -2,67 +2,134 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\PaketWisata;
-use App\Models\ObyekWisata;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PaketWisataController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $paketWisata = PaketWisata::with('obyek')->get();
-        return view('paket-wisata.index', compact('paketWisata'));
+        $greeting = $this->getGreeting();
+        $pakets = PaketWisata::orderBy('created_at', 'desc')->get();
+        
+        return view('be.paket.index', [
+            'greeting' => $greeting,
+            'pakets' => $pakets
+        ]);
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $greeting = $this->getGreeting();
+        return view('be.paket.create', [
+            'greeting' => $greeting
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'nama_paket' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'fasilitas' => 'required|string',
+            'harga_per_pack' => 'required|integer',
+            'foto1' => 'required|image|mimes:jpeg,png,jpg,gif',
+            'foto2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'foto4' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'foto5' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        // Handle file uploads
+        $imageFields = ['foto1', 'foto2', 'foto3', 'foto4', 'foto5'];
+        foreach ($imageFields as $field) {
+            if ($request->hasFile($field)) {
+                $path = $request->file($field)->store('paket-wisata-images', 'public');
+                $validatedData[$field] = $path;
+            }
+        }
+
+        PaketWisata::create($validatedData);
+
+        return redirect()->route('paket_manage')
+                         ->with('success', 'Paket wisata created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit($id)
     {
-        //
+        $greeting = $this->getGreeting();
+        $paket = PaketWisata::findOrFail($id);
+        
+        return view('be.paket.edit', [
+            'greeting' => $greeting,
+            'paket' => $paket
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $paket = PaketWisata::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'nama_paket' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'fasilitas' => 'required|string',
+            'harga_per_pack' => 'required|integer',
+            'foto1' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'foto2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'foto4' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'foto5' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        // Handle file uploads
+        $imageFields = ['foto1', 'foto2', 'foto3', 'foto4', 'foto5'];
+        foreach ($imageFields as $field) {
+            if ($request->hasFile($field)) {
+                // Delete old image if exists
+                if ($paket->$field) {
+                    Storage::disk('public')->delete($paket->$field);
+                }
+                
+                $path = $request->file($field)->store('paket-wisata-images', 'public');
+                $validatedData[$field] = $path;
+            } else {
+                // Keep the existing image if no new one was uploaded
+                $validatedData[$field] = $paket->$field;
+            }
+        }
+
+        $paket->update($validatedData);
+
+        return redirect()->route('paket_manage')
+                         ->with('success', 'Paket wisata updated successfully.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy($id)
     {
-        //
+        $paket = PaketWisata::findOrFail($id);
+        
+        // Delete all images if they exist
+        $imageFields = ['foto1', 'foto2', 'foto3', 'foto4', 'foto5'];
+        foreach ($imageFields as $field) {
+            if ($paket->$field) {
+                Storage::disk('public')->delete($paket->$field);
+            }
+        }
+        
+        $paket->delete();
+
+        return redirect()->route('paket_manage')
+                         ->with('success', 'Paket wisata deleted successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    private function getGreeting()
     {
-        //
+        $hour = now()->hour;
+        
+        if ($hour < 12) return 'Good Morning';
+        if ($hour < 18) return 'Good Afternoon';
+        return 'Good Evening';
     }
 }

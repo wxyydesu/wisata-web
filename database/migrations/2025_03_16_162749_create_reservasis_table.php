@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('reservasis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_pelanggan')->constrained('pelanggans')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('id_paket')->constrained('paket_wisatas')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('id_pelanggan')->references('id')->on('pelanggans')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('id_paket')->references('id')->on('paket_wisatas')->onDelete('cascade')->onUpdate('cascade');
             $table->dateTime('tgl_reservasi');
             $table->integer('harga');
             $table->integer('jumlah_peserta');

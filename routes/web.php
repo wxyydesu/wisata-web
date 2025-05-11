@@ -65,36 +65,40 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware('auth')->group(function () {
     // Users Routes
-    Route::resource('user_manage', App\Http\Controllers\UsersController::class)->middleware(['auth', CheckUserLevel::class . ':admin'])->names([
-        'index' => 'user_manage',
-        'create' => 'user_create',
-        'edit' => 'user_edit',
-        'destroy' => 'user_destroy',
-        'store' => 'user_store',
-        'update' => 'user_update',
-    ]);
+    Route::prefix('user-manage')->group(function () {
+        Route::get('/', [App\Http\Controllers\UsersController::class, 'index'])->name('user_manage');
+        Route::get('/create', [App\Http\Controllers\UsersController::class, 'create'])->name('user_create');
+        Route::post('/', [App\Http\Controllers\UsersController::class, 'store'])->name('user_store');
+        Route::get('/{id}/edit', [App\Http\Controllers\UsersController::class, 'edit'])->name('user_edit');
+        Route::put('/{id}', [App\Http\Controllers\UsersController::class, 'update'])->name('user_update');
+        Route::delete('/{id}', [App\Http\Controllers\UsersController::class, 'destroy'])->name('user_destroy');
+        Route::get('/{id}/detail', [App\Http\Controllers\UsersController::class, 'show'])->name('user_show');
+    });
 
     // Reservasi Routes
-    Route::resource('reservasi', App\Http\Controllers\ReservasiController::class)->names([
-        'index' => 'reservasi_manage',
-        'create' => 'reservasi_create',
-        'store' => 'reservasi_store',
-        'show' => 'reservasi_show',
-        'edit' => 'reservasi_edit',
-        'update' => 'reservasi_update',
-        'destroy' => 'reservasi_destroy',
-    ]);
+    Route::prefix('reservasi')->group(function() {
+        Route::get('/', [ App\Http\Controllers\ReservasiController::class, 'index'])->name('reservasi_manage');
+        Route::get('/create', [ App\Http\Controllers\ReservasiController::class, 'create'])->name('reservasi_create');
+        Route::post('/', [ App\Http\Controllers\ReservasiController::class, 'store'])->name('reservasi_store');
+        Route::get('/{reservasi}', [ App\Http\Controllers\ReservasiController::class, 'show'])->name('reservasi_show');
+        Route::get('/{reservasi}/edit', [ App\Http\Controllers\ReservasiController::class, 'edit'])->name('reservasi_edit');
+        Route::put('/{reservasi}', [ App\Http\Controllers\ReservasiController::class, 'update'])->name('reservasi_update');
+        Route::delete('/{reservasi}', [ App\Http\Controllers\ReservasiController::class, 'destroy'])->name('reservasi_destroy');
+        
+        // API for pending reservations
+        Route::get('/api/pending', [ App\Http\Controllers\ReservasiController::class, 'getPendingReservations'])->name('reservasi_pending');
+    });
 
     // Penginapan Routes
-    Route::resource('penginapan', App\Http\Controllers\PenginapanController::class)->names([
-        'index' => 'penginapan_manage',
-        'create' => 'penginapan_create',
-        'store' => 'penginapan_store',
-        'show' => 'penginapan_show',
-        'edit' => 'penginapan_edit',
-        'update' => 'penginapan_update',
-        'destroy' => 'penginapan_destroy',
-    ]);
+    Route::prefix('penginapan')->group(function () {
+        Route::get('/', [App\Http\Controllers\PenginapanController::class, 'index'])->name('penginapan_manage');
+        Route::get('/create', [App\Http\Controllers\PenginapanController::class, 'create'])->name('penginapan_create');
+        Route::post('/', [App\Http\Controllers\PenginapanController::class, 'store'])->name('penginapan_store');
+        Route::get('/{id}/edit', [App\Http\Controllers\PenginapanController::class, 'edit'])->name('penginapan_edit');
+        Route::put('/{id}', [App\Http\Controllers\PenginapanController::class, 'update'])->name('penginapan_update');
+        Route::delete('/{id}', [App\Http\Controllers\PenginapanController::class, 'destroy'])->name('penginapan_destroy');
+        Route::get('/{id}/detail', [App\Http\Controllers\PenginapanController::class, 'show'])->name('penginapan_show');
+    });
 
     // Objek Wisata Routes
     Route::resource('objek-wisata', App\Http\Controllers\ObyekWisataController::class)->names([
@@ -136,19 +140,28 @@ Route::middleware('auth')->group(function () {
         'update' => 'kategori_berita_update',
         'destroy' => 'kategori_berita_destroy',
     ]);
+
+    // Paket Wisata Routes
+    Route::resource('paket-wisata', App\Http\Controllers\PaketWisataController::class)->names([
+        'index' => 'paket_manage',
+        'create' => 'paket_create',
+        'store' => 'paket_store',
+        'show' => 'paket_show',
+        'edit' => 'paket_edit',
+        'update' => 'paket_update',
+        'destroy' => 'paket_destroy',
+    ]);
 });
 
 Route::put('user-manage/{user}', [App\Http\Controllers\UsersController::class, 'update'])->name('user.update');
 
-
-// Cart Routes
-// Route::middleware(['auth'])->group(function () {
-//     Route::post('/cart/add/{paket}', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
-//     Route::post('/cart/remove/{paket}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
-//     Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
-//     Route::post('/cart/clear', [App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
-//     Route::post('/cart/update/{paket}', [App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
-// });
+Route::get('/berita', [App\Http\Controllers\HomeController::class, 'berita'])->name('berita');
+Route::get('/berita/{id}', [App\Http\Controllers\HomeController::class, 'detailBerita'])->name('detail-berita');
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/package', [App\Http\Controllers\HomeController::class, 'paketWisata'])->name('paket');
+Route::get('/package/{id}', [App\Http\Controllers\HomeController::class, 'detailpaket'])->name('detail-paket');
+Route::get('/stay-cation', [App\Http\Controllers\HomeController::class, 'penginapan'])->name('penginapan');
+Route::get('/stay-cation/{id}', [App\Http\Controllers\HomeController::class, 'detailPenginapan'])->name('detail-penginapan');
 
 // Checkout Routes
 Route::middleware(['auth'])->group(function () {
