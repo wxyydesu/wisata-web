@@ -2,6 +2,10 @@
 @section('navbar')
     @include('fe.navbar')
 @endsection
+@section('slider')
+    @include('fe.slider')
+@endsection
+
 @section('content')
 <div class="main">
     <div class="container py-5">
@@ -68,7 +72,7 @@
                             <i class="fas fa-mountain fa-3x text-primary mb-3"></i>
                             <h3 class="card-title">{{ $kategori->kategori_wisata }}</h3>
                             <p class="card-text">{{ Str::limit($kategori->deskripsi, 100) }}</p>
-                            <a href="{{ route('objek-wisata') }}" class="btn btn-sm btn-outline-primary">Jelajahi</a>
+                            <a href="{{ route('obyek-wisata') }}" class="btn btn-sm btn-outline-primary">Jelajahi</a>
                         </div>
                     </div>
                 </div>

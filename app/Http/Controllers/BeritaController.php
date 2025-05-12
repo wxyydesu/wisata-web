@@ -47,7 +47,7 @@ class BeritaController extends Controller
 
         Berita::create($validatedData);
 
-        return redirect()->route('berita.index')
+        return redirect()->route('berita_manage')
                          ->with('success', 'Berita created successfully.');
     }
 

@@ -16,94 +16,68 @@
                             Perbarui data objek wisata
                         </p>
 
-                        <form class="forms-sample" action="{{ route('objek_wisata.update', $objekWisata->id) }}" method="POST" enctype="multipart/form-data">
+                        <form class="forms-sample" action="{{ route('objek_wisata_update', $obyekWisata->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
                             <div class="form-group">
-                                <label for="nama">Nama Objek Wisata</label>
-                                <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama" value="{{ old('nama', $objekWisata->nama) }}">
-                                @error('nama')
+                                <label for="nama_wisata">Nama Objek Wisata</label>
+                                <input type="text" class="form-control @error('nama_wisata') is-invalid @enderror" id="nama_wisata" name="nama_wisata" value="{{ old('nama_wisata', $obyekWisata->nama_wisata) }}">
+                                @error('nama_wisata')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="kategori">Kategori</label>
-                                <select class="form-control @error('kategori') is-invalid @enderror" id="kategori" name="kategori">
+                                <label for="id_kategori_wisata">Kategori</label>
+                                <select class="form-control @error('id_kategori_wisata') is-invalid @enderror" id="id_kategori_wisata" name="id_kategori_wisata">
                                     <option value="">Pilih Kategori</option>
-                                    <option value="Alam" {{ old('kategori', $objekWisata->kategori) == 'Alam' ? 'selected' : '' }}>Alam</option>
-                                    <option value="Budaya" {{ old('kategori', $objekWisata->kategori) == 'Budaya' ? 'selected' : '' }}>Budaya</option>
-                                    <option value="Sejarah" {{ old('kategori', $objekWisata->kategori) == 'Sejarah' ? 'selected' : '' }}>Sejarah</option>
-                                    <option value="Religi" {{ old('kategori', $objekWisata->kategori) == 'Religi' ? 'selected' : '' }}>Religi</option>
-                                    <option value="Kuliner" {{ old('kategori', $objekWisata->kategori) == 'Kuliner' ? 'selected' : '' }}>Kuliner</option>
+                                    @foreach($kategoris as $kategori)
+                                        <option value="{{ $kategori->id }}" {{ old('id_kategori_wisata', $obyekWisata->id_kategori_wisata) == $kategori->id ? 'selected' : '' }}>
+                                            {{ $kategori->kategori_wisata }}
+                                        </option>
+                                    @endforeach
                                 </select>
-                                @error('kategori')
+                                @error('id_kategori_wisata')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="lokasi">Lokasi</label>
-                                <input type="text" class="form-control @error('lokasi') is-invalid @enderror" id="lokasi" name="lokasi" value="{{ old('lokasi', $objekWisata->lokasi) }}">
-                                @error('lokasi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="harga_tiket">Harga Tiket (Rp)</label>
-                                        <input type="number" class="form-control @error('harga_tiket') is-invalid @enderror" id="harga_tiket" name="harga_tiket" value="{{ old('harga_tiket', $objekWisata->harga_tiket) }}">
-                                        @error('harga_tiket')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="jam_operasional">Jam Operasional</label>
-                                        <input type="text" class="form-control @error('jam_operasional') is-invalid @enderror" id="jam_operasional" name="jam_operasional" value="{{ old('jam_operasional', $objekWisata->jam_operasional) }}">
-                                        @error('jam_operasional')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="gambar">Gambar Objek Wisata</label>
-                                <input type="file" class="form-control-file @error('gambar') is-invalid @enderror" id="gambar" name="gambar">
-                                @error('gambar')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                @if($objekWisata->gambar)
-                                    <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $objekWisata->gambar) }}" alt="Gambar Wisata" style="max-width: 200px;">
-                                        <p class="text-muted">Gambar saat ini</p>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <div class="form-group">
-                                <label for="deskripsi">Deskripsi</label>
-                                <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="deskripsi" name="deskripsi" rows="4">{{ old('deskripsi', $objekWisata->deskripsi) }}</textarea>
-                                @error('deskripsi')
+                                <label for="deskripsi_wisata">Deskripsi</label>
+                                <textarea class="form-control @error('deskripsi_wisata') is-invalid @enderror" id="deskripsi_wisata" name="deskripsi_wisata" rows="4">{{ old('deskripsi_wisata', $obyekWisata->deskripsi_wisata) }}</textarea>
+                                @error('deskripsi_wisata')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="form-group">
                                 <label for="fasilitas">Fasilitas</label>
-                                <textarea class="form-control @error('fasilitas') is-invalid @enderror" id="fasilitas" name="fasilitas" rows="3">{{ old('fasilitas', $objekWisata->fasilitas) }}</textarea>
+                                <textarea class="form-control @error('fasilitas') is-invalid @enderror" id="fasilitas" name="fasilitas" rows="3">{{ old('fasilitas', $obyekWisata->fasilitas) }}</textarea>
                                 @error('fasilitas')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
+                            @for($i = 1; $i <= 5; $i++)
+                                @php $foto = 'foto'.$i; @endphp
+                                <div class="form-group">
+                                    <label>Foto {{ $i }}</label>
+                                    <input type="file" name="{{ $foto }}" class="form-control @error($foto) is-invalid @enderror">
+                                    @error($foto)
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @if($obyekWisata->$foto)
+                                        <div class="mt-2">
+                                            <img src="{{ asset('storage/' . $obyekWisata->$foto) }}" alt="Foto {{ $i }}" style="max-width: 200px;">
+                                            <p class="text-muted">Foto saat ini</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endfor
+
                             <button type="submit" class="btn btn-primary mr-2">Perbarui</button>
-                            <a href="{{ route('objek_wisata.index') }}" class="btn btn-light">Batal</a>
+                            <a href="{{ route('objek_wisata_manage') }}" class="btn btn-light">Batal</a>
                         </form>
                     </div>
                 </div>

@@ -101,15 +101,15 @@ Route::middleware('auth')->group(function () {
     });
 
     // Objek Wisata Routes
-    Route::resource('objek-wisata', App\Http\Controllers\ObyekWisataController::class)->names([
-        'index' => 'objek_wisata_manage',
-        'create' => 'objek_wisata_create',
-        'store' => 'objek_wisata_store',
-        'show' => 'objek_wisata_show',
-        'edit' => 'objek_wisata_edit',
-        'update' => 'objek_wisata_update',
-        'destroy' => 'objek_wisata_destroy',
-    ]);
+    Route::prefix('objek-wisata')->group(function () {
+        Route::get('/', [App\Http\Controllers\ObyekWisataController::class, 'index'])->name('objek_wisata_manage');
+        Route::get('/create', [App\Http\Controllers\ObyekWisataController::class, 'create'])->name('objek_wisata_create');
+        Route::post('/', [App\Http\Controllers\ObyekWisataController::class, 'store'])->name('objek_wisata_store');
+        Route::get('/{id}/edit', [App\Http\Controllers\ObyekWisataController::class, 'edit'])->name('objek_wisata_edit');
+        Route::put('/{id}', [App\Http\Controllers\ObyekWisataController::class, 'update'])->name('objek_wisata_update');
+        Route::delete('/{id}', [App\Http\Controllers\ObyekWisataController::class, 'destroy'])->name('objek_wisata_destroy');
+        Route::get('/{id}/detail', [App\Http\Controllers\ObyekWisataController::class, 'show'])->name('objek_wisata_show');
+    });
 
     // Kategori Wisata Routes
     Route::resource('kategori-wisata', App\Http\Controllers\KategoriWisataController::class)->except(['show'])->names([
@@ -155,20 +155,19 @@ Route::middleware('auth')->group(function () {
 
 Route::put('user-manage/{user}', [App\Http\Controllers\UsersController::class, 'update'])->name('user.update');
 
-Route::get('/berita', [App\Http\Controllers\HomeController::class, 'berita'])->name('berita');
-Route::get('/berita/{id}', [App\Http\Controllers\HomeController::class, 'detailBerita'])->name('detail-berita');
+// Route untuk frontend
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/package', [App\Http\Controllers\HomeController::class, 'paketWisata'])->name('paket');
-Route::get('/package/{id}', [App\Http\Controllers\HomeController::class, 'detailpaket'])->name('detail-paket');
+Route::get('/package', [App\Http\Controllers\HomeController::class, 'paketWisata'])->name('package');
+Route::get('/package/{id}', [App\Http\Controllers\HomeController::class, 'detailPaket'])->name('detail-package');
 Route::get('/stay-cation', [App\Http\Controllers\HomeController::class, 'penginapan'])->name('penginapan');
 Route::get('/stay-cation/{id}', [App\Http\Controllers\HomeController::class, 'detailPenginapan'])->name('detail-penginapan');
+Route::get('/wisata', [App\Http\Controllers\HomeController::class, 'obyekWisata'])->name('obyek-wisata');
+Route::get('/berita', [App\Http\Controllers\HomeController::class, 'berita'])->name('berita');
+Route::get('/berita/{id}', [App\Http\Controllers\HomeController::class, 'detailBerita'])->name('detail-berita');
 
-// Checkout Routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/success', [App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
-});
+// Route untuk reservasi
+Route::post('/reservasi', [App\Http\Controllers\ReservasiController::class, 'store'])->name('reservasi.store');
+Route::get('/reservasi/success/{id}', [App\Http\Controllers\ReservasiController::class, 'success'])->name('reservasi.success');
 // Route::prefix('admin')->middleware(['auth', CheckUserLevel::class . ':admin'])->group(function () {
     
 // });

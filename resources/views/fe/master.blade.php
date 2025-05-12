@@ -198,6 +198,7 @@
 <body>
     @yield('navbar')
 	@yield('slider')
+        @yield('main')
     <!-- New Packages Section -->
     @yield('content')
     <!-- END New Packages Section -->
