@@ -9,7 +9,7 @@
     <div class="content-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="card-title">{{ $greeting }}, Edit User</h4>
-            <a href="{{ route('user_manage') }}" class="btn btn-secondary">
+            <a href="{{ route('user.index') }}" class="btn btn-secondary">
                 <i class="fa fa-arrow-left me-2"></i> Back
             </a>
         </div>
@@ -18,7 +18,7 @@
             <div class="col-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <form method="POST" action="{{ route('user_update', $user->id) }}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('user.update', $user->id) }}" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 

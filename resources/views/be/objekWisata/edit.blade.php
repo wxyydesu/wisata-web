@@ -16,7 +16,7 @@
                             Perbarui data objek wisata
                         </p>
 
-                        <form class="forms-sample" action="{{ route('objek_wisata_update', $obyekWisata->id) }}" method="POST" enctype="multipart/form-data">
+                        <form class="forms-sample" action="{{ route('wisata.update', $obyekWisata->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -45,7 +45,7 @@
 
                             <div class="form-group">
                                 <label for="deskripsi_wisata">Deskripsi</label>
-                                <textarea class="form-control @error('deskripsi_wisata') is-invalid @enderror" id="deskripsi_wisata" name="deskripsi_wisata" rows="4">{{ old('deskripsi_wisata', $obyekWisata->deskripsi_wisata) }}</textarea>
+                                <textarea class="form-control @error('deskripsi_wisata') is-invalid @enderror" id="deskripsi_wisata" name="deskripsi_wisata" rows="8" style="min-height: 150px;">{{ old('deskripsi_wisata', $obyekWisata->deskripsi_wisata) }}</textarea>
                                 @error('deskripsi_wisata')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -53,14 +53,17 @@
 
                             <div class="form-group">
                                 <label for="fasilitas">Fasilitas</label>
-                                <textarea class="form-control @error('fasilitas') is-invalid @enderror" id="fasilitas" name="fasilitas" rows="3">{{ old('fasilitas', $obyekWisata->fasilitas) }}</textarea>
+                                <textarea class="form-control @error('fasilitas') is-invalid @enderror" id="fasilitas" name="fasilitas" rows="6" style="min-height: 120px;">{{ old('fasilitas', $obyekWisata->fasilitas) }}</textarea>
                                 @error('fasilitas')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             @for($i = 1; $i <= 5; $i++)
-                                @php $foto = 'foto'.$i; @endphp
+                                @php 
+                                    $foto = 'foto'.$i;
+                                    $deleteField = 'delete_foto'.$i;
+                                @endphp
                                 <div class="form-group">
                                     <label>Foto {{ $i }}</label>
                                     <input type="file" name="{{ $foto }}" class="form-control @error($foto) is-invalid @enderror">
@@ -68,16 +71,21 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     @if($obyekWisata->$foto)
-                                        <div class="mt-2">
-                                            <img src="{{ asset('storage/' . $obyekWisata->$foto) }}" alt="Foto {{ $i }}" style="max-width: 200px;">
-                                            <p class="text-muted">Foto saat ini</p>
+                                        <div class="mt-2 photo-container" data-foto="{{ $foto }}">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ asset('storage/' . $obyekWisata->$foto) }}" alt="Foto {{ $i }}" style="max-width: 200px; margin-right: 15px;">
+                                                <button type="button" class="btn btn-danger btn-sm delete-photo" data-field="{{ $deleteField }}">
+                                                    <i class="mdi mdi-delete"></i> Hapus Foto
+                                                </button>
+                                            </div>
+                                            <input type="hidden" name="{{ $deleteField }}" id="{{ $deleteField }}" value="0">
                                         </div>
                                     @endif
                                 </div>
                             @endfor
 
                             <button type="submit" class="btn btn-primary mr-2">Perbarui</button>
-                            <a href="{{ route('objek_wisata_manage') }}" class="btn btn-light">Batal</a>
+                            <a href="{{ route('wisata.index') }}" class="btn btn-light">Batal</a>
                         </form>
                     </div>
                 </div>
@@ -85,4 +93,29 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle delete photo buttons
+        document.querySelectorAll('.delete-photo').forEach(button => {
+            button.addEventListener('click', function() {
+                const fieldName = this.getAttribute('data-field');
+                const fieldInput = document.getElementById(fieldName);
+                const photoContainer = this.closest('.d-flex');
+                
+                // Set the delete field value to 1
+                fieldInput.value = '1';
+                
+                // Hide the photo and button
+                photoContainer.style.display = 'none';
+                
+                // Optional: Show a message that photo will be deleted
+                const message = document.createElement('div');
+                message.className = 'alert alert-warning mt-2';
+                message.textContent = 'Foto akan dihapus saat perubahan disimpan.';
+                photoContainer.parentNode.insertBefore(message, photoContainer.nextSibling);
+            });
+        });
+    });
+</script>
 @endsection

@@ -16,7 +16,7 @@
                             Formulir pengeditan data penginapan
                         </p>
 
-                        <form class="forms-sample" method="POST" action="{{ route('penginapan_update', $penginapan->id) }}" enctype="multipart/form-data">
+                        <form class="forms-sample" method="POST" action="{{ route('penginapan.update', $penginapan->id) }}" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -39,40 +39,31 @@
                                           placeholder="Masukkan fasilitas yang tersedia" required>{{ old('fasilitas', $penginapan->fasilitas) }}</textarea>
                             </div>
 
-                            <div class="form-group">
-                                <label>Foto Saat Ini</label>
-                                <div class="row mb-3">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        @php $foto = 'foto'.$i; @endphp
-                                        @if($penginapan->$foto)
-                                        <div class="col-md-4 mb-2">
-                                            <img src="{{ asset('storage/'.$penginapan->$foto) }}" 
-                                                 class="img-thumbnail" 
-                                                 width="150"
-                                                 onclick="showImgPreview('{{ asset('storage/'.$penginapan->$foto) }}')">
-                                            <div class="form-check mt-2">
-                                                <input type="checkbox" class="form-check-input" 
-                                                       name="hapus_foto{{ $i }}" id="hapus_foto{{ $i }}">
-                                                <label class="form-check-label" for="hapus_foto{{ $i }}">
-                                                    Hapus foto ini
-                                                </label>
+                            @for($i = 1; $i <= 5; $i++)
+                                @php 
+                                    $foto = 'foto'.$i;
+                                    $deleteField = 'delete_foto'.$i;
+                                @endphp
+                                <div class="form-group">
+                                    <label>Foto {{ $i }}</label>
+                                    <input type="file" name="{{ $foto }}" class="form-control @error($foto) is-invalid @enderror">
+                                    @error($foto)
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @if($obyekWisata->$foto)
+                                        <div class="mt-2 photo-container" data-foto="{{ $foto }}">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ asset('storage/' . $obyekWisata->$foto) }}" alt="Foto {{ $i }}" style="max-width: 200px; margin-right: 15px;">
+                                                <button type="button" class="btn btn-danger btn-sm delete-photo" data-field="{{ $deleteField }}">
+                                                    <i class="mdi mdi-delete"></i> Hapus Foto
+                                                </button>
                                             </div>
-                                            <input type="hidden" name="foto_lama{{ $i }}" value="{{ $penginapan->$foto }}">
+                                            <input type="hidden" name="{{ $deleteField }}" id="{{ $deleteField }}" value="0">
                                         </div>
-                                        @endif
-                                    @endfor
+                                    @endif
                                 </div>
-
-                                <label>Upload Foto Baru</label>
-                                <div class="row">
-                                    @for($i = 1; $i <= 5; $i++)
-                                    <div class="col-md-4 mb-3">
-                                        <input type="file" class="form-control" name="foto{{ $i }}" accept="image/*">
-                                        <small class="text-muted">Foto {{ $i }} (Opsional)</small>
-                                    </div>
-                                    @endfor
-                                </div>
-                            </div>
+                            @endfor
+                            
                             @if($errors->any())
                                 <div class="alert alert-danger">
                                     <ul>
@@ -84,7 +75,7 @@
                             @endif
 
                             <button type="submit" class="btn btn-primary me-2">Update</button>
-                            <a href="{{ route('penginapan_manage') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('penginapan.index') }}" class="btn btn-light">Cancel</a>
                         </form>
                     </div>
                 </div>

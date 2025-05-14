@@ -11,7 +11,7 @@
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Detail Penginapan</h4>
-                    <a href="{{ route('penginapan_manage') }}" class="btn btn-primary">
+                    <a href="{{ route('penginapan.index') }}" class="btn btn-primary">
                         <i class="fa fa-arrow-left me-2"></i> Kembali
                     </a>
                 </div>

@@ -16,7 +16,7 @@
                             Formulir penambahan data penginapan
                         </p>
 
-                        <form class="forms-sample" method="POST" action="{{ route('penginapan_store') }}" enctype="multipart/form-data">
+                        <form class="forms-sample" method="POST" action="{{ route('penginapan.store') }}" enctype="multipart/form-data">
                             @csrf
 
                             <div class="form-group">

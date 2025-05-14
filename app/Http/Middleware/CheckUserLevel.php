@@ -8,30 +8,32 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckUserLevel
 {
-    public function handle(Request $request, Closure $next, ...$level)
+    public function handle(Request $request, Closure $next, ...$levels)
     {
-        // Check if the user is authenticated
-        if (Auth::check()) {
-            $userLevel = Auth::user()->level;
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
 
-            // Check if the user's level matches the allowed levels
-            if (!in_array($userLevel, $level)) {
-                // Redirect to the appropriate dashboard based on their role
-                switch ($userLevel) {
-                    case 'admin':
-                        return redirect('/admin');
-                    case 'bendahara':
-                        return redirect('/bendahara');
-                    case 'pemilik':
-                        return redirect('/pemilik');
-                    case 'pelanggan':
-                        return redirect('/');
-                    default:
-                        return redirect('/'); // Default fallback
-                }
+        $userLevel = Auth::user()->level;
+
+        // Jika level user tidak ada di parameter middleware
+        if (!in_array($userLevel, $levels)) {
+            // Cegah redirect loop: jika sudah di dashboard sesuai level, lanjutkan saja
+            $dashboard = match($userLevel) {
+                'admin' => '/admin',
+                'bendahara' => '/bendahara',
+                'pemilik' => '/owner', // level 'pemilik' route '/owner'
+                'pelanggan' => '/',
+                default => '/login'
+            };
+
+            if ($request->is(ltrim($dashboard, '/'))) {
+                return $next($request);
             }
+
+            return redirect($dashboard);
         }
 
         return $next($request);
-    }                               
+    }        
 }

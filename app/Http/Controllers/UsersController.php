@@ -84,7 +84,7 @@ class UsersController extends Controller
             ]);
         }
 
-        return redirect()->route('user_manage')->with('success', 'User created successfully.');
+        return redirect()->route('user.index')->with('success', 'User created successfully.');
     }
 
     public function edit($id)
@@ -191,7 +191,7 @@ class UsersController extends Controller
             }
         }
 
-        return redirect()->route('user_manage')->with('success', 'User updated successfully.');
+        return redirect()->route('user.index')->with('success', 'User updated successfully.');
     }
 
     public function destroy($id)
@@ -216,7 +216,7 @@ class UsersController extends Controller
         // Delete user
         $user->delete();
 
-        return redirect()->route('user_manage')->with('success', 'User deleted successfully.');
+        return redirect()->route('user.index')->with('success', 'User deleted successfully.');
     }
 
     public function show($id)

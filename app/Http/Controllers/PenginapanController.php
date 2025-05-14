@@ -62,7 +62,7 @@ class PenginapanController extends Controller
 
         Penginapan::create($data);
 
-        return redirect()->route('penginapan_manage')->with('success', 'Penginapan created successfully.');
+        return redirect()->route('penginapan.index')->with('success', 'Penginapan created successfully.');
     }
 
     public function show($id)
@@ -100,6 +100,11 @@ class PenginapanController extends Controller
             'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto4' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto5' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'delete_foto1' => 'nullable|boolean',
+            'delete_foto2' => 'nullable|boolean',
+            'delete_foto3' => 'nullable|boolean',
+            'delete_foto4' => 'nullable|boolean',
+            'delete_foto5' => 'nullable|boolean',
         ]);
 
         $updateData = [
@@ -139,13 +144,13 @@ class PenginapanController extends Controller
 
         $penginapan->update($updateData);
 
-        return redirect()->route('penginapan_manage')->with('success', 'Data penginapan berhasil diperbarui.');
+        return redirect()->route('penginapan.index')->with('success', 'Data penginapan berhasil diperbarui.');
     }
 
     public function destroy(Penginapan $penginapan)
     {
         $penginapan->delete();
-        return redirect()->route('penginapan_manage')->with('success', 'Penginapan deleted successfully.');
+        return redirect()->route('penginapan.index')->with('success', 'Penginapan deleted successfully.');
     }
 
     private function getGreeting()

@@ -14,7 +14,7 @@
                         <h4 class="card-title">Tambah Objek Wisata</h4>
                         <p class="card-description">Form Tambah Data Objek Wisata</p>
 
-                        <form class="forms-sample" method="POST" action="{{ route('objek_wisata_store') }}" enctype="multipart/form-data">
+                        <form class="forms-sample" method="POST" action="{{ route('wisata.store') }}" enctype="multipart/form-data">
                             @csrf
 
                             <div class="form-group">

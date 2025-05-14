@@ -9,7 +9,7 @@
     <div class="content-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="card-title">{{ $greeting }}, here's your Users Management</h4>
-            <a href="{{ route('user_create') }}" class="btn btn-primary">
+            <a href="{{ route('user.create') }}" class="btn btn-primary">
                 <i class="fa fa-plus-circle me-2"></i>Add User
             </a>
         </div>
@@ -119,17 +119,17 @@
                                         {{-- Aksi --}}
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('user_edit', $data->id) }}'">
+                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('user.edit', $data->id) }}'">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </button>
-                                                <form action="{{ route('user_destroy', $data->id) }}" method="POST" id="deleteForm{{ $data->id }}" style="display: inline;">
+                                                <form action="{{ route('user.destroy', $data->id) }}" method="POST" id="deleteForm{{ $data->id }}" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $data->id }})">
                                                         <i class="fas fa-trash-alt me-1"></i>Delete
                                                     </button>
                                                 </form>
-                                                <button type="button" class="btn btn-success btn-sm" onClick="window.location.href='{{ route('user_show', $data->id) }}'">
+                                                <button type="button" class="btn btn-success btn-sm" onClick="window.location.href='{{ route('user.show', $data->id) }}'">
                                                     <i class="fa fa-eye"></i> Detail
                                                 </button>
                                             </div>

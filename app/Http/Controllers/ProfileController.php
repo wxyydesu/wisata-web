@@ -60,10 +60,10 @@ class ProfileController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request)
-    {
-        $user = Auth::user();
-        try {
-
+{
+    $user = Auth::user();
+    
+    try {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
@@ -72,74 +72,84 @@ class ProfileController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         
-        // Update data user
+        // Update user basic info (without foto)
         $user->name = $request->name;
         $user->email = $request->email;
         $user->no_hp = $request->no_hp;
         $user->alamat = $request->alamat;
-        
-        // Handle upload foto
-        if ($request->hasFile('foto')) {
-            if ($user->foto && Storage::exists($user->foto)) {
-                Storage::delete($user->foto);
-            }
-            $path = $request->file('foto')->store('profile-photos');
-            $user->foto = $path;
-        }
-        
         $user->save();
         
-        // Update data tambahan berdasarkan level
-        if ($user->level === 'pelanggan') {
-            $pelanggan = Pelanggan::where('id_user', $user->id)->firstOrFail();
-            $pelanggan->nama_lengkap = $request->name;
-            $pelanggan->no_hp = $request->no_hp;
-            $pelanggan->alamat = $request->alamat;
-            
-            if ($request->hasFile('foto')) {
+        // Handle photo upload and update specific table
+        $path = null;
+        if ($request->hasFile('foto')) {
+            // Handle upload based on user level
+            if ($user->level === 'pelanggan') {
+                $pelanggan = Pelanggan::where('id_user', $user->id)->firstOrFail();
+                
+                // Delete old photo if exists
                 if ($pelanggan->foto && Storage::exists($pelanggan->foto)) {
                     Storage::delete($pelanggan->foto);
                 }
+                
+                $path = $request->file('foto')->store('profile-photos');
+                $pelanggan->nama_lengkap = $request->name;
+                $pelanggan->no_hp = $request->no_hp;
+                $pelanggan->alamat = $request->alamat;
                 $pelanggan->foto = $path;
-            }
-            
-            $pelanggan->save();
-        } elseif (in_array($user->level, ['admin', 'bendahara', 'owner'])) {
-            $karyawan = Karyawan::where('id_user', $user->id)->firstOrFail();
-            $karyawan->nama_karyawan = $request->name;
-            $karyawan->no_hp = $request->no_hp;
-            $karyawan->alamat = $request->alamat;
-            
-            if ($request->hasFile('foto')) {
+                $pelanggan->save();
+                
+            } elseif (in_array($user->level, ['admin', 'bendahara', 'owner'])) {
+                $karyawan = Karyawan::where('id_user', $user->id)->firstOrFail();
+                
+                // Delete old photo if exists
                 if ($karyawan->foto && Storage::exists($karyawan->foto)) {
                     Storage::delete($karyawan->foto);
                 }
+                
+                $path = $request->file('foto')->store('profile-photos');
+                $karyawan->nama_karyawan = $request->name;
+                $karyawan->no_hp = $request->no_hp;
+                $karyawan->alamat = $request->alamat;
                 $karyawan->foto = $path;
+                $karyawan->save();
             }
-            
-            $karyawan->save();
+        } else {
+            // Update without photo
+            if ($user->level === 'pelanggan') {
+                $pelanggan = Pelanggan::where('id_user', $user->id)->firstOrFail();
+                $pelanggan->nama_lengkap = $request->name;
+                $pelanggan->no_hp = $request->no_hp;
+                $pelanggan->alamat = $request->alamat;
+                $pelanggan->save();
+            } elseif (in_array($user->level, ['admin', 'bendahara', 'owner'])) {
+                $karyawan = Karyawan::where('id_user', $user->id)->firstOrFail();
+                $karyawan->nama_karyawan = $request->name;
+                $karyawan->no_hp = $request->no_hp;
+                $karyawan->alamat = $request->alamat;
+                $karyawan->save();
+            }
         }
         
-            return redirect()->route('profile.index')->with([
-                'swal' => [
-                    'icon' => 'success',
-                    'title' => 'Berhasil!',
-                    'text' => 'profile updated!',
-                    'timer' => 1500
-                ]
-            ]);
-            
-        } catch (\Exception $e) {
-            return redirect()->back()->with([
-                'swal' => [
-                    'icon' => 'error',
-                    'title' => 'Gagal!',
-                    'text' => 'Fail to update profile: ' . $e->getMessage(),
-                    'timer' => 3000
-                ]
-            ])->withInput();
-        }
+        return redirect()->route('profile.index')->with([
+            'swal' => [
+                'icon' => 'success',
+                'title' => 'Berhasil!',
+                'text' => 'Profile updated successfully!',
+                'timer' => 1500
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return redirect()->back()->with([
+            'swal' => [
+                'icon' => 'error',
+                'title' => 'Gagal!',
+                'text' => 'Failed to update profile: ' . $e->getMessage(),
+                'timer' => 3000
+            ]
+        ])->withInput();
     }
+}
 
     /**
      * Remove the specified resource from storage.

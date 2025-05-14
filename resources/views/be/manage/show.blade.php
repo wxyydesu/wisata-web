@@ -9,7 +9,7 @@
     <div class="content-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="card-title">{{ $greeting }}, User Details</h4>
-            <a href="{{ route('user_manage') }}" class="btn btn-secondary">
+            <a href="{{ route('user.index') }}" class="btn btn-secondary">
                 <i class="fa fa-arrow-left me-2"></i> Back
             </a>
         </div>
@@ -84,10 +84,10 @@
                                 </div>
                                 
                                 <div class="mt-4">
-                                    <a href="{{ route('user_edit', $user->id) }}" class="btn btn-primary me-2">
+                                    <a href="{{ route('user.edit', $user->id) }}" class="btn btn-primary me-2">
                                         <i class="fa fa-edit me-1"></i> Edit User
                                     </a>
-                                    <form action="{{ route('user_destroy', $user->id) }}" method="POST" style="display: inline;">
+                                    <form action="{{ route('user.destroy', $user->id) }}" method="POST" style="display: inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">

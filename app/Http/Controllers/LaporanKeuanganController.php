@@ -3,31 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
-class AdminController extends Controller
+class LaporanKeuanganController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $now = Carbon::now();
-
-        $greeting = '';
-
-        if ($now->hour >= 5 && $now->hour < 12) {
-            $greeting = 'Good Morning';
-        } elseif ($now->hour >= 12 && $now->hour < 18) {
-            $greeting = 'Good Evening';
-        } else {
-            $greeting = 'Good Night';
-        }
-
-        return view('be.users.admin.index', [
-            'title' => 'Admin',
-            'greeting' => $greeting,
-        ]);
+        //
     }
 
     /**

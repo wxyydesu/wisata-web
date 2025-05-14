@@ -6,6 +6,7 @@ use App\Models\ObyekWisata;
 use App\Models\KategoriWisata;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ObyekWisataController extends Controller
 {
@@ -15,7 +16,7 @@ class ObyekWisataController extends Controller
         $greeting = $this->getGreeting();
         
         return view('be.objekWisata.index', [
-            'title' => 'Objek Wisata Management',
+            'title' => 'Objek Wisata indexment',
             'objekWisatas' => $objekWisatas,
             'greeting' => $greeting
         ]);
@@ -57,7 +58,7 @@ class ObyekWisataController extends Controller
 
         ObyekWisata::create($validated);
 
-        return redirect()->route('objek_wisata_manage')->with('success', 'Objek Wisata created successfully.');
+        return redirect()->route('wisata.index')->with('success', 'Objek Wisata created successfully.');
     }
 
 
@@ -88,8 +89,10 @@ class ObyekWisataController extends Controller
         ]);
     }
 
-    public function update(Request $request, ObyekWisata $obyekWisata)
+    public function update(Request $request, $id)
     {
+        $obyekWisata = ObyekWisata::findOrFail($id);
+        
         $validated = $request->validate([
             'nama_wisata' => 'required|string|max:255',
             'deskripsi_wisata' => 'required|string',
@@ -100,25 +103,52 @@ class ObyekWisataController extends Controller
             'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'foto4' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'foto5' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'delete_foto1' => 'nullable|boolean',
+            'delete_foto2' => 'nullable|boolean',
+            'delete_foto3' => 'nullable|boolean',
+            'delete_foto4' => 'nullable|boolean',
+            'delete_foto5' => 'nullable|boolean',
         ]);
 
-        // Isi manual data lama dulu (jika tidak ada file baru)
-        foreach (range(1, 5) as $i) {
-            $field = 'foto' . $i;
-
-            if ($request->hasFile($field)) {
-                // Jika ada foto baru, upload dan simpan
-                $validated[$field] = $request->file($field)->store('objekwisata', 'public');
-            } else {
-                // Jika tidak ada foto baru, pakai data lama
-                $validated[$field] = $obyekWisata->$field;
+            // Handle photo deletions first
+            for ($i = 1; $i <= 5; $i++) {
+            $deleteField = 'delete_foto'.$i;
+            $fotoField = 'foto'.$i;
+            
+            if ($request->has($deleteField) && $request->$deleteField == '1') {
+                // Delete the file from storage
+                if ($obyekWisata->$fotoField && Storage::disk('public')->exists($obyekWisata->$fotoField)) {
+                    Storage::disk('public')->delete($obyekWisata->$fotoField);
+                }
+                // Clear the database field
+                $obyekWisata->$fotoField = null;
             }
         }
 
-        $obyekWisata->update($validated);
+        // Handle file uploads
+        for ($i = 1; $i <= 5; $i++) {
+            $fotoField = 'foto'.$i;
+            if ($request->hasFile($fotoField)) {
+                // Delete old file if exists
+                if ($obyekWisata->$fotoField && Storage::disk('public')->exists($obyekWisata->$fotoField)) {
+                    Storage::disk('public')->delete($obyekWisata->$fotoField);
+                }
+                // Store new file
+                $obyekWisata->$fotoField = $request->file($fotoField)->store('objekwisata', 'public');
+            }
+        }
 
-        return redirect()->route('objek_wisata_manage')->with('success', 'Objek Wisata updated successfully.');
+        // Update other fields
+        $obyekWisata->nama_wisata = $validated['nama_wisata'];
+        $obyekWisata->id_kategori_wisata = $validated['id_kategori_wisata'];
+        $obyekWisata->deskripsi_wisata = $validated['deskripsi_wisata'];
+        $obyekWisata->fasilitas = $validated['fasilitas'];
+        
+        $obyekWisata->save();
+
+        return redirect()->route('wisata.index')->with('success', 'Objek Wisata updated successfully.');
     }
+
 
 
 
@@ -126,7 +156,7 @@ class ObyekWisataController extends Controller
     {
         $obyekWisata = ObyekWisata::findOrFail($id);
         $obyekWisata->delete();
-        return redirect()->route('objek_wisata_manage')->with('success', 'Objek Wisata deleted successfully.');
+        return redirect()->route('wisata.index')->with('success', 'Objek Wisata deleted successfully.');
     }
 
     private function getGreeting()

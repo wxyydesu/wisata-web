@@ -19,13 +19,13 @@
                     <a class="nav-link" href="{{ route('home') }}">Beranda</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('package') }}">Paket Wisata</a>
+                    <a class="nav-link" href="{{ route('fe.paket.index') }}">Paket Wisata</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('penginapan') }}">Penginapan</a>
+                    <a class="nav-link" href="{{ route('fe.penginapan.index') }}">Penginapan</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('berita') }}">Berita</a>
+                    <a class="nav-link" href="{{ route('fe.berita.index') }}">Berita</a>
                 </li>
             </ul>
             

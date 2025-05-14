@@ -17,7 +17,7 @@
       <li class="nav-item nav-category">Menu</li>
       @if (str_contains(Auth::user()->level, 'admin'))
       <li class="nav-item">
-        <a class="nav-link" href="{{ route('user_manage') }}">
+        <a class="nav-link" href="{{ route('user.index') }}">
           <i class="menu-icon mdi mdi-account-circle-outline"></i>
           <span class="menu-title">Users Manage</span>
         </a>
@@ -25,47 +25,60 @@
       <li class="nav-item">
         <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
           <i class="menu-icon mdi mdi-card-text-outline"></i>
-          <span class="menu-title">All Form</span>
+          <span class="menu-title">Menu Admin</span>
           <i class="menu-arrow"></i>
         </a>
         <div class="collapse" id="form-elements">
           <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('paket_manage') }}">Paket</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan.index') }}">Penginapan</a></li>
           </ul>
         </div>
         <div class="collapse" id="form-elements">
           <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan_manage') }}">Penginapan</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('wisata.index') }}">Obyek Wisata</a></li>
+          </ul>
+        </div>
+                <div class="collapse" id="form-elements">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"><a class="nav-link" href="{{ route('berita.index') }}">Berita</a></li>
           </ul>
         </div>
         <div class="collapse" id="form-elements">
           <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi_manage') }}">Reservasi</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('kategori-wisata.index') }}">Kategori Wisata</a></li>
           </ul>
         </div>
         <div class="collapse" id="form-elements">
           <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('objek_wisata_manage') }}">Obyek Wisata</a></li>
-          </ul>
-        </div>
-        <div class="collapse" id="form-elements">
-          <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('kategori_wisata_manage') }}">Kategori Wisata</a></li>
-          </ul>
-        </div>
-        <div class="collapse" id="form-elements">
-          <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('berita_manage') }}">Berita</a></li>
-          </ul>
-        </div>
-        <div class="collapse" id="form-elements">
-          <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('kategori_berita_manage') }}">Kategori Berita</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('kategori-berita.index') }}">Kategori Berita</a></li>
           </ul>
         </div>
       </li>
-      @else
-
+      @elseif(str_contains(Auth::user()->level, 'bendahara'))
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
+          <i class="menu-icon mdi mdi-card-text-outline"></i>
+          <span class="menu-title">Menu Bendahara</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="form-elements">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"><a class="nav-link" href="{{ route('paket.index') }}">Paket</a></li>
+          </ul>
+        </div>
+        <div class="collapse" id="form-elements">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Reservasi</a></li>
+          </ul>
+        </div>
+        <div class="collapse" id="form-elements">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"><a class="nav-link" href="{{ route('diskon.index') }}">Diskon</a></li>
+          </ul>
+        </div>
+      </li>
+      @elseif(str_contains(Auth::user()->level, 'bendahara'))
+      
       @endif
       <li class="nav-item">
         <a class="nav-link" data-bs-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">

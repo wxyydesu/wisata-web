@@ -8,7 +8,7 @@
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="d-flex justify-content-end mb-3">
-            <a href="{{ route('penginapan_create') }}" class="btn btn-primary">
+            <a href="{{ route('penginapan.create') }}" class="btn btn-primary">
                 <i class="fa fa-plus-circle me-2"></i>Tambah Penginapan
             </a>
         </div>
@@ -69,11 +69,11 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('penginapan_edit', $p->id) }}'">
+                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('penginapan.edit', $p->id) }}'">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </button>
                                                 
-                                                <form action="{{ route('penginapan_destroy', $p->id) }}" method="POST" 
+                                                <form action="{{ route('penginapan.destroy', $p->id) }}" method="POST" 
                                                       onsubmit="return confirm('Yakin ingin menghapus?')">
                                                     @csrf 
                                                     @method('DELETE')
@@ -82,7 +82,7 @@
                                                     </button>
                                                 </form>
                                                 
-                                                <button type="button" class="btn btn-success btn-sm" onClick="window.location.href='{{ route('penginapan_show', $p->id) }}'">
+                                                <button type="button" class="btn btn-success btn-sm" onClick="window.location.href='{{ route('penginapan.show', $p->id) }}'">
                                                     <i class="fa fa-eye"></i> Detail
                                                 </button>
                                             </div>
