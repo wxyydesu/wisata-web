@@ -50,10 +50,10 @@
                                     @error($foto)
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    @if($obyekWisata->$foto)
+                                    @if($penginapan->$foto)
                                         <div class="mt-2 photo-container" data-foto="{{ $foto }}">
                                             <div class="d-flex align-items-center">
-                                                <img src="{{ asset('storage/' . $obyekWisata->$foto) }}" alt="Foto {{ $i }}" style="max-width: 200px; margin-right: 15px;">
+                                                <img src="{{ asset('storage/' . $penginapan->$foto) }}" alt="Foto {{ $i }}" style="max-width: 200px; margin-right: 15px;">
                                                 <button type="button" class="btn btn-danger btn-sm delete-photo" data-field="{{ $deleteField }}">
                                                     <i class="mdi mdi-delete"></i> Hapus Foto
                                                 </button>
