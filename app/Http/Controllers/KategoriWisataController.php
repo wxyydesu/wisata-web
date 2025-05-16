@@ -37,7 +37,7 @@ class KategoriWisataController extends Controller
 
         KategoriWisata::create($validatedData);
 
-        return redirect()->route('kategori_wisata_manage')
+        return redirect()->route('kategori-wisata.index')
                          ->with('success', 'Category created successfully.');
     }
 
@@ -63,7 +63,7 @@ class KategoriWisataController extends Controller
 
         $category->update($validatedData);
 
-        return redirect()->route('kategori_wisata_manage')
+        return redirect()->route('kategori-wisata.index')
                          ->with('success', 'Category updated successfully.');
     }
 
@@ -73,7 +73,7 @@ class KategoriWisataController extends Controller
         
         $category->delete();
 
-        return redirect()->route('kategori_wisata_manage')
+        return redirect()->route('kategori-wisata.index')
                          ->with('success', 'Category deleted successfully.');
     }
 

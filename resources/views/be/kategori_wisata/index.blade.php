@@ -5,11 +5,10 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="card-title">{{ $greeting }}, here's your Tourism Category Management</h4>
-            <a href="{{ route('kategori_wisata_create') }}" class="btn btn-primary">
+            <a href="{{ route('kategori-wisata.create') }}" class="btn btn-primary">
                 <i class="fa fa-plus-circle me-2"></i>Add Category
             </a>
         </div>
@@ -87,10 +86,10 @@
                                         {{-- Aksi --}}
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('kategori_wisata_edit', $category->id) }}'">
+                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('kategori-wisata.edit', $category->id) }}'">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </button>
-                                                <form action="{{ route('kategori_wisata_destroy', $category->id) }}" method="POST" id="deleteForm{{ $category->id }}" style="display: inline;">
+                                                <form action="{{ route('kategori-wisata.destroy', $category->id) }}" method="POST" id="deleteForm{{ $category->id }}" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $category->id }})">
@@ -116,7 +115,6 @@
             </div> <!-- col -->
         </div> <!-- row -->
     </div> <!-- content-wrapper -->
-</div> <!-- main-panel -->
 
 <!-- Image Preview Modal -->
 <div class="modal fade" id="imgPreviewModal" tabindex="-1" aria-hidden="true">

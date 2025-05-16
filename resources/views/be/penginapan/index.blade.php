@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="d-flex justify-content-end mb-3">
             <a href="{{ route('penginapan.create') }}" class="btn btn-primary">
@@ -102,7 +101,6 @@
             </div> <!-- col -->
         </div> <!-- row -->
     </div> <!-- content-wrapper -->
-</div> <!-- main-panel -->
 
 <!-- Modal Preview Gambar -->
 <div class="modal fade" id="imgPreviewModal" tabindex="-1" aria-labelledby="imgPreviewLabel" aria-hidden="true">

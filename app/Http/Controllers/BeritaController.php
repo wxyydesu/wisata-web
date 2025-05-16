@@ -47,7 +47,7 @@ class BeritaController extends Controller
 
         Berita::create($validatedData);
 
-        return redirect()->route('berita_manage')
+        return redirect()->route('berita.index')
                          ->with('success', 'Berita created successfully.');
     }
 
@@ -88,7 +88,7 @@ class BeritaController extends Controller
 
         $berita->update($validatedData);
 
-        return redirect()->route('berita_manage')
+        return redirect()->route('berita.index')
                          ->with('success', 'Berita updated successfully.');
     }
 
@@ -103,7 +103,7 @@ class BeritaController extends Controller
         
         $berita->delete();
 
-        return redirect()->route('berita_manage')
+        return redirect()->route('berita.index')
                          ->with('success', 'Berita deleted successfully.');
     }
 

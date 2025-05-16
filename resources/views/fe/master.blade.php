@@ -25,6 +25,61 @@
 <!-- Toastify JS -->
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <style>
+    .discount-badge {
+        background: #ff5722;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        display: inline-block;
+        margin-left: 10px;
+    }
+    
+    .itinerary {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 15px;
+    }
+    
+    .itinerary h5 {
+        margin-top: 15px;
+        color: #333;
+    }
+    
+    .card {
+        margin-bottom: 20px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .form-control {
+        padding: 10px;
+        border-radius: 4px;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        padding: 10px 20px;
+    }
+    
+    .alert-info {
+        background-color: #f8f9fa;
+        border-color: #ddd;
+    }
+    
+    .success-icon {
+        font-size: 80px;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+    
+    .booking-code {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+    }
     .dropdown-menu {
         background-color: #fff !important;
     }
@@ -191,7 +246,17 @@
 
     /* Fix dropdown menus */
     .dropdown-menu {
-        z-index: 1040 !important; /* Should be higher than navbar */
+        z-index: 1040 !important;
+    }
+    
+    .reducedfrom {
+    text-decoration: line-through;
+    color: #999;
+    }
+    
+    .actual {
+        color: #f00;
+        font-weight: bold;
     }
 </style>
 </head>
@@ -201,6 +266,7 @@
         @yield('main')
     <!-- New Packages Section -->
     @yield('content')
+    @yield('product')
     <!-- END New Packages Section -->
 	<div class="footer">
 		<div class="container">

@@ -13,7 +13,7 @@
                     <div class="card-body">
                         <h4 class="card-title">Create News</h4>
                         
-                        <form action="{{ route('berita_store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('berita.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             
                             <div class="form-group">
@@ -67,7 +67,7 @@
                             </div>
                             
                             <button type="submit" class="btn btn-primary me-2">Submit</button>
-                            <a href="{{ route('berita_manage') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('berita.index') }}" class="btn btn-light">Cancel</a>
                         </form>
                     </div>
                 </div>

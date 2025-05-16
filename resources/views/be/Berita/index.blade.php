@@ -5,11 +5,10 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="card-title">{{ $greeting }}, here's your News Management</h4>
-            <a href="{{ route('berita_create') }}" class="btn btn-primary">
+            <h4 class="card-title">News Management</h4>
+            <a href="{{ route('berita.create') }}" class="btn btn-primary">
                 <i class="fa fa-plus-circle me-2"></i>Add News
             </a>
         </div>
@@ -80,10 +79,10 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('berita_edit', $item->id) }}'">
+                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('berita.edit', $item->id) }}'">
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </button>
-                                                <form action="{{ route('berita_destroy', $item->id) }}" method="POST" style="display: inline;">
+                                                <form action="{{ route('berita.destroy', $item->id) }}" method="POST" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
@@ -108,5 +107,5 @@
             </div>
         </div>
     </div>
-</div>
+
 @endsection

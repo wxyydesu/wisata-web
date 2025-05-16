@@ -33,6 +33,7 @@ class PenginapanController extends Controller
 
     public function store(Request $request)
     {
+    try {
         $validated = $request->validate([
             'nama_penginapan' => 'required|string|max:255',
             'deskripsi' => 'required|string',
@@ -65,9 +66,18 @@ class PenginapanController extends Controller
         return redirect()->route('penginapan.index')->with('swal', [
             'icon' => 'success',
             'title' => 'Berhasil',
-            'text' => 'Penginapan berhasil ditambahkan!',
+            'text' => 'Data Penginapan berhasil dibuat',
             'timer' => 1500
         ]);
+    } catch (\Exception $e) {
+            \Log::error('Delete failed: '.$e->getMessage());
+            return back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'text' => 'Gagal Mebuat Penginapan',
+                'timer' => 3000
+            ]);
+        }
     }
 
     public function show($id)
@@ -96,6 +106,7 @@ class PenginapanController extends Controller
 
     public function update(Request $request, $id)
     {
+    try {
         $penginapan = Penginapan::findOrFail($id);
         $validated = $request->validate([
             'nama_penginapan' => 'required|string|max:255',
@@ -153,9 +164,18 @@ class PenginapanController extends Controller
         return redirect()->route('penginapan.index')->with('swal', [
             'icon' => 'success',
             'title' => 'Berhasil',
-            'text' => 'Data penginapan berhasil diperbarui!',
+            'text' => 'Data penginapan berhasil diperbarui',
             'timer' => 1500
         ]);
+    } catch (\Exception $e) {
+            \Log::error('Delete failed: '.$e->getMessage());
+            return back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'text' => 'Gagal Memperbarui Penginapan',
+                'timer' => 3000
+            ]);
+        }
     }
 
     public function destroy($id)

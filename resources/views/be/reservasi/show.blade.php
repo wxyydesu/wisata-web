@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
@@ -191,7 +190,6 @@
             </div>
         </div>
     </div>
-</div>
 
 @if($reservasi->file_bukti_tf)
 <div class="modal fade" id="buktiTFModal" tabindex="-1" aria-labelledby="buktiTFModalLabel" aria-hidden="true">

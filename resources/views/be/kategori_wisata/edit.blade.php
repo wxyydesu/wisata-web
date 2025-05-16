@@ -14,8 +14,8 @@
                         <h4 class="font-weight-bold mb-0">Edit Tourism Category</h4>
                     </div>
                     <div>
-                        <a href="{{ route('kategori_wisata_manage') }}" class="btn btn-primary btn-icon-text btn-rounded">
-                            <i class="fas fa-arrow-left btn-icon-prepend"></i>
+                        <a href="{{ route('kategori-wisata.index') }}" class="btn btn-primary btn-icon-text ">
+                            <i class="fa fa-arrow-left me-2"></i>
                             Back to List
                         </a>
                     </div>
@@ -41,7 +41,7 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('kategori_wisata_update', $category->id) }}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('kategori-wisata.update', $category->id) }}" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 

@@ -17,16 +17,22 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $paketWisata = PaketWisata::paginate(9);
-        $penginapan = Penginapan::latest()->take(6)->get();
-        $kategoriWisata = KategoriWisata::where('aktif', 1)->get();
-        
+        $paketWisata = PaketWisata::latest()->paginate(8); // ubah get() jadi paginate(8)
+        $penginapan = Penginapan::latest()->take(8)->get(); // ambil 8 penginapan terbaru
+        $kategoriWisata = KategoriWisata::where('aktif', 1)->with(['obyekWisata' => function($q) {
+            $q->latest()->take(8);
+        }])->get();
+
+        // Ambil top paket wisata, misal berdasarkan terbaru atau populer
+        $topPaket = PaketWisata::orderBy('created_at', 'desc')->take(5)->get();
+
         return view('fe.home.index', [
             'title' => 'Home',
             'user' => $user,
             'paketWisata' => $paketWisata,
             'penginapan' => $penginapan,
-            'kategoriWisata' => $kategoriWisata
+            'kategoriWisata' => $kategoriWisata,
+            'topPaket' => $topPaket
         ]);
     }
 

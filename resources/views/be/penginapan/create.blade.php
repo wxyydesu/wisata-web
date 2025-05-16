@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
@@ -54,45 +53,44 @@
             </div>
         </div>
     </div>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Debug: Check if SweetAlert is loaded
-        if (typeof Swal === 'undefined') {
-            console.error('SweetAlert2 is not loaded!');
-            return;
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Check if SweetAlert is loaded
+    if (typeof Swal === 'undefined') {
+        console.error('SweetAlert2 is not loaded!');
+        return;
+    }
 
-        // Debug: Check session data
-        console.log('Session swal data:', @json(session('swal')));
-        console.log('Validation errors:', @json($errors->all()));
+    // Debug: Check session data
+    console.log('Session swal data:', @json(session('swal')));
+    console.log('Validation errors:', @json($errors->all()));
 
-        // Show SweetAlert notification if exists
-        @if(session('swal'))
-            Swal.fire({
-                position: 'top-end',
-                icon: '{{ session('swal.icon') }}',
-                title: {!! json_encode(session('swal.title')) !!},
-                text: {!! json_encode(session('swal.text')) !!},
-                showConfirmButton: false,
-                timer: {{ session('swal.timer') ?? 1500 }},
-                toast: true
-            });
-        @endif
-
-        // Show validation errors if any
-        @if($errors->any())
-            Swal.fire({
-                position: 'top-end',
-                icon: 'error',
-                title: 'Validasi Error',
-                html: `{!! implode('<br>', $errors->all()) !!}`,
-                showConfirmButton: false,
-                timer: 4000,
-                toast: true
-            });
-        @endif
-    });
+    // Show SweetAlert notification if exists
+    @if(session('swal'))
+        Swal.fire({
+            position: 'top-end',
+            icon: '{{ session('swal.icon') }}',
+            title: {!! json_encode(session('swal.title')) !!},
+            text: {!! json_encode(session('swal.text')) !!},
+            showConfirmButton: false,
+            timer: {{ session('swal.timer') ?? 1500 }},
+            toast: true
+        });
+    @endif
+    
+    // Show validation errors if any
+    @if($errors->any())
+        Swal.fire({
+            position: 'top-end',
+            icon: 'error',
+            title: 'Validasi Error',
+            html: `{!! implode('<br>', $errors->all()) !!}`,
+            showConfirmButton: false,
+            timer: 4000,
+            toast: true
+        });
+    @endif
+});
 </script>
 @endsection

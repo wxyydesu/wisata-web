@@ -2,83 +2,63 @@
 @section('navbar')
     @include('fe.navbar')
 @endsection
-@section('slider')
-    @include('fe.slider')
-@endsection
 
 @section('content')
-<div class="main">
-    <div class="container py-5">
-        <!-- Paket Wisata Section -->
-        <section class="mb-5">
-            <h2 class="section-title">Paket Wisata Populer</h2>
-            <div class="package-container">
+<div class="shop_top">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                <li class="breadcrumb-item active"><a href="{{ route('paket') }}">Travel Packages</a></li>
+            </ol>
+        </nav>
+            <div class="row shop_box-top">
                 @foreach($paketWisata as $paket)
-                <div class="package-card">
-                    <div class="package-image">
-                        <img src="{{ $paket->foto1 ? asset('storage/' . $paket->foto1) : asset('fe/images/default-package.jpg') }}" alt="{{ $paket->nama_paket }}">
+                @php
+                    $diskon = $paket->diskonAktif ?? null;
+                    $hargaNormal = $paket->harga_per_pack;
+                    $hargaDiskon = $hargaNormal;
+                    if ($diskon && $diskon->persen > 0) {
+                        $hargaDiskon = $hargaNormal - ($hargaNormal * $diskon->persen / 100);
+                    }
+                    // Paket dianggap baru jika dibuat dalam 7 hari terakhir
+                    $isNew = \Carbon\Carbon::parse($paket->created_at)->gt(now()->subDays(7));
+                @endphp
+                <div class="col-md-3">
+                    <div style="position:relative;">
+                        @if($isNew)
+                        <span class="new-box" style="position:absolute;top:10px;right:10px;z-index:2;">
+                            <span class="new-label" style="background:#f00;color:#fff;padding:2px 8px;border-radius:4px;font-size:16px;font-weight:bold;">NEW</span>
+                        </span>
+                        @endif
+                        <img src="{{ asset('storage/' . $paket->foto1) }}" class="img-responsive" alt="{{ $paket->nama_paket }}" style="width:100%; height:200px; object-fit:cover;" />
                     </div>
-                    <div class="package-details">
-                        <h3 class="package-title">{{ $paket->nama_paket }}</h3>
-                        <div class="package-price">Rp {{ number_format($paket->harga_per_pack, 0, ',', '.') }}</div>
-                        <div class="package-meta">
-                            <span><i class="fas fa-clock"></i> 3 Hari 2 Malam</span>
-                            <span class="package-rating"><i class="fas fa-star"></i> 4.8</span>
-                        </div>
-                        <a href="{{ route('detail-paket', $paket->id) }}" class="book-now">Lihat Detail</a>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            <div class="text-center mt-4">
-                <a href="{{ route('paket.index') }}" class="btn btn-outline-primary">Lihat Semua Paket</a>
-            </div>
-        </section>
-        
-        <!-- Penginapan Section -->
-        <section class="mb-5">
-            <h2 class="section-title">Penginapan Terbaik</h2>
-            <div class="package-container">
-                @foreach($penginapan as $penginapan)
-                <div class="package-card">
-                    <div class="package-image">
-                        <img src="{{ $penginapan->foto1 ? asset('storage/' . $penginapan->foto1) : asset('fe/images/default-hotel.jpg') }}" alt="{{ $penginapan->nama_penginapan }}">
-                    </div>
-                    <div class="package-details">
-                        <h3 class="package-title">{{ $penginapan->nama_penginapan }}</h3>
-                        <div class="package-meta">
-                            <span><i class="fas fa-map-marker-alt"></i> Lokasi Strategis</span>
-                            <span class="package-rating"><i class="fas fa-star"></i> 4.5</span>
-                        </div>
-                        <p class="text-muted mb-2">{{ Str::limit($penginapan->deskripsi, 100) }}</p>
-                        <a href="{{ route('fe.penginapan.show', $penginapan->id) }}" class="book-now">Lihat Detail</a>
+                    <div class="shop_desc">
+                        <a href="{{ route('paket.detail', $paket->id) }}"></a>
+                        <h3><a href="{{ route('paket.detail', $paket->id) }}"></a><a href="{{ route('paket.detail', $paket->id) }}">{{ $paket->nama_paket }}</a></h3>
+                        <p>{{ \Illuminate\Support\Str::limit($paket->deskripsi, 50) }}</p>
+                        @if($diskon && $diskon->persen > 0)
+                            <span class="reducedfrom">Rp{{ number_format($hargaNormal, 0, ',', '.') }}</span>
+                            <span class="actual">Rp{{ number_format($hargaDiskon, 0, ',', '.') }}</span>
+                        @else
+                            <span class="actual">Rp{{ number_format($hargaNormal, 0, ',', '.') }}</span>
+                        @endif
+                        <br>
+                        <ul class="buttons">
+                            <li class="cart"><a href="">Checkout</a></li>
+                            <li class="shop_btn"><a href="{{ route('paket.detail', $paket->id) }}">More Detail</a></li>
+                            <div class="clear"> </div>
+                        </ul>
                     </div>
                 </div>
                 @endforeach
             </div>
-            <div class="text-center mt-4">
-                <a href="{{ route('fe.penginapan.index') }}" class="btn btn-outline-primary">Lihat Semua Penginapan</a>
-            </div>
-        </section>
-        
-        <!-- Kategori Wisata Section -->
-        <section>
-            <h2 class="section-title">Kategori Wisata</h2>
             <div class="row">
-                @foreach($kategoriWisata as $kategori)
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-mountain fa-3x text-primary mb-3"></i>
-                            <h3 class="card-title">{{ $kategori->kategori_wisata }}</h3>
-                            <p class="card-text">{{ Str::limit($kategori->deskripsi, 100) }}</p>
-                            <a href="{{ route('wisata.index') }}" class="btn btn-sm btn-outline-primary">Jelajahi</a>
-                        </div>
-                    </div>
+                <div class="col-12">
+                    {{ $paketWisata->links() }}
                 </div>
-                @endforeach
             </div>
-        </section>
+        </div>
     </div>
 </div>
 @endsection

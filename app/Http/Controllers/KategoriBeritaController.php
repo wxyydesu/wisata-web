@@ -41,7 +41,7 @@ class KategoriBeritaController extends Controller
 
         KategoriBerita::create($validatedData);
 
-        return redirect()->route('kategori_berita_manage')
+        return redirect()->route('kategori-berita.index')
                          ->with('success', 'Category created successfully.');
     }
 
@@ -80,7 +80,7 @@ class KategoriBeritaController extends Controller
 
         $category->update($validatedData);
 
-        return redirect()->route('kategori_berita_manage')
+        return redirect()->route('kategori-berita.index')
                          ->with('success', 'Category updated successfully.');
     }
 
@@ -92,7 +92,7 @@ class KategoriBeritaController extends Controller
         $category = KategoriBerita::findOrFail($id);
         $category->delete();
 
-        return redirect()->route('kategori_berita_manage')
+        return redirect()->route('kategori-berita.index')
                          ->with('success', 'Category deleted successfully.');
     }
 

@@ -13,7 +13,7 @@
                     <div class="card-body">
                         <h4 class="card-title">{{ isset($category) ? 'Edit' : 'Create' }} News Category</h4>
                         
-                        <form action="{{ isset($category) ? route('kategori_berita_update', $category->id) : route('kategori_berita_store') }}" method="POST">
+                        <form action="{{ isset($category) ? route('kategori-berita.update', $category->id) : route('kategori-berita.store') }}" method="POST">
                             @csrf
                             @if(isset($category))
                                 @method('PUT')
@@ -29,7 +29,7 @@
                             </div>
                             
                             <button type="submit" class="btn btn-primary me-2">Submit</button>
-                            <a href="{{ route('kategori_berita_manage') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('kategori-berita.index') }}" class="btn btn-light">Cancel</a>
                         </form>
                     </div>
                 </div>

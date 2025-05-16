@@ -32,4 +32,18 @@ class PaketWisata extends Model
         return $this->hasMany(Reservasi::class, 'id_paket')
             ->whereNotIn('status_reservasi', ['ditolak', 'selesai']);
     }
+
+    public function diskonAktif()
+    {
+        return $this->hasOne(DiskonPaket::class, 'paket_id')
+            ->where('aktif', 1)
+            ->where(function($q) {
+                $q->whereNull('tanggal_mulai')
+                ->orWhere('tanggal_mulai', '<=', now());
+            })
+            ->where(function($q) {
+                $q->whereNull('tanggal_akhir')
+                ->orWhere('tanggal_akhir', '>=', now());
+            });
+    }
 }

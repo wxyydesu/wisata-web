@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
             <div class="col-md-12 grid-margin">
@@ -14,8 +13,8 @@
                         <h4 class="font-weight-bold mb-0">Create New Tourism Category</h4>
                     </div>
                     <div>
-                        <a href="{{ route('kategori_wisata_manage') }}" class="btn btn-primary btn-icon-text btn-rounded">
-                            <i class="fas fa-arrow-left btn-icon-prepend"></i>
+                        <a href="{{ route('kategori-wisata.index') }}" class="btn btn-primary btn-icon-text">
+                            <i class="fa fa-arrow-left me-2"></i>
                             Back to List
                         </a>
                     </div>
@@ -37,7 +36,7 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('kategori_wisata_store') }}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('kategori-wisata.store') }}" enctype="multipart/form-data">
                             @csrf
 
                             <div class="form-group">
@@ -87,7 +86,6 @@
             </div>
         </div>
     </div>
-</div>
 
 {{-- <script>
 document.addEventListener('DOMContentLoaded', function() {

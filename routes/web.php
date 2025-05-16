@@ -173,10 +173,15 @@ Route::get('/export-excel', [App\Http\Controllers\OwnerController::class, 'expor
 
 // FRONT END ROUTES
 Route::get('/berita', [App\Http\Controllers\HomeController::class, 'berita'])->name('berita');
-Route::get('/berita/{id}', [App\Http\Controllers\HomeController::class, 'detailBerita'])->name('detail-berita');
+Route::get('/berita/{id}', [App\Http\Controllers\HomeController::class, 'detailBerita'])->name('detail.berita.index');
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/package', [App\Http\Controllers\HomeController::class, 'paketWisata'])->name('paket');
-Route::get('/package/{id}', [App\Http\Controllers\HomeController::class, 'detailpaket'])->name('detail-paket');
+Route::get('/paket', [App\Http\Controllers\HomeController::class, 'paketWisata'])->name('paket');
+Route::get('/paket/{id}', [App\Http\Controllers\HomeController::class, 'detailpaket'])->name('paket.detail');
 Route::get('/stay-cation', [App\Http\Controllers\HomeController::class, 'penginapan'])->name('penginapan');
-Route::get('/stay-cation/{id}', [App\Http\Controllers\HomeController::class, 'detailPenginapan'])->name('detail-penginapan');
+Route::get('/stay-cation/{id}', [App\Http\Controllers\HomeController::class, 'detailPenginapan'])->name('detail.penginapan.index');
+Route::get('/objek-wisata', [App\Http\Controllers\HomeController::class, 'penginapan'])->name('wisata');
+Route::get('/objek-wisata/{id}', [App\Http\Controllers\HomeController::class, 'detailWisata'])->name('detail.wisata.index');
 
+Route::get('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
+Route::post('/checkout/process', [App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
+Route::get('/checkout/success', [App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
