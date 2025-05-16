@@ -18,30 +18,21 @@ class DiskonPaketController extends Controller
 
         $greeting = $this->getGreeting();
         $paket = PaketWisata::all();
-        $diskon = DiskonPaket::with('paket')->get()->keyBy('paket_id');
-        return view('be.diskon.index', compact('paket', 'diskon', 'greeting'));
-    }
 
-    public function update(Request $request)
-    {
-        // Nonaktifkan diskon yang sudah lewat tanggal akhir
-        DiskonPaket::whereNotNull('tanggal_akhir')
-            ->where('tanggal_akhir', '<', Carbon::today())
+        // Ambil hanya diskon yang aktif dan valid tanggalnya
+        $today = Carbon::today()->format('Y-m-d');
+        $diskon = DiskonPaket::with('paket')
             ->where('aktif', 1)
-            ->update(['aktif' => 0]);
+            ->where(function($q) use ($today) {
+                $q->whereNull('tanggal_mulai')->orWhere('tanggal_mulai', '<=', $today);
+            })
+            ->where(function($q) use ($today) {
+                $q->whereNull('tanggal_akhir')->orWhere('tanggal_akhir', '>=', $today);
+            })
+            ->get()
+            ->keyBy('paket_id');
 
-        foreach ($request->paket_id as $id) {
-            DiskonPaket::updateOrCreate(
-                ['paket_id' => $id],
-                [
-                    'aktif' => in_array($id, $request->aktif ?? []) ? 1 : 0,
-                    'persen' => $request->persen[$id] ?? 0,
-                    'tanggal_mulai' => $request->tanggal_mulai[$id] ?? null,
-                    'tanggal_akhir' => $request->tanggal_akhir[$id] ?? null,
-                ]
-            );
-        }
-        return back()->with('success', 'Diskon berhasil diperbarui!');
+        return view('be.diskon.index', compact('paket', 'diskon', 'greeting'));
     }
 
     // Tambahkan method updateAll untuk batch update diskon
@@ -54,13 +45,19 @@ class DiskonPaketController extends Controller
             ->update(['aktif' => 0]);
 
         foreach ($request->paket_id as $id) {
+            $tanggalMulai = $request->tanggal_mulai[$id] ?? null;
+            $tanggalAkhir = $request->tanggal_akhir[$id] ?? null;
+
+            // Otomatis aktif jika tanggal mulai dan akhir terisi
+            $aktif = (!empty($tanggalMulai) && !empty($tanggalAkhir)) ? 1 : (in_array($id, $request->aktif ?? []) ? 1 : 0);
+
             DiskonPaket::updateOrCreate(
                 ['paket_id' => $id],
                 [
-                    'aktif' => in_array($id, $request->aktif ?? []) ? 1 : 0,
+                    'aktif' => $aktif,
                     'persen' => $request->persen[$id] ?? 0,
-                    'tanggal_mulai' => $request->tanggal_mulai[$id] ?? null,
-                    'tanggal_akhir' => $request->tanggal_akhir[$id] ?? null,
+                    'tanggal_mulai' => $tanggalMulai,
+                    'tanggal_akhir' => $tanggalAkhir,
                 ]
             );
         }

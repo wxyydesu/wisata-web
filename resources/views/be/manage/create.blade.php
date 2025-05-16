@@ -5,11 +5,10 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="card-title">{{ $greeting }}, Create New User</h4>
-            <a href="{{ route('user_manage') }}" class="btn btn-secondary">
+            <a href="{{ route('user.index') }}" class="btn btn-primary">
                 <i class="fa fa-arrow-left me-2"></i> Back
             </a>
         </div>
@@ -18,7 +17,7 @@
             <div class="col-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <form method="POST" action="{{ route('user_store') }}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('user.store') }}" enctype="multipart/form-data">
                             @csrf
 
                             <div class="row">
@@ -107,7 +106,7 @@
                                     <input type="text" class="form-control" id="file-info" placeholder="Choose file..." readonly>
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" type="button" id="browse-btn">
-                                            <i class="fas fa-upload me-1"></i> Choose
+                                            <i class="mdi mdi-image-edit"></i> Choose
                                         </button>
                                     </div>
                                 </div>
@@ -122,7 +121,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <script>
 document.getElementById('level').addEventListener('change', function() {
@@ -190,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const removeBtn = document.createElement('button');
                         removeBtn.type = 'button';
                         removeBtn.className = 'btn btn-sm btn-danger mt-2';
-                        removeBtn.innerHTML = '<i class="fas fa-trash"></i> Remove';
+                        removeBtn.innerHTML = '<i class="mdi mdi-delete"></i> Remove';
                         removeBtn.onclick = function() {
                             fileInput.value = '';
                             fileInfo.value = '';

@@ -124,6 +124,27 @@ class PaketWisataController extends Controller
                          ->with('success', 'Paket wisata deleted successfully.');
     }
 
+    public function deleteImage(Request $request, $id, $field = null)
+    {
+        $paket = PaketWisata::findOrFail($id);
+        $imageFields = ['foto1', 'foto2', 'foto3', 'foto4', 'foto5'];
+
+        // Ambil field dari request jika tidak ada di parameter
+        $field = $field ?? $request->input('field');
+
+        if (!in_array($field, $imageFields)) {
+            return back()->with('error', 'Invalid image field.');
+        }
+
+        if ($paket->$field) {
+            \Storage::disk('public')->delete($paket->$field);
+            $paket->$field = null;
+            $paket->save();
+        }
+
+        return back()->with('success', 'Image deleted successfully.');
+    }
+
     private function getGreeting()
     {
         $hour = now()->hour;

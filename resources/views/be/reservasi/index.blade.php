@@ -4,7 +4,6 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <!-- Page Header -->
         <div class="row mb-3">
@@ -177,7 +176,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

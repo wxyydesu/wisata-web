@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-<div class="main-panel">
     <div class="content-wrapper">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="card-title">{{ $greeting }}, here's your Users Management</h4>
@@ -151,7 +150,6 @@
             </div> <!-- col -->
         </div> <!-- row -->
     </div> <!-- content-wrapper -->
-</div> <!-- main-panel -->
 
 <!-- Image Preview Modal -->
 <div class="modal fade" id="imgPreviewModal" tabindex="-1" aria-hidden="true">

@@ -154,6 +154,7 @@ Route::middleware('auth')->group(function () {
         'update' => 'paket.update',
         'destroy' => 'paket.destroy',
     ]);
+    Route::delete('/paket/{id}/delete-image/{field}', [App\Http\Controllers\PaketWisataController::class, 'deleteImage'])->name('paket.deleteImage');
 
     // Tambahkan route khusus untuk batch update diskon
     Route::post('diskon/update-all', [App\Http\Controllers\DiskonPaketController::class, 'updateAll'])->name('diskon.updateAll');
@@ -162,7 +163,6 @@ Route::middleware('auth')->group(function () {
         'index' => 'diskon.index',
         'update' => 'diskon.update',
     ]);
-
 });
 
 Route::put('user-index/{user}', [App\Http\Controllers\UsersController::class, 'update'])->name('user.update');

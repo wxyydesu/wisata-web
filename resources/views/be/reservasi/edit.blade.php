@@ -269,8 +269,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedOption = paketSelect.options[paketSelect.selectedIndex];
         const harga = selectedOption ? parseFloat(selectedOption.getAttribute('data-harga')) || 0 : 0;
         const peserta = parseInt(jumlahPeserta.value) || 1;
-        // Ambil diskon otomatis dari data attribute (readonly di edit juga, agar konsisten)
-        const diskon = selectedOption ? parseFloat(selectedOption.getAttribute('data-diskon')) || 0 : 0;
+        // Ambil diskon otomatis dari data attribute
+        let diskon = 0;
+        if (selectedOption && selectedOption.hasAttribute('data-diskon')) {
+            diskon = parseFloat(selectedOption.getAttribute('data-diskon')) || 0;
+        }
         diskonInput.value = diskon;
 
         const subtotal = harga * peserta;
@@ -294,16 +297,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners
     paketSelect.addEventListener('change', calculateTotal);
     jumlahPeserta.addEventListener('input', calculateTotal);
-    // diskonInput.addEventListener('input', calculateTotal); // readonly, diisi otomatis
 
     // Set initial values
     jumlahPeserta.value = jumlahPeserta.value || 1;
-    // diskonInput.value = diskonInput.value || 0; // Akan diisi otomatis oleh calculateTotal
 
-    // Trigger initial calculation
-    if (paketSelect.selectedIndex > 0) {
-        calculateTotal();
-    }
+    // Trigger initial calculation (agar diskon tampil saat load awal)
+    calculateTotal();
 
     // Calculate duration
     const tglMulai = document.getElementById('tgl_mulai');

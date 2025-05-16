@@ -231,7 +231,8 @@ class ReservasiController extends Controller
             $pelanggan = Pelanggan::all();
         }
 
-        $paket = PaketWisata::all();
+        // Pastikan field harga_per_pack ikut di-select agar data-diskon di view tetap jalan
+        $paket = PaketWisata::select('id', 'nama_paket', 'harga_per_pack')->get();
 
         // Ambil diskon aktif untuk setiap paket (sama seperti create)
         $diskonAktif = [];
