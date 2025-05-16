@@ -14,14 +14,17 @@ class Reservasi extends Model
     protected $fillable = [
         'id_pelanggan',
         'id_paket',
-        'tgl_reservasi_wisata',
+        'tgl_reservasi',
+        'tgl_mulai',
+        'tgl_akhir',
+        'lama_reservasi',
         'harga',
         'jumlah_peserta',
         'diskon',
         'nilai_diskon',
         'total_bayar',
         'file_bukti_tf',
-        'status_reservasi_wisata'
+        'status_reservasi'
     ];
 
     public function pelanggan()

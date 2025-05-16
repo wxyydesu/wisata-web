@@ -68,9 +68,11 @@ class HomeController extends Controller
 
     public function detailPenginapan($id)
     {
-        $penginapan = Penginapan::with('ulasan.user')->findOrFail($id);
-        $related = Penginapan::where('id', '!=', $id)->take(4)->get();
-                    
+        $penginapan = Penginapan::with(['ulasan.user'])->findOrFail($id); // Ensure reviews and user data are loaded
+        $related = Penginapan::where('id', '!=', $id)
+                    ->take(4)
+                    ->get(); // Fetch related accommodations
+
         return view('fe.penginapan.detail', [
             'title' => $penginapan->nama_penginapan,
             'penginapan' => $penginapan,

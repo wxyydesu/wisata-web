@@ -62,7 +62,12 @@ class PenginapanController extends Controller
 
         Penginapan::create($data);
 
-        return redirect()->route('penginapan.index')->with('success', 'Penginapan created successfully.');
+        return redirect()->route('penginapan.index')->with('swal', [
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'text' => 'Penginapan berhasil ditambahkan!',
+            'timer' => 1500
+        ]);
     }
 
     public function show($id)
@@ -89,8 +94,9 @@ class PenginapanController extends Controller
         ]);
     }
 
-    public function update(Request $request, Penginapan $penginapan)
+    public function update(Request $request, $id)
     {
+        $penginapan = Penginapan::findOrFail($id);
         $validated = $request->validate([
             'nama_penginapan' => 'required|string|max:255',
             'deskripsi' => 'required|string',
@@ -116,7 +122,7 @@ class PenginapanController extends Controller
         // Handle photo updates
         for ($i = 1; $i <= 5; $i++) {
             $field = 'foto'.$i;
-            $deleteField = 'hapus_foto'.$i;
+            $deleteField = 'delete_foto'.$i; // <-- perbaiki dari hapus_foto ke delete_foto
 
             // If delete checkbox is checked
             if ($request->has($deleteField) && $request->input($deleteField)) {
@@ -144,13 +150,49 @@ class PenginapanController extends Controller
 
         $penginapan->update($updateData);
 
-        return redirect()->route('penginapan.index')->with('success', 'Data penginapan berhasil diperbarui.');
+        return redirect()->route('penginapan.index')->with('swal', [
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'text' => 'Data penginapan berhasil diperbarui!',
+            'timer' => 1500
+        ]);
     }
 
-    public function destroy(Penginapan $penginapan)
+    public function destroy($id)
     {
-        $penginapan->delete();
-        return redirect()->route('penginapan.index')->with('success', 'Penginapan deleted successfully.');
+        \Log::info('Delete request received for penginapan ID: '.$id);
+        
+        try {
+            $penginapan = Penginapan::findOrFail($id);
+            \Log::info('Found penginapan: '.$penginapan->nama_penginapan);
+            
+            // Hapus file foto
+            for ($i = 1; $i <= 5; $i++) {
+                $field = 'foto'.$i;
+                if ($penginapan->$field) {
+                    \Log::info('Deleting photo: '.$penginapan->$field);
+                    Storage::disk('public')->delete($penginapan->$field);
+                }
+            }
+            
+            $penginapan->delete();
+            \Log::info('Penginapan deleted successfully');
+            
+            return redirect()->route('penginapan.index')->with('swal', [
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'text' => 'Penginapan berhasil dihapus!',
+                'timer' => 1500
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Delete failed: '.$e->getMessage());
+            return back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'text' => 'Gagal menghapus penginapan',
+                'timer' => 3000
+            ]);
+        }
     }
 
     private function getGreeting()

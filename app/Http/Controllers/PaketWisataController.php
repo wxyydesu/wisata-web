@@ -52,7 +52,7 @@ class PaketWisataController extends Controller
 
         PaketWisata::create($validatedData);
 
-        return redirect()->route('paket_manage')
+        return redirect()->route('paket.index')
                          ->with('success', 'Paket wisata created successfully.');
     }
 
@@ -102,7 +102,7 @@ class PaketWisataController extends Controller
 
         $paket->update($validatedData);
 
-        return redirect()->route('paket_manage')
+        return redirect()->route('paket.index')
                          ->with('success', 'Paket wisata updated successfully.');
     }
 
@@ -120,7 +120,7 @@ class PaketWisataController extends Controller
         
         $paket->delete();
 
-        return redirect()->route('paket_manage')
+        return redirect()->route('paket.index')
                          ->with('success', 'Paket wisata deleted successfully.');
     }
 

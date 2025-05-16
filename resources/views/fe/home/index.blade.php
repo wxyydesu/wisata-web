@@ -25,13 +25,13 @@
                             <span><i class="fas fa-clock"></i> 3 Hari 2 Malam</span>
                             <span class="package-rating"><i class="fas fa-star"></i> 4.8</span>
                         </div>
-                        <a href="{{ route('fe.paket.show', $paket->id) }}" class="book-now">Lihat Detail</a>
+                        <a href="" class="book-now">Lihat Detail</a>
                     </div>
                 </div>
                 @endforeach
             </div>
             <div class="text-center mt-4">
-                <a href="{{ route('fe.paket.index') }}" class="btn btn-outline-primary">Lihat Semua Paket</a>
+                <a href="" class="btn btn-outline-primary">Lihat Semua Paket</a>
             </div>
         </section>
         
@@ -51,13 +51,13 @@
                             <span class="package-rating"><i class="fas fa-star"></i> 4.5</span>
                         </div>
                         <p class="text-muted mb-2">{{ Str::limit($penginapan->deskripsi, 100) }}</p>
-                        <a href="{{ route('fe.penginapan.show', $penginapan->id) }}" class="book-now">Lihat Detail</a>
+                        <a href="" class="book-now">Lihat Detail</a>
                     </div>
                 </div>
                 @endforeach
             </div>
             <div class="text-center mt-4">
-                <a href="{{ route('fe.penginapan.index') }}" class="btn btn-outline-primary">Lihat Semua Penginapan</a>
+                <a href="" class="btn btn-outline-primary">Lihat Semua Penginapan</a>
             </div>
         </section>
         
@@ -72,7 +72,7 @@
                             <i class="fas fa-mountain fa-3x text-primary mb-3"></i>
                             <h3 class="card-title">{{ $kategori->kategori_wisata }}</h3>
                             <p class="card-text">{{ Str::limit($kategori->deskripsi, 100) }}</p>
-                            <a href="{{ route('fe.wisata.index') }}" class="btn btn-sm btn-outline-primary">Jelajahi</a>
+                            <a href="" class="btn btn-sm btn-outline-primary">Jelajahi</a>
                         </div>
                     </div>
                 </div>

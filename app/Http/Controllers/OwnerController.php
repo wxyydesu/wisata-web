@@ -20,15 +20,16 @@ class OwnerController extends Controller
         $totalPendapatan = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar');
         $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->count();
         $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'pesan')->count();
+        $totalReservasiSelesai = Reservasi::where('status_reservasi', 'selesai')->count();
 
         $paketLaris = Reservasi::selectRaw('id_paket, COUNT(*) as jumlah')
             ->whereIn('status_reservasi', ['dibayar', 'selesai'])
             ->groupBy('id_paket')
             ->orderByDesc('jumlah')
-            ->with('paket')
+            ->with('paketWisata')
             ->first();
         
-        $reservasi = Reservasi::with(['pelanggan', 'paket'])
+        $reservasi = Reservasi::with(['pelanggan', 'paketWisata'])
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();
@@ -50,32 +51,32 @@ class OwnerController extends Controller
 
         return view('be.users.owner.index', compact(
             'totalPendapatan', 'totalReservasiDibayar', 'totalReservasiMenunggu',
-            'paketLaris', 'reservasi', 'paket', 'pendapatanBulanan', 'greeting'
+            'totalReservasiSelesai', 'paketLaris', 'reservasi', 'paket', 
+            'pendapatanBulanan', 'greeting'
         ));
     }
 
     public function exportPdf()
     {
-        // Get data with correct column names from your schema
         $data = [
             'totalPendapatan' => Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar'),
             'paketLaris' => Reservasi::selectRaw('id_paket, COUNT(*) as jumlah')
                 ->whereIn('status_reservasi', ['dibayar', 'selesai'])
                 ->groupBy('id_paket')
                 ->orderByDesc('jumlah')
-                ->with('paket')
+                ->with('paketWisata')  // Changed from 'paket'
                 ->first(),
             'statistikPeserta' => Reservasi::selectRaw('id_paket, SUM(jumlah_peserta) as total_peserta')
                 ->whereIn('status_reservasi', ['dibayar', 'selesai'])
                 ->groupBy('id_paket')
-                ->with('paket')
+                ->with('paketWisata')  // Changed from 'paket'
                 ->get(),
             'grafikPendapatan' => Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
                 ->whereIn('status_reservasi', ['dibayar', 'selesai'])
                 ->groupBy('bulan')
                 ->orderBy('bulan')
                 ->get(),
-            'reservasi' => Reservasi::with(['pelanggan', 'paket'])
+            'reservasi' => Reservasi::with(['pelanggan', 'paketWisata'])  // Changed from 'paket'
                 ->whereIn('status_reservasi', ['dibayar', 'selesai'])
                 ->orderByDesc('created_at')
                 ->get(),
@@ -84,7 +85,6 @@ class OwnerController extends Controller
             'user' => auth()->user()
         ];
 
-        // Configure PDF options
         $pdf = Pdf::loadView('be.users.owner.pdf', $data)
             ->setPaper('A4', 'portrait')
             ->setOption([
@@ -95,7 +95,6 @@ class OwnerController extends Controller
 
         return $pdf->download('laporan-keuangan-'.Carbon::now()->format('Ymd-His').'.pdf');
     }
-
     public function exportExcel()
     {
         $reservasi = Reservasi::with(['pelanggan', 'paket'])
@@ -121,7 +120,7 @@ class OwnerController extends Controller
         foreach ($reservasi as $i => $r) {
             $sheet->setCellValue('A'.$row, $i+1);
             $sheet->setCellValue('B'.$row, $r->pelanggan->nama_lengkap ?? '-');
-            $sheet->setCellValue('C'.$row, $r->paket->nama_paket ?? '-');
+            $sheet->setCellValue('C'.$row, $r->paketWisata->nama_paket ?? '-');
             $sheet->setCellValue('D'.$row, $r->tgl_reservasi);
             $sheet->setCellValue('E'.$row, $r->harga);
             $sheet->setCellValue('F'.$row, $r->jumlah_peserta);

@@ -22,9 +22,9 @@
                             Data Penginapan <code>Tambah | Edit | Hapus</code>
                         </p>
 
-                        @if(session('success'))
+                        {{-- @if(session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>
-                        @endif
+                        @endif --}}
 
                         <div class="table-responsive">
                             <table class="table table-striped">
@@ -73,11 +73,10 @@
                                                     <i class="fa fa-pencil-square-o"></i> Edit
                                                 </button>
                                                 
-                                                <form action="{{ route('penginapan.destroy', $p->id) }}" method="POST" 
-                                                      onsubmit="return confirm('Yakin ingin menghapus?')">
+                                                <form action="{{ route('penginapan.destroy', $p->id) }}" method="POST" id="deleteForm{{ $p->id }}" style="display: inline;">
                                                     @csrf 
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-fw">
+                                                    <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $p->id }})">
                                                         <i class="fa fa-trash"></i> Hapus
                                                     </button>
                                                 </form>
@@ -115,8 +114,45 @@
         </div>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Check if SweetAlert is loaded
+    if (typeof Swal === 'undefined') {
+        console.error('SweetAlert2 is not loaded!');
+        return;
+    }
+
+    // Debug: Check session data
+    console.log('Session swal data:', @json(session('swal')));
+    console.log('Validation errors:', @json($errors->all()));
+
+    // Show SweetAlert notification if exists
+    @if(session('swal'))
+        Swal.fire({
+            position: 'top-end',
+            icon: '{{ session('swal.icon') }}',
+            title: {!! json_encode(session('swal.title')) !!},
+            text: {!! json_encode(session('swal.text')) !!},
+            showConfirmButton: false,
+            timer: {{ session('swal.timer') ?? 1500 }},
+            toast: true
+        });
+    @endif
+    
+    // Show validation errors if any
+    @if($errors->any())
+        Swal.fire({
+            position: 'top-end',
+            icon: 'error',
+            title: 'Validasi Error',
+            html: `{!! implode('<br>', $errors->all()) !!}`,
+            showConfirmButton: false,
+            timer: 4000,
+            toast: true
+        });
+    @endif
+});
 function showImgPreview(src) {
     document.getElementById('imgPreview').src = src;
     var myModal = new bootstrap.Modal(document.getElementById('imgPreviewModal'));
@@ -124,9 +160,19 @@ function showImgPreview(src) {
 }
 
 function deleteConfirm(id) {
-    if (confirm('Yakin ingin menghapus penginapan ini?')) {
-        document.getElementById('deleteForm' + id).submit();
-    }
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('deleteForm' + id).submit();
+        }
+    });
 }
 </script>
 @endsection

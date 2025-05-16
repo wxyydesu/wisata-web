@@ -27,4 +27,9 @@ class PaketWisata extends Model
     {
         return $this->hasMany(Reservasi::class, 'id_paket');
     }
+    public function reservasiAktif()
+    {
+        return $this->hasMany(Reservasi::class, 'id_paket')
+            ->whereNotIn('status_reservasi', ['ditolak', 'selesai']);
+    }
 }

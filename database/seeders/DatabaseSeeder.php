@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'no_hp' => '081234567890',
             'alamat' => 'Jl. Admin No. 1',
-            'password' => Hash::make('admin_ganteng'),
+            'password' => Hash::make('12312312'),
             'level' => 'admin',
         ]);
 
@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'bendahara@gmail.com',
             'no_hp' => '081234567891',
             'alamat' => 'Jl. Bendahara No. 2',
-            'password' => Hash::make('bendahara_ganteng'),
+            'password' => Hash::make('12312312'),
             'level' => 'bendahara',
         ]);
 
@@ -70,7 +70,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'owner@gmail.com',
             'no_hp' => '081234567892',
             'alamat' => 'Jl. Owner No. 3',
-            'password' => Hash::make('owner_ganteng'),
+            'password' => Hash::make('12312312'),
             'level' => 'owner',
         ]);
         
@@ -89,7 +89,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'pelanggan1@gmail.com',
             'no_hp' => '081234567893',
             'alamat' => 'Jl. Pelanggan No. 4',
-            'password' => Hash::make('pelanggan_ganteng'),
+            'password' => Hash::make('12312312'),
             'level' => 'pelanggan',
         ]);
 

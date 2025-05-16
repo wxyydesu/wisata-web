@@ -50,11 +50,11 @@ Route::get('/dashboard', function () {
 
 Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])
     ->middleware(['auth',  CheckUserLevel::class . ':admin'])
-    ->name('admin.dashboard');
+    ->name('admin');
 
 Route::get('/bendahara', [App\Http\Controllers\BendaharaController::class, 'index'])
     ->middleware(['auth', CheckUserLevel::class . ':bendahara'])
-    ->name('bendahara.dashboard');
+    ->name('bendahara');
 
 Route::get('/owner', [App\Http\Controllers\OwnerController::class, 'index'])
     ->middleware(['auth', CheckUserLevel::class . ':owner'])
@@ -83,7 +83,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [ App\Http\Controllers\ReservasiController::class, 'index'])->name('reservasi.index');
         Route::get('/create', [ App\Http\Controllers\ReservasiController::class, 'create'])->name('reservasi.create');
         Route::post('/', [ App\Http\Controllers\ReservasiController::class, 'store'])->name('reservasi.store');
-        Route::get('/{reservasi}', [ App\Http\Controllers\ReservasiController::class, 'show'])->name('reservasi.show');
+        Route::get('/{reservasi}/show', [ App\Http\Controllers\ReservasiController::class, 'show'])->name('reservasi.show');
         Route::get('/{reservasi}/edit', [ App\Http\Controllers\ReservasiController::class, 'edit'])->name('reservasi.edit');
         Route::put('/{reservasi}', [ App\Http\Controllers\ReservasiController::class, 'update'])->name('reservasi.update');
         Route::delete('/{reservasi}', [ App\Http\Controllers\ReservasiController::class, 'destroy'])->name('reservasi.destroy');
@@ -97,12 +97,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [App\Http\Controllers\PenginapanController::class, 'index'])->name('penginapan.index');
         Route::get('/create', [App\Http\Controllers\PenginapanController::class, 'create'])->name('penginapan.create');
         Route::post('/', [App\Http\Controllers\PenginapanController::class, 'store'])->name('penginapan.store');
-        Route::get('/{id}/edit', [App\Http\Controllers\PenginapanController::class, 'edit'])->name('penginapan.edit');
-        Route::put('/{id}', [App\Http\Controllers\PenginapanController::class, 'update'])->name('penginapan.update');
-        Route::delete('/{id}', [App\Http\Controllers\PenginapanController::class, 'destroy'])->name('penginapan.destroy');
-        Route::get('/{id}/detail', [App\Http\Controllers\PenginapanController::class, 'show'])->name('penginapan.show');
+        Route::get('/{penginapan}/edit', [App\Http\Controllers\PenginapanController::class, 'edit'])->name('penginapan.edit');
+        Route::put('/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'update'])->name('penginapan.update');
+        Route::delete('/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'destroy'])->name('penginapan.destroy');
+        Route::get('/{penginapan}/detail', [App\Http\Controllers\PenginapanController::class, 'show'])->name('penginapan.show');
     });
-
+    
     // Objek Wisata Routes
     Route::resource('objek-wisata', App\Http\Controllers\ObyekWisataController::class)->names([
         'index' => 'wisata.index',
@@ -155,7 +155,10 @@ Route::middleware('auth')->group(function () {
         'destroy' => 'paket.destroy',
     ]);
 
-    Route::resource('diskon', App\Http\Controllers\PaketWisataController::class)->names([
+    // Tambahkan route khusus untuk batch update diskon
+    Route::post('diskon/update-all', [App\Http\Controllers\DiskonPaketController::class, 'updateAll'])->name('diskon.updateAll');
+
+    Route::resource('diskon', App\Http\Controllers\DiskonPaketController::class)->names([
         'index' => 'diskon.index',
         'update' => 'diskon.update',
     ]);

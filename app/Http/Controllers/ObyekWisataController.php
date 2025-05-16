@@ -36,6 +36,7 @@ class ObyekWisataController extends Controller
 
     public function store(Request $request)
     {
+        try {
         $validated = $request->validate([
             'nama_wisata' => 'required|string|max:255',
             'deskripsi_wisata' => 'required|string',
@@ -58,7 +59,21 @@ class ObyekWisataController extends Controller
 
         ObyekWisata::create($validated);
 
-        return redirect()->route('wisata.index')->with('success', 'Objek Wisata created successfully.');
+        return redirect()->route('wisata.index')->with('swal', [
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'text' => 'Data Objek wisata berhasil dibuat',
+            'timer' => 1500
+        ]);
+        } catch (\Exception $e) {
+            \Log::error('Delete failed: '.$e->getMessage());
+            return back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'text' => 'Gagal Membuat penginapan',
+                'timer' => 3000
+            ]);
+        }
     }
 
 
@@ -138,6 +153,7 @@ class ObyekWisataController extends Controller
             }
         }
 
+        try {
         // Update other fields
         $obyekWisata->nama_wisata = $validated['nama_wisata'];
         $obyekWisata->id_kategori_wisata = $validated['id_kategori_wisata'];
@@ -146,7 +162,21 @@ class ObyekWisataController extends Controller
         
         $obyekWisata->save();
 
-        return redirect()->route('wisata.index')->with('success', 'Objek Wisata updated successfully.');
+        return redirect()->route('wisata.index')->with('swal', [
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'text' => 'Data Objek wisata berhasil diperbarui!',
+            'timer' => 1500
+        ]);
+        } catch (\Exception $e) {
+            \Log::error('Delete failed: '.$e->getMessage());
+            return back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'text' => 'Gagal Memperbarui penginapan',
+                'timer' => 3000
+            ]);
+        }
     }
 
 
@@ -154,9 +184,24 @@ class ObyekWisataController extends Controller
 
     public function destroy($id)
     {
+    try {
         $obyekWisata = ObyekWisata::findOrFail($id);
         $obyekWisata->delete();
-        return redirect()->route('wisata.index')->with('success', 'Objek Wisata deleted successfully.');
+            return redirect()->route('wisata.index')->with('swal', [
+                'icon' => 'success',
+                'title' => 'Berhasil',
+                'text' => 'Penginapan berhasil dihapus!',
+                'timer' => 1500
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Delete failed: '.$e->getMessage());
+            return back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Gagal',
+                'text' => 'Gagal menghapus penginapan',
+                'timer' => 3000
+            ]);
+        }
     }
 
     private function getGreeting()

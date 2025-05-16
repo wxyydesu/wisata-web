@@ -13,61 +13,52 @@
               <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#audiences" role="tab" aria-selected="false">Audiences</a>
+              <a class="nav-link" id="reservations-tab" data-bs-toggle="tab" href="#reservations" role="tab" aria-selected="false">Reservations</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#demographics" role="tab" aria-selected="false">Demographics</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link border-0" id="more-tab" data-bs-toggle="tab" href="#more" role="tab" aria-selected="false">More</a>
+              <a class="nav-link" id="packages-tab" data-bs-toggle="tab" href="#packages" role="tab" aria-selected="false">Packages</a>
             </li>
           </ul>
-          <div>
-            <div class="btn-wrapper">
-              <a href="#" class="btn btn-otline-dark align-items-center"><i class="icon-share"></i> Share</a>
-              <a href="#" class="btn btn-otline-dark"><i class="icon-printer"></i> Print</a>
-              <a href="#" class="btn btn-primary text-white me-0"><i class="icon-download"></i> Export</a>
-            </div>
-          </div>
+          
         </div>
+        
         <div class="tab-content tab-content-basic">
+          <!-- Overview Tab -->
           <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview">
             <div class="row">
               <div class="col-sm-12">
                 <div class="statistics-details d-flex align-items-center justify-content-between">
                   <div>
-                    <p class="statistics-title">Bounce Rate</p>
-                    <h3 class="rate-percentage">32.53%</h3>
-                    <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>-0.5%</span></p>
+                    <p class="statistics-title">Total Pendapatan</p>
+                    <h3 class="rate-percentage">Rp {{ number_format($totalPendapatan,0,',','.') }}</h3>
+                    <p class="text-success d-flex"><i class="mdi mdi-menu-up"></i><span>+12%</span></p>
                   </div>
                   <div>
-                    <p class="statistics-title">Page Views</p>
-                    <h3 class="rate-percentage">7,682</h3>
-                    <p class="text-success d-flex"><i class="mdi mdi-menu-up"></i><span>+0.1%</span></p>
+                    <p class="statistics-title">Reservasi Dibayar</p>
+                    <h3 class="rate-percentage">{{ $totalReservasiDibayar }}</h3>
+                    @php
+                        $totalReservations = $totalReservasiDibayar + $totalReservasiMenunggu;
+                        $paidPercentage = $totalReservations > 0 ? round(($totalReservasiDibayar / $totalReservations) * 100) : 0;
+                    @endphp
+                    <p class="text-success d-flex"><i class="mdi mdi-menu-up"></i><span>+{{ $paidPercentage }}%</span></p>
                   </div>
                   <div>
-                    <p class="statistics-title">New Sessions</p>
-                    <h3 class="rate-percentage">68.8</h3>
-                    <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>68.8</span></p>
+                    <p class="statistics-title">Menunggu Pembayaran</p>
+                    <h3 class="rate-percentage">{{ $totalReservasiMenunggu }}</h3>
+                    @php
+                        $waitingPercentage = $totalReservations > 0 ? round(($totalReservasiMenunggu / $totalReservations) * 100) : 0;
+                    @endphp
+                    <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>-{{ $waitingPercentage }}%</span></p>
                   </div>
                   <div class="d-none d-md-block">
-                    <p class="statistics-title">Avg. Time on Site</p>
-                    <h3 class="rate-percentage">2m:35s</h3>
-                    <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span>+0.8%</span></p>
-                  </div>
-                  <div class="d-none d-md-block">
-                    <p class="statistics-title">New Sessions</p>
-                    <h3 class="rate-percentage">68.8</h3>
-                    <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>68.8</span></p>
-                  </div>
-                  <div class="d-none d-md-block">
-                    <p class="statistics-title">Avg. Time on Site</p>
-                    <h3 class="rate-percentage">2m:35s</h3>
-                    <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span>+0.8%</span></p>
+                    <p class="statistics-title">Paket Paling Laris</p>
+                    <h3 class="rate-percentage">{{ $paketLaris->paketWisata->nama_paket ?? '-' }}</h3>
+                    <p class="text-success d-flex"><i class="mdi mdi-star"></i><span>Top Seller</span></p>
                   </div>
                 </div>
               </div>
             </div>
+            
             <div class="row">
               <div class="col-lg-8 d-flex flex-column">
                 <div class="row flex-grow">
@@ -76,245 +67,94 @@
                       <div class="card-body">
                         <div class="d-sm-flex justify-content-between align-items-start">
                           <div>
-                            <h4 class="card-title card-title-dash">Market Overview</h4>
-                            <p class="card-subtitle card-subtitle-dash">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
+                            <h4 class="card-title card-title-dash">Grafik Pendapatan Bulanan</h4>
+                            <p class="card-subtitle card-subtitle-dash">Statistik pendapatan bulan {{ date('F Y') }}</p>
                           </div>
                           <div>
                             <div class="dropdown">
-                              <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> This month </button>
+                              <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Bulan {{ request('bulan', date('F')) }}
+                              </button>
                               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-                                <h6 class="dropdown-header">Settings</h6>
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <a class="dropdown-item" href="#">Something else here</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">Separated link</a>
+                                <h6 class="dropdown-header">Pilih Bulan</h6>
+                                @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $idx => $bulan)
+                                  <a class="dropdown-item bulan-filter" href="#" data-bulan="{{ $bulan }}">{{ $bulan }}</a>
+                                @endforeach
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div class="d-sm-flex align-items-center mt-1 justify-content-between">
-                          <div class="d-sm-flex align-items-center mt-4 justify-content-between">
-                            <h2 class="me-2 fw-bold">$36,2531.00</h2>
-                            <h4 class="me-2">USD</h4>
-                            <h4 class="text-success">(+1.37%)</h4>
-                          </div>
-                          <div class="me-3">
-                            <div id="marketingOverview-legend"></div>
-                          </div>
-                        </div>
                         <div class="chartjs-bar-wrapper mt-3">
-                          <canvas id="marketingOverview"></canvas>
+                          <canvas id="revenueChart" height="300"></canvas>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+                
                 <div class="row flex-grow">
                   <div class="col-12 grid-margin stretch-card">
                     <div class="card card-rounded">
                       <div class="card-body">
                         <div class="d-sm-flex justify-content-between align-items-start">
                           <div>
-                            <h4 class="card-title card-title-dash">Pending Requests</h4>
-                            <p class="card-subtitle card-subtitle-dash">You have 50+ new requests</p>
+                            <h4 class="card-title card-title-dash">Reservasi Terbaru</h4>
+                            <p class="card-subtitle card-subtitle-dash">5 reservasi terakhir</p>
                           </div>
-                          <div>
-                            <button class="btn btn-primary btn-lg text-white mb-0 me-0" type="button"><i class="mdi mdi-account-plus"></i>Add new member</button>
-                          </div>
+                          {{-- <div>
+                            <a href="#reservations" class="btn btn-primary btn-lg text-white mb-0 me-0"
+                               data-bs-toggle="tab" role="tab" aria-controls="reservations" aria-selected="false">
+                              Lihat Semua <i class="mdi mdi-arrow-right ms-1"></i>
+                            </a>
+                          </div> --}}
                         </div>
-                        <div class="table-responsive  mt-1">
+                        <div class="table-responsive mt-1">
                           <table class="table select-table">
                             <thead>
                               <tr>
-                                <th>
-                                  <div class="form-check form-check-flat mt-0">
-                                    <label class="form-check-label">
-                                      <input type="checkbox" class="form-check-input" aria-checked="false" id="check-all"><i class="input-helper"></i></label>
-                                  </div>
-                                </th>
-                                <th>Customer</th>
-                                <th>Company</th>
-                                <th>Progress</th>
+                                <th>Pelanggan</th>
+                                <th>Paket</th>
+                                <th>Tanggal</th>
+                                <th>Total</th>
                                 <th>Status</th>
+                                <th>Aksi</th>
                               </tr>
                             </thead>
                             <tbody>
+                              @foreach($reservasi as $r)
                               <tr>
-                                <td>
-                                  <div class="form-check form-check-flat mt-0">
-                                    <label class="form-check-label">
-                                      <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="d-flex ">
-                                    <img src="{{ asset('be/assets/images/faces/face1.jpg') }}" alt="">
-                                    <div>
-                                      <h6>Brandon Washington</h6>
-                                      <p>Head admin</p>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <h6>Company name 1</h6>
-                                  <p>company type</p>
-                                </td>
-                                <td>
-                                  <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                      <p class="text-success">79%</p>
-                                      <p>85/162</p>
-                                    </div>
-                                    <div class="progress progress-md">
-                                      <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="badge badge-opacity-warning">In progress</div>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="form-check form-check-flat mt-0">
-                                    <label class="form-check-label">
-                                      <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                  </div>
-                                </td>
                                 <td>
                                   <div class="d-flex">
-                                    <img src="{{ asset('be/assets/images/faces/face2.jpg') }}" alt="">
+                                    {{-- <div class="avatar avatar-sm me-3">
+                                      <span class="avatar-title rounded-circle bg-light text-dark">
+                                        {{ substr($r->pelanggan->nama_lengkap ?? '-', 0, 1) }}
+                                      </span>
+                                    </div> --}}
                                     <div>
-                                      <h6>Laura Brooks</h6>
-                                      <p>Head admin</p>
+                                      <h6>{{ $r->pelanggan->nama_lengkap ?? '-' }}</h6>
+                                      <p>{{ $r->pelanggan->email ?? '-' }}</p>
                                     </div>
                                   </div>
                                 </td>
+                                <td>{{ $r->paketWisata->nama_paket ?? '-' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($r->tgl_reservasi_wisata)->format('d M Y') }}</td>
+                                <td>Rp{{ number_format($r->total_bayar,0,',','.') }}</td>
                                 <td>
-                                  <h6>Company name 1</h6>
-                                  <p>company type</p>
+                                  @if($r->status_reservasi == 'pesan')
+                                    <div class="badge badge-opacity-warning">Menunggu</div>
+                                  @elseif($r->status_reservasi == 'dibayar')
+                                    <div class="badge badge-opacity-success">Dibayar</div>
+                                  @elseif($r->status_reservasi == 'selesai')
+                                    <div class="badge badge-opacity-info">Selesai</div>
+                                  @endif
                                 </td>
                                 <td>
-                                  <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                      <p class="text-success">65%</p>
-                                      <p>85/162</p>
-                                    </div>
-                                    <div class="progress progress-md">
-                                      <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="badge badge-opacity-warning">In progress</div>
+                                  <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="mdi mdi-eye"></i>
+                                  </button>
                                 </td>
                               </tr>
-                              <tr>
-                                <td>
-                                  <div class="form-check form-check-flat mt-0">
-                                    <label class="form-check-label">
-                                      <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="d-flex">
-                                    <img src="{{ asset('be/assets/images/faces/face3.jpg') }}" alt="">
-                                    <div>
-                                      <h6>Wayne Murphy</h6>
-                                      <p>Head admin</p>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <h6>Company name 1</h6>
-                                  <p>company type</p>
-                                </td>
-                                <td>
-                                  <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                      <p class="text-success">65%</p>
-                                      <p>85/162</p>
-                                    </div>
-                                    <div class="progress progress-md">
-                                      <div class="progress-bar bg-warning" role="progressbar" style="width: 38%" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="badge badge-opacity-warning">In progress</div>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="form-check form-check-flat mt-0">
-                                    <label class="form-check-label">
-                                      <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="d-flex">
-                                    <img src="{{ asset('be/assets/images/faces/face4.jpg') }}" alt="">
-                                    <div>
-                                      <h6>Matthew Bailey</h6>
-                                      <p>Head admin</p>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <h6>Company name 1</h6>
-                                  <p>company type</p>
-                                </td>
-                                <td>
-                                  <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                      <p class="text-success">65%</p>
-                                      <p>85/162</p>
-                                    </div>
-                                    <div class="progress progress-md">
-                                      <div class="progress-bar bg-danger" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="badge badge-opacity-danger">Pending</div>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <div class="form-check form-check-flat mt-0">
-                                    <label class="form-check-label">
-                                      <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="d-flex">
-                                    <img src="{{ asset('be/assets/images/faces/face5.jpg') }}" alt="">
-                                    <div>
-                                      <h6>Katherine Butler</h6>
-                                      <p>Head admin</p>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <h6>Company name 1</h6>
-                                  <p>company type</p>
-                                </td>
-                                <td>
-                                  <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                      <p class="text-success">65%</p>
-                                      <p>85/162</p>
-                                    </div>
-                                    <div class="progress progress-md">
-                                      <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="badge badge-opacity-success">Completed</div>
-                                </td>
-                              </tr>
+                              @endforeach
                             </tbody>
                           </table>
                         </div>
@@ -323,6 +163,7 @@
                   </div>
                 </div>
               </div>
+              
               <div class="col-lg-4 d-flex flex-column">
                 <div class="row flex-grow">
                   <div class="col-12 grid-margin stretch-card">
@@ -330,87 +171,20 @@
                       <div class="card-body">
                         <div class="row">
                           <div class="col-lg-12">
-                            <div class="d-flex justify-content-between align-items-center">
-                              <h4 class="card-title card-title-dash">Todo list</h4>
-                              <div class="add-items d-flex mb-0">
-                                <!-- <input type="text" class="form-control todo-list-input" placeholder="What do you need to do today?"> -->
-                                <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0 pl-12p"><i class="mdi mdi-plus"></i></button>
-                              </div>
-                            </div>
-                            <div class="list-wrapper">
-                              <ul class="todo-list todo-list-rounded">
-                                <li class="d-block">
-                                  <div class="form-check w-100">
-                                    <label class="form-check-label">
-                                      <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                    </label>
-                                    <div class="d-flex mt-2">
-                                      <div class="ps-4 text-small me-3">24 June 2020</div>
-                                      <div class="badge badge-opacity-warning me-3">Due tomorrow</div>
-                                      <i class="mdi mdi-flag ms-2 flag-color"></i>
-                                    </div>
-                                  </div>
-                                </li>
-                                <li class="d-block">
-                                  <div class="form-check w-100">
-                                    <label class="form-check-label">
-                                      <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                    </label>
-                                    <div class="d-flex mt-2">
-                                      <div class="ps-4 text-small me-3">23 June 2020</div>
-                                      <div class="badge badge-opacity-success me-3">Done</div>
-                                    </div>
-                                  </div>
-                                </li>
-                                <li>
-                                  <div class="form-check w-100">
-                                    <label class="form-check-label">
-                                      <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                    </label>
-                                    <div class="d-flex mt-2">
-                                      <div class="ps-4 text-small me-3">24 June 2020</div>
-                                      <div class="badge badge-opacity-success me-3">Done</div>
-                                    </div>
-                                  </div>
-                                </li>
-                                <li class="border-bottom-0">
-                                  <div class="form-check w-100">
-                                    <label class="form-check-label">
-                                      <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                    </label>
-                                    <div class="d-flex mt-2">
-                                      <div class="ps-4 text-small me-3">24 June 2020</div>
-                                      <div class="badge badge-opacity-danger me-3">Expired</div>
-                                    </div>
-                                  </div>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row flex-grow">
-                  <div class="col-12 grid-margin stretch-card">
-                    <div class="card card-rounded">
-                      <div class="card-body">
-                        <div class="row">
-                          <div class="col-lg-12">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                              <h4 class="card-title card-title-dash">Type By Amount</h4>
+                              <h4 class="card-title card-title-dash">Distribusi Reservasi</h4>
                             </div>
                             <div>
-                              <canvas class="my-auto" id="doughnutChart"></canvas>
+                              <canvas class="my-auto" id="reservationChart" height="250"></canvas>
                             </div>
-                            <div id="doughnutChart-legend" class="mt-5 text-center"></div>
+                            <div id="reservationChart-legend" class="mt-5 text-center"></div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+                
                 <div class="row flex-grow">
                   <div class="col-12 grid-margin stretch-card">
                     <div class="card card-rounded">
@@ -418,21 +192,28 @@
                         <div class="row">
                           <div class="col-lg-12">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                              <div>
-                                <h4 class="card-title card-title-dash">Leave Report</h4>
-                              </div>
-                              <div>
-                                <div class="dropdown">
-                                  <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Month Wise </button>
-                                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-                                    <h6 class="dropdown-header">week Wise</h6>
-                                    <a class="dropdown-item" href="#">Year Wise</a>
-                                  </div>
-                                </div>
-                              </div>
+                              <h4 class="card-title card-title-dash">Top 3 Paket</h4>
+                              {{-- <a href="#packages" class="btn btn-sm btn-link"
+                                 data-bs-toggle="tab" role="tab" aria-controls="packages" aria-selected="false">
+                                Lihat Semua
+                              </a> --}}
                             </div>
                             <div class="mt-3">
-                              <canvas id="leaveReport"></canvas>
+                              @foreach($paket->take(3) as $p)
+                              <div class="wrapper d-flex align-items-center justify-content-between py-2 border-bottom">
+                                <div class="d-flex">
+                                  @php $foto = $p->foto1 ? 'storage/'.$p->foto1 : 'assets/images/default-package.jpg'; @endphp
+                                  <img class="img-sm rounded-10" src="{{ asset($foto) }}" alt="{{ $p->nama_paket }}">
+                                  <div class="wrapper ms-3">
+                                    <p class="ms-1 mb-1 fw-bold">{{ $p->nama_paket }}</p>
+                                    <small class="text-muted mb-0">Rp{{ number_format($p->harga_per_pack,0,',','.') }}</small>
+                                  </div>
+                                </div>
+                                <div class="text-muted text-small">
+                                  1/12/2020
+                                </div>
+                              </div>
+                              @endforeach
                             </div>
                           </div>
                         </div>
@@ -440,9 +221,103 @@
                     </div>
                   </div>
                 </div>
-                <div class="row flex-grow">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Reservations Tab -->
+          <div class="tab-pane fade" id="reservations" role="tabpanel" aria-labelledby="reservations-tab">
+            <div class="row">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card card-rounded">
+                  <div class="card-body">
+                    <div class="d-sm-flex justify-content-between align-items-start">
+                      <div>
+                        <h4 class="card-title card-title-dash">Semua Reservasi</h4>
+                        <p class="card-subtitle card-subtitle-dash">Daftar lengkap reservasi</p>
+                      </div>
+                      {{-- <div>
+                        <button class="btn btn-primary btn-lg text-white mb-0 me-0" type="button">
+                          <i class="mdi mdi-plus"></i> Tambah Reservasi
+                        </button>
+                      </div> --}}
+                    </div>
+                    <div class="table-responsive mt-1">
+                      <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th>No</th>
+                            <th>Pelanggan</th>
+                            <th>Paket</th>
+                            <th>Tanggal</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach($reservasi as $i => $r)
+                          <tr>
+                            <td>{{ $i+1 }}</td>
+                            <td>{{ $r->pelanggan->nama_lengkap ?? '-' }}</td>
+                            <td>{{ $r->paketWisata->nama_paket ?? '-' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($r->tgl_reservasi_wisata)->format('d M Y') }}</td>
+                            <td>Rp{{ number_format($r->total_bayar,0,',','.') }}</td>
+                            <td>
+                              @if($r->status_reservasi == 'pesan')
+                                <div class="badge badge-opacity-warning">Menunggu</div>
+                              @elseif($r->status_reservasi == 'dibayar')
+                                <div class="badge badge-opacity-success">Dibayar</div>
+                              @elseif($r->status_reservasi == 'selesai')
+                                <div class="badge badge-opacity-info">Selesai</div>
+                              @endif
+                            </td>
+                            <td>
+                              <button class="btn btn-outline-secondary btn-sm">
+                                <i class="mdi mdi-eye"></i>
+                              </button>
+                              <button class="btn btn-outline-primary btn-sm">
+                                <i class="mdi mdi-pencil"></i>
+                              </button>
+                            </td>
+                          </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          <!-- Packages Tab -->
+          <div class="tab-pane fade" id="packages" role="tabpanel" aria-labelledby="packages-tab">
+            <div class="row">
+              @foreach($paket as $p)
+              <div class="col-12 col-md-6 col-lg-4 grid-margin stretch-card">
+                <div class="card card-rounded">
+                  <div class="package-image">
+                    @php $foto = $p->foto1 ? 'storage/'.$p->foto1 : 'assets/images/default-package.jpg'; @endphp
+                    <img src="{{ asset($foto) }}" class="card-img-top" alt="{{ $p->nama_paket }}">
+                    <span class="package-price">Rp{{ number_format($p->harga_per_pack,0,',','.') }}</span>
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title">{{ $p->nama_paket }}</h5>
+                    <p class="card-text text-muted">{{ Str::limit($p->deskripsi, 100) }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <i class="mdi mdi-account-group me-1"></i> 
+                        <small>{{ $p->minimal_orang }} orang</small>
+                      </div>
+                      <a href="{{ route('wisata.show', $p->id) }}" class="btn btn-sm btn-primary">
+                        Detail
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              @endforeach
             </div>
           </div>
         </div>
@@ -450,4 +325,141 @@
     </div>
   </div>
 </div>
+
+<!-- Chart JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Revenue Chart
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueChart = new Chart(revenueCtx, {
+  type: 'bar',
+  data: {
+    labels: {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
+      return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
+    })) !!},
+    datasets: [{
+      label: 'Pendapatan',
+      data: {!! json_encode($pendapatanBulanan->pluck('total')) !!},
+      backgroundColor: 'rgba(58, 123, 213, 0.7)',
+      borderColor: 'rgba(58, 123, 213, 1)',
+      borderWidth: 0,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+              return 'Rp ' + context.raw.toLocaleString('id-ID');
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return 'Rp ' + value.toLocaleString('id-ID');
+          }
+        },
+        grid: {
+          drawBorder: false,
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        }
+      }
+    }
+  }
+});
+
+// Reservation Distribution Chart
+const reservationCtx = document.getElementById('reservationChart').getContext('2d');
+const reservationChart = new Chart(reservationCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Dibayar', 'Menunggu', 'Selesai'],
+    datasets: [{
+      data: [
+        {{ $totalReservasiDibayar }}, 
+        {{ $totalReservasiMenunggu }}, 
+        {{ $totalReservasiSelesai ?? 0 }}
+      ],
+      backgroundColor: [
+        'rgba(40, 167, 69, 0.7)',
+        'rgba(255, 193, 7, 0.7)',
+        'rgba(23, 162, 184, 0.7)'
+      ],
+      borderColor: [
+        'rgba(40, 167, 69, 1)',
+        'rgba(255, 193, 7, 1)',
+        'rgba(23, 162, 184, 1)'
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    },
+    cutout: '70%'
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.bulan-filter').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const bulan = this.getAttribute('data-bulan');
+            const url = new URL(window.location.href);
+            url.searchParams.set('bulan', bulan);
+            window.location.href = url.toString();
+        });
+    });
+});
+</script>
+
+<style>
+  .package-image {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+  }
+  .package-image img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .package-price {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+  }
+  .avatar-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+</style>
 @endsection

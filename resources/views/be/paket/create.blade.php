@@ -13,7 +13,7 @@
                     <div class="card-body">
                         <h4 class="card-title">Create Paket Wisata</h4>
                         
-                        <form action="{{ route('paket_store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('paket.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             
                             <div class="form-group">
@@ -91,7 +91,7 @@
                             </div>
                             
                             <button type="submit" class="btn btn-primary me-2">Submit</button>
-                            <a href="{{ route('paket_manage') }}" class="btn btn-light">Cancel</a>
+                            <a href="{{ route('paket.index') }}" class="btn btn-light">Cancel</a>
                         </form>
                     </div>
                 </div>

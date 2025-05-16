@@ -38,7 +38,12 @@
             <li class="nav-item"><a class="nav-link" href="{{ route('wisata.index') }}">Obyek Wisata</a></li>
           </ul>
         </div>
-                <div class="collapse" id="form-elements">
+        <div class="collapse" id="form-elements">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Reservasi</a></li>
+          </ul>
+        </div>
+        <div class="collapse" id="form-elements">
           <ul class="nav flex-column sub-menu">
             <li class="nav-item"><a class="nav-link" href="{{ route('berita.index') }}">Berita</a></li>
           </ul>
@@ -80,24 +85,5 @@
       @elseif(str_contains(Auth::user()->level, 'bendahara'))
       
       @endif
-      <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
-          <i class="menu-icon mdi mdi-chart-line"></i>
-          <span class="menu-title">Charts</span>
-          <i class="menu-arrow"></i>
-        </a>
-        <div class="collapse" id="charts">
-          <ul class="nav flex-column sub-menu">
-            <li class="nav-item"> <a class="nav-link" href="pages/charts/chartjs.html">ChartJs</a></li>
-          </ul>
-        </div>
-      </li>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="docs/documentation.html">
-          <i class="menu-icon mdi mdi-file-document"></i>
-          <span class="menu-title">Documentation</span>
-        </a>
-      </li>
     </ul>
   </nav>
