@@ -19,13 +19,12 @@
               <a class="nav-link" id="packages-tab" data-bs-toggle="tab" href="#packages" role="tab" aria-selected="false">Packages</a>
             </li>
           </ul>
-          <div>
-            <div class="btn-wrapper">
-              <a href="{{ route('exportPdf') }}" class="btn btn-otline-dark align-items-center"><i class="icon-printer"></i> PDF</a>
-              <a href="{{ route('exportExcel') }}" class="btn btn-primary text-white me-0"><i class="icon-download"></i> Excel</a>
-            </div>
+          <div class="btn-wrapper">
+            <a href="{{ route('exportPdf') }}" class="btn btn-otline-dark align-items-center"><i class="icon-printer"></i> PDF</a>
+            <a href="{{ route('exportExcel') }}" class="btn btn-primary text-white me-0"><i class="icon-download"></i> Excel</a>
           </div>
         </div>
+
         
         <div class="tab-content tab-content-basic">
           <!-- Overview Tab -->
@@ -73,18 +72,18 @@
                         <div class="d-sm-flex justify-content-between align-items-start">
                           <div>
                             <h4 class="card-title card-title-dash">Grafik Pendapatan Bulanan</h4>
-                            <p class="card-subtitle card-subtitle-dash">Statistik pendapatan tahun {{ date('Y') }}</p>
+                            <p class="card-subtitle card-subtitle-dash">Statistik pendapatan bulan {{ date('F Y') }}</p>
                           </div>
                           <div>
                             <div class="dropdown">
-                              <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                                Tahun {{ date('Y') }}
+                              <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Bulan {{ request('bulan', date('F')) }}
                               </button>
                               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-                                <h6 class="dropdown-header">Pilih Tahun</h6>
-                                <a class="dropdown-item" href="#">2023</a>
-                                <a class="dropdown-item" href="#">2024</a>
-                                <a class="dropdown-item" href="#">2025</a>
+                                <h6 class="dropdown-header">Pilih Bulan</h6>
+                                @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $idx => $bulan)
+                                  <a class="dropdown-item bulan-filter" href="#" data-bulan="{{ $bulan }}">{{ $bulan }}</a>
+                                @endforeach
                               </div>
                             </div>
                           </div>
@@ -146,18 +145,39 @@
                                 <td>Rp{{ number_format($r->total_bayar,0,',','.') }}</td>
                                 <td>
                                   @if($r->status_reservasi == 'pesan')
-                                    <div class="badge badge-opacity-warning">Menunggu</div>
-                                  @elseif($r->status_reservasi == 'dibayar')
-                                    <div class="badge badge-opacity-success">Dibayar</div>
-                                  @elseif($r->status_reservasi == 'selesai')
-                                    <div class="badge badge-opacity-info">Selesai</div>
+                                      <div class="d-flex gap-1">
+                                          <form method="POST" action="{{ route('reservasi.confirm', $r->id) }}">
+                                              @csrf
+                                              @method('PUT')
+                                              <button type="submit" class="btn btn-success btn-sm">
+                                                  <i class="mdi mdi-check"></i> Confirm
+                                              </button>
+                                          </form>
+                                          <form method="POST" action="{{ route('reservasi.reject', $r->id) }}">
+                                              @csrf
+                                              @method('PUT')
+                                              <button type="submit" class="btn btn-danger btn-sm">
+                                                  <i class="mdi mdi-close"></i> Reject
+                                              </button>
+                                          </form>
+                                      </div>
+                                  @else
+                                      <button class="btn btn-outline-secondary btn-sm" disabled>
+                                          @if($r->status_reservasi == 'dibayar')
+                                              <i class="mdi mdi-check-all"></i> Confirmed
+                                          @elseif($r->status_reservasi == 'ditolak')
+                                              <i class="mdi mdi-block-helper"></i> Rejected
+                                          @else
+                                              <i class="mdi mdi-history"></i> {{ $r->status_reservasi }}
+                                          @endif
+                                      </button>
                                   @endif
-                                </td>
+                              </td>
                                 <td>
-                                  <button class="btn btn-outline-secondary btn-sm">
-                                    <i class="mdi mdi-eye"></i>
-                                  </button>
-                                </td>
+                                <button class="btn btn-detail-reservasi" 
+                                      data-url="{{ route('be-reservasi.detail', ['reservasi' => $r->id]) }}">
+                                <i class="mdi mdi-eye"></i>
+                                </button>
                               </tr>
                               @endforeach
                             </tbody>
@@ -275,16 +295,36 @@
                                 <div class="badge badge-opacity-success">Dibayar</div>
                               @elseif($r->status_reservasi == 'selesai')
                                 <div class="badge badge-opacity-info">Selesai</div>
+                              @elseif($r->status_reservasi == 'ditolak')
+                                <div class="badge badge-opacity-danger">Ditolak</div>
                               @endif
                             </td>
                             <td>
-                              <button class="btn btn-outline-secondary btn-sm">
-                                <i class="mdi mdi-eye"></i>
-                              </button>
-                              <button class="btn btn-outline-primary btn-sm">
-                                <i class="mdi mdi-pencil"></i>
-                              </button>
-                            </td>
+                              @if($r->status_reservasi == 'pesan')
+                                <form method="POST" action="{{ route('reservasi.confirm', $r->id) }}">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="mdi mdi-check"></i> Confirm
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('reservasi.reject', $r->id) }}">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="mdi mdi-close"></i> Reject
+                                    </button>
+                                </form>
+                              @elseif($r->status_reservasi == 'ditolak')
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="mdi mdi-close"></i>
+                                </button>
+                              @else
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="mdi mdi-check-all"></i>
+                                </button>
+                              @endif
+                          </td>
                           </tr>
                           @endforeach
                         </tbody>
@@ -315,7 +355,8 @@
                         <i class="mdi mdi-account-group me-1"></i> 
                         <small>{{ $p->minimal_orang }} orang</small>
                       </div>
-                      <a href="{{ route('wisata.show', $p->id) }}" class="btn btn-sm btn-primary">
+                      <a href="#" class="btn btn-sm btn-secondary btn-detail-paket" 
+                        data-url="{{ route('be-paket.detail', ['paket' => $p->id]) }}">
                         Detail
                       </a>
                     </div>
@@ -331,20 +372,152 @@
   </div>
 </div>
 
+<!-- Modal Detail Reservasi -->
+<div class="modal fade" id="reservasiDetailModal" tabindex="-1" aria-labelledby="reservasiDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reservasiDetailModalLabel">Detail Reservasi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Informasi Pelanggan</h6>
+            <table class="table table-sm">
+              <tr>
+                <th>Nama</th>
+                <td id="detail-nama"></td>
+              </tr>
+              <tr>
+                <th>Email</th>
+                <td id="detail-email"></td>
+              </tr>
+              <tr>
+                <th>No. Telepon</th>
+                <td id="detail-telepon"></td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6>Detail Reservasi</h6>
+            <table class="table table-sm">
+              <tr>
+                <th>Paket</th>
+                <td id="detail-paket"></td>
+              </tr>
+              <tr>
+                <th>Tanggal</th>
+                <td id="detail-tanggal"></td>
+              </tr>
+              <tr>
+                <th>Jumlah Peserta</th>
+                <td id="detail-peserta"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <h6>Informasi Pembayaran</h6>
+            <table class="table table-sm">
+              <tr>
+                <th>Total Bayar</th>
+                <td id="detail-total"></td>
+              </tr>
+              <tr>
+                <th>Status</th>
+                <td id="detail-status"></td>
+              </tr>
+              <tr>
+                <th>Metode Pembayaran</th>
+                <td id="detail-metode"></td>
+              </tr>
+              <tr>
+                <th>Waktu Reservasi</th>
+                <td id="detail-waktu"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detail Paket -->
+<div class="modal fade" id="paketDetailModal" tabindex="-1" aria-labelledby="paketDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paketDetailModalLabel">Detail Paket Wisata</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-8">
+            <div id="paketCarousel" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-inner" id="carousel-inner">
+                <!-- Images will be inserted here -->
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#paketCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#paketCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <h4 id="paket-nama"></h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="text-primary">Rp <span id="paket-harga"></span></h5>
+              <span class="badge bg-info">
+                <i class="mdi mdi-account-group"></i> 
+                Min. <span id="paket-min-orang"></span> orang
+              </span>
+            </div>
+            <p id="paket-deskripsi" class="text-muted"></p>
+            <h6>Fasilitas:</h6>
+            <ul id="paket-fasilitas" class="list-unstyled">
+              <!-- Facilities will be inserted here -->
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Chart JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Revenue Chart
 const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueLabels = {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
+  try {
+    return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
+  } catch (\Exception $e) {
+    return $item;
+  }
+})) !!};
+const revenueData = {!! json_encode($pendapatanBulanan->pluck('total')) !!};
 const revenueChart = new Chart(revenueCtx, {
   type: 'bar',
   data: {
-    labels: {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
-      return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
-    })) !!},
+    labels: revenueLabels,
     datasets: [{
       label: 'Pendapatan',
-      data: {!! json_encode($pendapatanBulanan->pluck('total')) !!},
+      data: revenueData,
       backgroundColor: 'rgba(58, 123, 213, 0.7)',
       borderColor: 'rgba(58, 123, 213, 1)',
       borderWidth: 0,
@@ -424,6 +597,65 @@ const reservationChart = new Chart(reservationCtx, {
     cutout: '70%'
   }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.bulan-filter').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const bulan = this.getAttribute('data-bulan');
+            const url = new URL(window.location.href);
+            url.searchParams.set('bulan', bulan);
+            window.location.href = url.toString();
+        });
+
+        
+
+      // Detail Reservasi
+      document.querySelectorAll('.btn-detail-reservasi').forEach(button => {
+        button.addEventListener('click', function() {
+        const url = this.dataset.url;
+    
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+           
+          new bootstrap.Modal(document.getElementById('reservasiDetailModal')).show();
+        });
+      });
+    });
+
+    // Detail Paket
+    document.querySelectorAll('.btn-detail-paket').forEach(button => {
+        button.addEventListener('click', function(e) {e.preventDefault();
+          const url = this.dataset.url;
+  
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+
+             
+            new bootstrap.Modal(document.getElementById('paketDetailModal')).show();
+            });
+        });
+
+        document.getElementById('paket-nama').textContent = data.nama_paket;
+        document.getElementById('paket-harga').textContent = data.harga_per_pack.toLocaleString('id-ID');
+        document.getElementById('paket-min-orang').textContent = data.minimal_orang;
+        document.getElementById('paket-deskripsi').textContent = data.deskripsi;
+        
+        const fasilitasList = document.getElementById('paket-fasilitas');
+        fasilitasList.innerHTML = '';
+        data.fasilitas.split(',').forEach(fasilitas => {
+          const li = document.createElement('li');
+          li.className = 'mb-2';
+          li.innerHTML = `<i class="mdi mdi-check-circle-outline text-success me-2"></i>${fasilitas.trim()}`;
+          fasilitasList.appendChild(li);
+        });
+
+        new bootstrap.Modal(document.getElementById('paketDetailModal')).show();
+      });
+  });
+});
 </script>
 
 <style>
@@ -453,6 +685,19 @@ const reservationChart = new Chart(reservationCtx, {
     justify-content: center;
     width: 100%;
     height: 100%;
+  }
+  .modal-body table tr th {
+  width: 40%;
+  white-space: nowrap;
+  }
+
+  .carousel-item img {
+    border-radius: 10px;
+  }
+
+  #paket-fasilitas li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
   }
 </style>
 @endsection

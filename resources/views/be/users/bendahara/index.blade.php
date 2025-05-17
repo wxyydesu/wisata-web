@@ -19,12 +19,7 @@
               <a class="nav-link" id="packages-tab" data-bs-toggle="tab" href="#packages" role="tab" aria-selected="false">Packages</a>
             </li>
           </ul>
-          <div>
-            <div class="btn-wrapper">
-              <a href="{{ route('exportPdf') }}" class="btn btn-otline-dark align-items-center"><i class="icon-printer"></i> PDF</a>
-              <a href="{{ route('exportExcel') }}" class="btn btn-primary text-white me-0"><i class="icon-download"></i> Excel</a>
-            </div>
-          </div>
+          
         </div>
         
         <div class="tab-content tab-content-basic">
@@ -336,15 +331,21 @@
 <script>
 // Revenue Chart
 const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueLabels = {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
+  try {
+    return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
+  } catch (\Exception $e) {
+    return $item;
+  }
+})) !!};
+const revenueData = {!! json_encode($pendapatanBulanan->pluck('total')) !!};
 const revenueChart = new Chart(revenueCtx, {
   type: 'bar',
   data: {
-    labels: {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
-      return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
-    })) !!},
+    labels: revenueLabels,
     datasets: [{
       label: 'Pendapatan',
-      data: {!! json_encode($pendapatanBulanan->pluck('total')) !!},
+      data: revenueData,
       backgroundColor: 'rgba(58, 123, 213, 0.7)',
       borderColor: 'rgba(58, 123, 213, 1)',
       borderWidth: 0,

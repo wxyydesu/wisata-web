@@ -23,16 +23,16 @@
                     <div id="packageCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner rounded-3">
                             <div class="carousel-item active">
-                                <img src="{{ asset('storage/' . $paket->foto1) }}" class="d-block w-100" alt="Package Image">
+                                <img src="{{ asset('storage/' . $paket->foto1) }}" class="d-block w-100 package-image" style="object-fit: cover" alt="Package Image">
                             </div>
                             @if($paket->foto2)
                             <div class="carousel-item">
-                                <img src="{{ asset('storage/' . $paket->foto2) }}" class="d-block w-100" alt="Package Image">
+                                <img src="{{ asset('storage/' . $paket->foto2) }}" class="d-block w-100 package-image" style="object-fit: cover" alt="Package Image">
                             </div>
                             @endif
                             @if($paket->foto3)
                             <div class="carousel-item">
-                                <img src="{{ asset('storage/' . $paket->foto3) }}" class="d-block w-100" alt="Package Image">
+                                <img src="{{ asset('storage/' . $paket->foto3) }}" class="d-block w-100 package-image" style="object-fit: cover" alt="Package Image">
                             </div>
                             @endif
                         </div>
@@ -50,16 +50,16 @@
                     <div class="thumbnail-container mt-2">
                         <div class="row g-2">
                             <div class="col-4">
-                                <img src="{{ asset('storage/' . $paket->foto1) }}" class="img-thumbnail active" onclick="changeSlide(0)">
+                                <img src="{{ asset('storage/' . $paket->foto1) }}" class="img-thumbnail active" style="object-fit: cover" onclick="changeSlide(0)">
                             </div>
                             @if($paket->foto2)
                             <div class="col-4">
-                                <img src="{{ asset('storage/' . $paket->foto2) }}" class="img-thumbnail" onclick="changeSlide(1)">
+                                <img src="{{ asset('storage/' . $paket->foto2) }}" class="img-thumbnail" style="object-fit: cover" onclick="changeSlide(1)">
                             </div>
                             @endif
                             @if($paket->foto3)
                             <div class="col-4">
-                                <img src="{{ asset('storage/' . $paket->foto3) }}" class="img-thumbnail" onclick="changeSlide(2)">
+                                <img src="{{ asset('storage/' . $paket->foto3) }}" class="img-thumbnail" style="object-fit: cover" onclick="changeSlide(2)">
                             </div>
                             @endif
                         </div>
@@ -91,12 +91,10 @@
                     
                     <div class="package-facilities mb-4">
                         <h4 class="section-title"><i class="fas fa-umbrella-beach me-2"></i>Fasilitas Paket</h4>
-                        <div class="facility-grid">
+                        <div class="card">
                             <div class="card-body">
-                                <i class="fas fa-info-circle"></i> Fasilitas
-                                <div clas>
-                                    <p>{{ $paket->fasilitas }}</p>
-                                    
+                                <div class="facility-content">
+                                    {!! nl2br(e($paket->fasilitas)) !!}
                                 </div>
                             </div>
                         </div>
@@ -132,15 +130,24 @@
                             <p class="price-note text-muted">Harga per paket</p>
                         </div>
                         
-                        <form id="bookingForm">
+                        @auth
+                        <form id="bookingForm" action="{{ route('checkout.form', $paket->id) }}" method="GET">
+                            @csrf
+                            <input type="hidden" name="id_paket" value="{{ $paket->id }}">
+                            
                             <div class="mb-3">
-                                <label for="travelDate" class="form-label">Tanggal Perjalanan</label>
-                                <input type="date" class="form-control" id="travelDate" required>
+                                <label for="startDate" class="form-label">Tanggal Mulai</label>
+                                <input type="date" class="form-control" id="startDate" name="tgl_mulai" min="{{ date('Y-m-d') }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">Tanggal Selesai</label>
+                                <input type="date" class="form-control" id="endDate" name="tgl_akhir" disabled required>
                             </div>
                             
                             <div class="mb-3">
                                 <label for="jumlah_peserta" class="form-label">Jumlah Peserta</label>
-                                <select class="form-select" id="jumlah_peserta" required>
+                                <select class="form-select" id="jumlah_peserta" name="jumlah_peserta" required>
                                     @for($i = 1; $i <= 10; $i++)
                                         <option value="{{ $i }}">{{ $i }} orang</option>
                                     @endfor
@@ -152,13 +159,16 @@
                                     <i class="fas fa-shopping-cart me-2"></i>Pesan Sekarang
                                 </button>
                             </div>
-                            
-                            <div class="text-center">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToCart()">
-                                    <i class="fas fa-heart me-2"></i>Simpan untuk nanti
-                                </button>
-                            </div>
                         </form>
+                        @else
+                        <div class="alert alert-warning">
+                            <p>Anda harus <a href="{{ route('login') }}" class="alert-link">login</a> terlebih dahulu untuk melakukan pemesanan.</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ route('login') }}" class="btn btn-warning">Login</a>
+                                <a href="{{ route('register') }}" class="btn btn-outline-secondary">Daftar Akun</a>
+                            </div>
+                        </div>
+                        @endauth
                         
                         <div class="booking-features mt-4">
                             <div class="feature-item">
@@ -283,8 +293,10 @@
                             @endif
                             <span class="badge bg-success">Populer</span>
                         </div>
-                        <img src="{{ asset('storage/' . $r->foto1) }}" class="card-img-top" alt="{{ $r->nama_paket }}">
-                        <div class="card-body">
+                        <div class="package-image-container">
+                            <img src="{{ asset('storage/' . $r->foto1) }}" class="card-img-top package-image" alt="{{ $r->nama_paket }}">
+                        </div>
+                        <div class="card-body d-flex flex-column">
                             <div class="package-meta mb-2">
                                 <span class="package-duration"><i class="fas fa-clock me-1"></i> {{ $r->durasi }} Hari</span>
                                 <span class="package-destination"><i class="fas fa-map-marker-alt me-1"></i> {{ $r->destinasi }}</span>
@@ -301,7 +313,7 @@
                                 }
                             @endphp
                             
-                            <div class="package-price mt-3">
+                            <div class="package-price mt-auto">
                                 @if($diskonR && $diskonR->persen > 0)
                                     <span class="original-price">Rp{{ number_format($hargaNormalR, 0, ',', '.') }}</span>
                                     <span class="discounted-price">Rp{{ number_format($hargaDiskonR, 0, ',', '.') }}</span>
@@ -366,12 +378,21 @@
         border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        height: 170px; /* Fixed height for carousel */
+    }
+    
+    .package-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
     .thumbnail-container .img-thumbnail {
         cursor: pointer;
         transition: all 0.3s;
         border: 2px solid transparent;
+        height: 80px;
+        object-fit: cover;
     }
     
     .thumbnail-container .img-thumbnail:hover,
@@ -402,26 +423,9 @@
         font-size: 16px;
     }
     
-    /* Facilities Grid */
-    .facility-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .facility-item {
-        display: flex;
-        align-items: flex-start;
-        padding: 12px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-    
-    .facility-icon {
-        font-size: 20px;
-        color: #3498db;
-        margin-right: 10px;
-        margin-top: 3px;
+    /* Facilities */
+    .facility-content {
+        line-height: 1.8;
     }
     
     /* Booking Card */
@@ -512,72 +516,6 @@
         line-height: 1.8;
     }
     
-    /* Itinerary Timeline */
-    .timeline {
-        position: relative;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    
-    .timeline::before {
-        content: '';
-        position: absolute;
-        width: 2px;
-        background-color: #3498db;
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        margin-left: -1px;
-    }
-    
-    .timeline-item {
-        padding: 10px 40px;
-        position: relative;
-        width: 50%;
-        box-sizing: border-box;
-    }
-    
-    .timeline-item::after {
-        content: '';
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        background-color: white;
-        border: 3px solid #3498db;
-        border-radius: 50%;
-        top: 15px;
-        z-index: 1;
-    }
-    
-    .timeline-item.left {
-        left: 0;
-    }
-    
-    .timeline-item.right {
-        left: 50%;
-    }
-    
-    .timeline-item.left::after {
-        right: -10px;
-    }
-    
-    .timeline-item.right::after {
-        left: -10px;
-    }
-    
-    .timeline-content {
-        padding: 15px;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .timeline-day {
-        font-weight: 600;
-        color: #3498db;
-        margin-bottom: 5px;
-    }
-    
     /* Reviews */
     .review-section {
         max-width: 800px;
@@ -644,11 +582,19 @@
         border-radius: 10px;
         overflow: hidden;
         transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
     
     .package-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .package-image-container {
+        height: 180px;
+        overflow: hidden;
     }
     
     .package-badge {
@@ -684,10 +630,12 @@
     .package-excerpt {
         font-size: 14px;
         color: #7f8c8d;
+        margin-bottom: 15px;
     }
     
     .package-price {
         font-weight: 600;
+        margin-top: auto;
     }
     
     .original-price {
@@ -746,33 +694,28 @@
     
     /* Responsive Adjustments */
     @media (max-width: 991px) {
-        .timeline::before {
-            left: 31px;
-        }
-        
-        .timeline-item {
-            width: 100%;
-            padding-left: 70px;
-            padding-right: 25px;
-        }
-        
-        .timeline-item.right {
-            left: 0;
-        }
-        
-        .timeline-item.left::after, 
-        .timeline-item.right::after {
-            left: 21px;
+        .carousel-inner {
+            height: 320px;
         }
     }
     
     @media (max-width: 767px) {
-        .facility-grid {
-            grid-template-columns: 1fr;
+        .carousel-inner {
+            height: 300px;
         }
         
         .booking-card {
             margin-top: 30px;
+        }
+        
+        .package-image-container {
+            height: 200px;
+        }
+    }
+    
+    @media (max-width: 575px) {
+        .carousel-inner {
+            height: 250px;
         }
     }
 </style>
@@ -796,6 +739,21 @@
     
     function addToCart() {
         const jumlahPeserta = document.getElementById('jumlah_peserta').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
+        if (!startDate || !endDate) {
+            Toastify({
+                text: "Harap pilih tanggal mulai dan tanggal selesai",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#e74c3c",
+                stopOnFocus: true
+            }).showToast();
+            return;
+        }
         
         Toastify({
             text: "Paket ditambahkan ke keranjang",
@@ -831,6 +789,38 @@
         packageCarousel.addEventListener('slid.bs.carousel', function(event) {
             changeSlide(event.to);
         });
+        
+        // Set minimum date for start date (today)
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').min = today;
+        
+        // Update end date when start date changes
+        document.getElementById('startDate').addEventListener('change', function() {
+        const startDate = new Date(this.value);
+        const endDateInput = document.getElementById('endDate');
+        
+        if (this.value) {
+            // Calculate minimum end date (start date + package duration)
+            const minEndDate = new Date(startDate);
+            minEndDate.setDate(minEndDate.getDate() + {{ $paket->durasi }});
+            
+            // Format as YYYY-MM-DD
+            const minEndDateStr = minEndDate.toISOString().split('T')[0];
+            
+            // Set minimum end date
+            endDateInput.min = minEndDateStr;
+            
+            // Set default end date (start date + package duration)
+            endDateInput.value = minEndDateStr;
+            
+            // Enable end date
+            endDateInput.disabled = false;
+        } else {
+            // Disable end date if no start date
+            endDateInput.disabled = true;
+            endDateInput.value = '';
+        }
     });
+});
 </script>
 @endsection

@@ -331,15 +331,21 @@
 <script>
 // Revenue Chart
 const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueLabels = {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
+  try {
+    return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
+  } catch (\Exception $e) {
+    return $item;
+  }
+})) !!};
+const revenueData = {!! json_encode($pendapatanBulanan->pluck('total')) !!};
 const revenueChart = new Chart(revenueCtx, {
   type: 'bar',
   data: {
-    labels: {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
-      return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
-    })) !!},
+    labels: revenueLabels,
     datasets: [{
       label: 'Pendapatan',
-      data: {!! json_encode($pendapatanBulanan->pluck('total')) !!},
+      data: revenueData,
       backgroundColor: 'rgba(58, 123, 213, 0.7)',
       borderColor: 'rgba(58, 123, 213, 1)',
       borderWidth: 0,

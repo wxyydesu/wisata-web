@@ -8,6 +8,7 @@ use App\Models\Reservasi;
 use App\Models\PaketWisata;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Support\Facades\DB;
 use PDF;
 
 class OwnerController extends Controller
@@ -15,7 +16,7 @@ class OwnerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $totalPendapatan = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar');
         $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->count();
@@ -35,25 +36,102 @@ class OwnerController extends Controller
             ->get();
         
         $paket = PaketWisata::all();
-        
-        $now = Carbon::now();
-        $greeting = match(true) {
-            $now->hour >= 5 && $now->hour < 12 => 'Good Morning',
-            $now->hour >= 12 && $now->hour < 18 => 'Good Afternoon',
-            default => 'Good Evening'
-        };
-        
         $pendapatanBulanan = Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
-            ->whereIn('status_reservasi', ['dibayar', 'selesai'])
-            ->groupBy('bulan')
-            ->orderBy('bulan')
-            ->get();
+        ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+        ->groupBy('bulan')
+        ->orderBy('bulan')
+        ->get();
 
-        return view('be.users.owner.index', compact(
-            'totalPendapatan', 'totalReservasiDibayar', 'totalReservasiMenunggu',
-            'totalReservasiSelesai', 'paketLaris', 'reservasi', 'paket', 
-            'pendapatanBulanan', 'greeting'
-        ));
+        $bulanRequest = $request->get('bulan', date('F'));
+        $bulanMap = [
+            'Januari' => 1, 'Februari' => 2, 'Maret' => 3, 'April' => 4, 'Mei' => 5, 'Juni' => 6,
+            'Juli' => 7, 'Agustus' => 8, 'September' => 9, 'Oktober' => 10, 'November' => 11, 'Desember' => 12
+        ];
+        $bulanAngka = $bulanMap[$bulanRequest] ?? date('n');
+
+        // Filter pendapatanBulanan sesuai bulan jika ada filter
+        if ($request->has('bulan') && isset($bulanMap[$bulanRequest])) {
+            $pendapatanBulanan = $pendapatanBulanan->filter(function($item) use ($bulanAngka) {
+                try {
+                    return \Carbon\Carbon::createFromFormat('Y-m', $item->bulan)->month == $bulanAngka;
+                } catch (\Exception $e) {
+                    return false;
+                }
+            })->values();
+        }
+
+        $now = Carbon::now();
+
+        $greeting = '';
+
+        if ($now->hour >= 5 && $now->hour < 12) {
+            $greeting = 'Good Morning';
+        } elseif ($now->hour >= 12 && $now->hour < 18) {
+            $greeting = 'Good Evening';
+        } else {
+            $greeting = 'Good Night';
+        }
+
+        return view('be.users.owner.index', [
+            'title' => 'Owner',
+            'greeting' => $greeting,
+            'totalPendapatan' => $totalPendapatan,
+            'totalReservasiDibayar' => $totalReservasiDibayar,
+            'totalReservasiMenunggu' => $totalReservasiMenunggu,
+            'totalReservasiSelesai' => $totalReservasiSelesai,
+            'paketLaris' => $paketLaris,
+            'reservasi' => $reservasi,
+            'paket' => $paket,
+            'pendapatanBulanan' => $pendapatanBulanan,
+        ]);
+    }
+
+    public function confirm(Reservasi $reservasi)
+    {
+        try {
+            $reservasi->update(['status_reservasi' => 'dibayar']);
+            return redirect()->back()->with('success', 'Reservasi berhasil dikonfirmasi!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengkonfirmasi reservasi');
+        }
+    }
+
+    public function reject(Reservasi $reservasi)
+    {
+        try {
+            $reservasi->update(['status_reservasi' => 'ditolak']);
+            return redirect()->back()->with('success', 'Reservasi berhasil ditolak!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menolak reservasi');
+        }
+    }
+
+    public function showReservasi(Reservasi $reservasi)
+    {
+        return response()->json([
+            'pelanggan' => $reservasi->pelanggan,
+            'paket_wisata' => $reservasi->paketWisata,
+            'tgl_reservasi_wisata' => $reservasi->tgl_reservasi_wisata,
+            'jumlah_peserta' => $reservasi->jumlah_peserta,
+            'total_bayar' => $reservasi->total_bayar,
+            'status_reservasi' => $reservasi->status_reservasi,
+            'metode_pembayaran' => $reservasi->metode_pembayaran,
+            'created_at' => $reservasi->created_at
+        ]);
+    }
+
+    public function showPaket(PaketWisata $paket)
+    {
+        return response()->json([
+            'nama_paket' => $paket->nama_paket,
+            'harga_per_pack' => $paket->harga_per_pack,
+            'minimal_orang' => $paket->minimal_orang,
+            'deskripsi' => $paket->deskripsi,
+            'fasilitas' => $paket->fasilitas,
+            'foto1' => $paket->foto1,
+            'foto2' => $paket->foto2,
+            'foto3' => $paket->foto3
+        ]);
     }
 
     public function exportPdf()

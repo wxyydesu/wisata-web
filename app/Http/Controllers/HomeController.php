@@ -10,6 +10,8 @@ use App\Models\KategoriWisata;
 use App\Models\Reservasi;
 use App\Models\Berita;
 use App\Models\ObyekWisata;
+use App\Models\Bank;
+use App\Models\DiskonPaket;
 use App\Models\Ulasan;
 
 class HomeController extends Controller
@@ -17,18 +19,41 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $paketWisata = PaketWisata::latest()->paginate(8); // ubah get() jadi paginate(8)
-        $penginapan = Penginapan::latest()->take(8)->get(); // ambil 8 penginapan terbaru
-        $kategoriWisata = KategoriWisata::where('aktif', 1)->with(['obyekWisata' => function($q) {
-            $q->latest()->take(8);
-        }])->get();
+        
+        // Get data for slider - latest 3 items from each category
+        $sliderPackages = PaketWisata::latest()->take(3)->get();
+        $sliderAccommodations = Penginapan::latest()->take(3)->get();
+        $sliderAttractions = ObyekWisata::latest()->take(3)->get();
+        
+        // Merge all slider items and shuffle for variety
+        $sliderItems = collect()
+            ->merge($sliderPackages->map(function($item) { 
+                $item->type = 'package'; 
+                return $item; 
+            }))
+            ->merge($sliderAccommodations->map(function($item) { 
+                $item->type = 'accommodation'; 
+                return $item; 
+            }))
+            ->merge($sliderAttractions->map(function($item) { 
+                $item->type = 'attraction'; 
+                return $item; 
+            }))
+            ->shuffle();
 
-        // Ambil top paket wisata, misal berdasarkan terbaru atau populer
+        // Existing data for other sections
+        $paketWisata = PaketWisata::latest()->paginate(8);
+        $penginapan = Penginapan::latest()->take(8)->get();
+        $kategoriWisata = KategoriWisata::where('aktif', 1)
+            ->with(['obyekWisata' => function($q) {
+                $q->latest()->take(8);
+            }])->get();
         $topPaket = PaketWisata::orderBy('created_at', 'desc')->take(5)->get();
 
         return view('fe.home.index', [
             'title' => 'Home',
             'user' => $user,
+            'sliderItems' => $sliderItems,
             'paketWisata' => $paketWisata,
             'penginapan' => $penginapan,
             'kategoriWisata' => $kategoriWisata,
@@ -132,36 +157,6 @@ class HomeController extends Controller
             'title' => $obyekWisata->nama_obyek_wisata,
             'obyekWisata' => $obyekWisata
         ]);
-    }
-
-    public function checkout(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu');
-        }
-
-        $request->validate([
-            'id_paket' => 'required|exists:paket_wisatas,id',
-            'tgl_reservasi' => 'required|date|after_or_equal:today',
-            'jumlah_peserta' => 'required|integer|min:1',
-            'catatan' => 'nullable|string|max:500'
-        ]);
-
-        $paket = PaketWisata::findOrFail($request->id_paket);
-        $totalBayar = $paket->harga_per_pack * $request->jumlah_peserta;
-
-        $reservasi = Reservasi::create([
-            'id_pelanggan' => Auth::id(),
-            'id_paket' => $paket->id,
-            'tgl_reservasi' => $request->tgl_reservasi,
-            'harga' => $paket->harga_per_pack,
-            'jumlah_peserta' => $request->jumlah_peserta,
-            'total_bayar' => $totalBayar,
-            'status_reservasi' => 'pesan',
-            'catatan' => $request->catatan
-        ]);
-
-        return redirect()->route('checkout.success', $reservasi->id);
     }
 
     public function checkoutSuccess($id)

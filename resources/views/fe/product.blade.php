@@ -33,8 +33,7 @@
                     @endif
                     <br>
                     <ul class="buttons">
-                        <li class="cart"><a href="#">Checkout</a></li>
-                        <li class="shop_btn"><a href="{{ route('paket.detail', $paket->id) }}">Read More</a></li>
+                        <li class="shop_btn"><a href="{{ route('paket.detail', $paket->id) }}">Order Now</a></li>
                         <div class="clear"> </div>
                     </ul>
                 </div>

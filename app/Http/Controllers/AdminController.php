@@ -50,9 +50,13 @@ class AdminController extends Controller
         $bulanAngka = $bulanMap[$bulanRequest] ?? date('n');
 
         // Filter pendapatanBulanan sesuai bulan jika ada filter
-        if ($bulanRequest) {
+        if ($request->has('bulan') && isset($bulanMap[$bulanRequest])) {
             $pendapatanBulanan = $pendapatanBulanan->filter(function($item) use ($bulanAngka) {
-                return \Carbon\Carbon::createFromFormat('Y-m', $item->bulan)->month == $bulanAngka;
+                try {
+                    return \Carbon\Carbon::createFromFormat('Y-m', $item->bulan)->month == $bulanAngka;
+                } catch (\Exception $e) {
+                    return false;
+                }
             })->values();
         }
 

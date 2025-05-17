@@ -36,4 +36,9 @@ class Reservasi extends Model
     {
         return $this->belongsTo(PaketWisata::class, 'id_paket');
     }
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class, 'id_bank');
+    }
 }

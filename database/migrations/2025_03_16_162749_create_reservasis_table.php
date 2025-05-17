@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_pelanggan')->references('id')->on('pelanggans')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('id_paket')->references('id')->on('paket_wisatas')->onDelete('cascade')->onUpdate('cascade');
-            $table->dateTime('tgl_reservasi');
+            $table->dateTime('tgl_reservasi')->nullable();
             $table->date('tgl_mulai')->nullable();
             $table->date('tgl_akhir')->nullable();
             $table->integer('lama_reservasi')->nullable();
