@@ -279,6 +279,7 @@
     @yield('content')
     <hr>
     @yield('product')
+    @yield('wisata')
     @yield('related-berita')
     <!-- END New Packages Section -->
     

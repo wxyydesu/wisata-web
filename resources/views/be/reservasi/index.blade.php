@@ -123,7 +123,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        @if(Auth::user()->level !== 'pelanggan' || $reservasi->status_reservasi == 'pesan')
+                                        @if(Auth::user()->level == 'admin' || Auth::user()->level == 'owner')
                                         <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('reservasi.edit', $item->id) }}'">
                                             <i class="fa fa-pencil-square-o"></i> Edit
                                         </button>

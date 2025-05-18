@@ -9,9 +9,15 @@
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item active"><a href="{{ route('paket') }}">Travel Packages</a></li>
+                <li class="breadcrumb-item active"><a href="{{ route('paket') }}">Paket Wisata</a></li>
             </ol>
         </nav>
+        <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Paket Terbaru</h2>
+            <p class="text-muted">Informasi terupdate seputar wisata dan travel</p>
+        </div>
+        </div>
             <div class="row shop_box-top">
                 @foreach($paketWisata as $paket)
                 @php

@@ -14,7 +14,9 @@
           <span class="menu-title">Dashboard</span>
         </a>
       </li>
+      @if (Auth::user()->level === 'admin' || Auth::user()->level === 'bendahara')
       <li class="nav-item nav-category">Menu</li>
+      @endif
       @if (Auth::user()->level === 'admin')
       <li class="nav-item">
         <a class="nav-link" href="{{ route('user.index') }}">

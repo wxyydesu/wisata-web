@@ -6,6 +6,9 @@
     @include('fe.slider')
 @endsection
 
+@section('wisata')
+    @include('fe.wisata')
+@endsection
 @section('content')
 <style>
     .top_box {

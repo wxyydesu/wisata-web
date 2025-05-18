@@ -10,12 +10,22 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0"><i class="fas fa-history me-2"></i> Riwayat Pesanan</h2>
             <div class="d-flex">
-                <button class="btn btn-outline-secondary me-2">
-                    <i class="fas fa-filter me-1"></i> Filter
-                </button>
-                <button class="btn btn-outline-secondary">
-                    <i class="fas fa-download me-1"></i> Export
-                </button>
+                <form method="GET" action="{{ route('pesanan.index') }}" class="me-2">
+                    <div class="input-group">
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Status</option>
+                            <option value="pesan" {{ request('status') == 'pesan' ? 'selected' : '' }}>Pesan</option>
+                            <option value="dibayar" {{ request('status') == 'dibayar' ? 'selected' : '' }}>Dibayar</option>
+
+                            <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                        </select>
+                        <button type="submit" class="btn btn-outline-secondary d-none">Filter</button>
+                    </div>
+                </form>
+                <a href="{{ route('pesanan.printAll', request()->only('status')) }}" target="_blank" class="btn btn-outline-secondary">
+                    <i class="fas fa-print me-1"></i> Cetak
+                </a>
             </div>
         </div>
 
@@ -55,9 +65,9 @@
                         <a href="{{ route('pesanan.detail', $reservasi->id) }}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-eye me-1"></i> Detail
                         </a>
-                        <button class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ route('pesanan.print', $reservasi->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-print me-1"></i> Cetak
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -110,10 +120,10 @@
                                                title="Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button class="btn btn-sm btn-outline-secondary"
-                                                    title="Cetak">
+                                            <a href="{{ route('pesanan.print', $reservasi->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary"
+                                               title="Cetak">
                                                 <i class="fas fa-print"></i>
-                                            </button>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>

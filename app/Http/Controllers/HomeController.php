@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\{PaketWisata, Penginapan, KategoriWisata, Reservasi, Berita, ObyekWisata, Bank, DiskonPaket, Ulasan, KategoriBerita};
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
+
+        
         
         // Optimized slider data fetching
         $sliderItems = $this->getSliderItems();
@@ -37,6 +40,7 @@ class HomeController extends Controller
         $topPenginapan = cache()->remember('top_penginapan', now()->addHours(1), function() {
             return Penginapan::orderBy('created_at', 'desc')->take(3)->get();
         });
+        $obyekWisata = ObyekWisata::with(['kategoriWisata'])->paginate(8);
 
         // Ambil 3 berita terbaru untuk related berita
         $relatedBerita = Berita::with('kategoriBerita')
@@ -46,7 +50,7 @@ class HomeController extends Controller
 
         return view('fe.home.index', compact(
             'user', 'sliderItems', 'paketWisata', 'penginapan', 
-            'kategoriWisata', 'topPaket', 'topPenginapan', 'relatedBerita'
+            'kategoriWisata', 'topPaket', 'topPenginapan', 'obyekWisata', 'relatedBerita'
         ))->with('title', 'Home');
     }
 
@@ -67,7 +71,7 @@ class HomeController extends Controller
             
             $attractions = ObyekWisata::latest()->take(3)->get()->map(function($item) {
                 $item->type = 'attraction';
-                $item->route = route('detail.obyekwisata', $item->id);
+                $item->route = route('detail.objekwisata', $item->id);
                 return $item;
             });
             
@@ -146,7 +150,7 @@ class HomeController extends Controller
     public function detailBerita($id)
     {
         $user = Auth::user();
-    $berita = Berita::with('kategoriBerita')->findOrFail($id);
+        $berita = Berita::with('kategoriBerita')->findOrFail($id);
         
         // Get popular news - ordered by most recent first
         $popularNews = Berita::with('kategoriBerita')
@@ -173,25 +177,39 @@ class HomeController extends Controller
 
     public function objekWisata()
     {
-        return view('fe.objek-wisata', [
+        $user = Auth::user();
+        $obyekWisata = ObyekWisata::with(['kategoriWisata'])->paginate(9);
+        $wisata = ObyekWisata::with(['kategoriWisata'])->paginate(9);
+        $allReservasis = null;
+        if ($user) {
+            // Jika menggunakan relasi melalui Pelanggan
+            $allReservasis = Reservasi::with(['paketWisata', 'pelanggan'])
+                ->whereHas('pelanggan', function($query) use ($user) {
+                    $query->where('id_user', $user->id);
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('fe.wisata.index', [
             'title' => 'Objek Wisata',
-            'kategoriWisata' => KategoriWisata::with(['obyekWisata' => function($query) {
-                $query->where('aktif', 1);
-            }])->where('aktif', 1)->get()
+            'user' => $user,
+            'obyekWisata' => $obyekWisata,
+            'allReservasis' => $allReservasis,
+            'wisata' => $wisata,
+            'kategoriWisata' => KategoriWisata::with(['obyekWisata'])->get()
         ]);
     }
 
     public function detailObjekWisata($id)
     {
-        $obyekWisata = ObyekWisata::with(['kategoriWisata', 'fasilitas'])->findOrFail($id);
+        $user = Auth::user();
+        $obyekWisata = ObyekWisata::with(['kategoriWisata'])->findOrFail($id);
         
-        return view('fe.detail-obyek-wisata', [
+        return view('fe.wisata.detail', [
             'title' => $obyekWisata->nama_obyek_wisata,
             'obyekWisata' => $obyekWisata,
-            'nearby' => ObyekWisata::where('id_kategori_wisata', $obyekWisata->id_kategori_wisata)
-                ->where('id', '!=', $id)
-                ->take(4)
-                ->get()
+            'user' => $user,
         ]);
     }
 

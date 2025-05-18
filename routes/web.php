@@ -30,6 +30,9 @@ Route::get('/objek-wisata/{id}', [App\Http\Controllers\HomeController::class, 'd
 // Authenticated User Routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/pesanan', [App\Http\Controllers\PesananController::class, 'index'])->name('pesanan.index')->middleware('auth');
+    Route::get('/pesanan/{id}', [App\Http\Controllers\PesananController::class, 'show'])->name('pesanan.detail')->middleware('auth');
     
     // Checkout & Orders
     Route::get('/checkout/{id}', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.form');
@@ -40,6 +43,13 @@ Route::middleware('auth')->group(function () {
     // Profile
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/pesanan/print/all', [App\Http\Controllers\PesananController::class, 'printAll'])->name('pesanan.printAll');
+    Route::get('/pesanan/{id}/print', [App\Http\Controllers\PesananController::class, 'print'])->name('pesanan.print');
+
+    Route::get('/info', function () {
+        return view('auth.info');
+    })->name('auth.info');
 });
 
 Route::middleware(CheckUserLevel::class . ':pelanggan')->group(function () {

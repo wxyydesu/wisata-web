@@ -18,10 +18,14 @@ class PesananController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $reservasis = Reservasi::with(['paketWisata', 'bank'])
-                      ->where('id_pelanggan', Auth::user()->pelanggan->id)
-                      ->latest()
-                      ->paginate(10);
+        $query = Reservasi::with(['paketWisata', 'bank'])
+            ->where('id_pelanggan', $user->pelanggan->id);
+
+        if (request('status')) {
+            $query->where('status_reservasi', request('status'));
+        }
+
+        $reservasis = $query->latest()->paginate(10)->appends(request()->all());
 
         return view('fe.pesanan.index', [
             'title' => 'Pesanan Saya',
@@ -102,6 +106,29 @@ class PesananController extends Controller
         ]);
 
         return $pdf->stream('invoice-' . $reservasi->id . '.pdf');
+    }
+
+    /**
+     * Print all reservations for the current user.
+     */
+    public function printAll()
+    {
+        $user = Auth::user();
+        $query = Reservasi::with(['paketWisata', 'bank', 'pelanggan'])
+            ->where('id_pelanggan', $user->pelanggan->id);
+
+        if (request('status')) {
+            $query->where('status_reservasi', request('status'));
+        }
+
+        $reservasis = $query->latest()->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('fe.pesanan.invoice-all', [
+            'reservasis' => $reservasis,
+            'title' => 'Invoice Semua Pesanan'
+        ]);
+
+        return $pdf->stream('invoice-semua-pesanan.pdf');
     }
 
     /**

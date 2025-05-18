@@ -38,7 +38,7 @@
                             Rp {{ number_format($item->harga_per_malam, 0, ',', '.') }} / malam
                         </div>
                         @endif
-                        <a href="{{ route('detail.penginapan', $item->id) }}" class="btn btn-success btn-sm rounded-pill">Lihat Detail</a>
+                        <a href="{{ route('detail.penginapan', $item->id) }}" class="btn btn-dark btn-sm rounded-pill">Lihat Detail</a>
                     </div>
                 </div>
             </div>
