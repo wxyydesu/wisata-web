@@ -1,3 +1,4 @@
+{{-- filepath: c:\xampp\htdocs\LSP\wisata-web\resources\views\fe\penginapan\detail.blade.php --}}
 @extends('fe.master')
 @section('navbar')
     @include('fe.navbar')
@@ -7,6 +8,14 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6">
+             <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Beranda</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('penginapan') }}">Penginapan</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ Str::limit($penginapan->nama_penginapan, 30) }}</li>
+                </ol>
+            </nav>
             <div class="detail-image">
                 <img src="{{ asset('storage/' . $penginapan->foto1) }}" alt="{{ $penginapan->nama_penginapan }}" class="img-fluid rounded">
             </div>
@@ -29,16 +38,6 @@
             @endforeach
         </ul>
     </div>
-    <div class="row mt-5">
-        <h3 class="section-title">Ulasan</h3>
-        @forelse($penginapan->ulasan as $ulasan)
-            <div class="review">
-                <p><strong>{{ $ulasan->user->name }}</strong> <span class="text-warning"><i class="bi bi-star-fill"></i> {{ $ulasan->rating }}</span></p>
-                <p>{{ $ulasan->komentar }}</p>
-            </div>
-        @empty
-            <p>Belum ada ulasan untuk penginapan ini.</p>
-        @endforelse
-    </div>
+    {{-- Bagian ulasan dihapus --}}
 </div>
 @endsection

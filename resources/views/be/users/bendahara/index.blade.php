@@ -19,8 +19,8 @@
               <a class="nav-link" id="packages-tab" data-bs-toggle="tab" href="#packages" role="tab" aria-selected="false">Packages</a>
             </li>
           </ul>
-          
         </div>
+
         
         <div class="tab-content tab-content-basic">
           <!-- Overview Tab -->
@@ -71,6 +71,8 @@
                             <p class="card-subtitle card-subtitle-dash">Statistik pendapatan bulan {{ date('F Y') }}</p>
                           </div>
                           <div>
+                            {{-- Hapus dropdown filter bulan --}}
+                            {{-- 
                             <div class="dropdown">
                               <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Bulan {{ request('bulan', date('F')) }}
@@ -82,6 +84,7 @@
                                 @endforeach
                               </div>
                             </div>
+                            --}}
                           </div>
                         </div>
                         <div class="chartjs-bar-wrapper mt-3">
@@ -113,7 +116,7 @@
                             <thead>
                               <tr>
                                 <th>Pelanggan</th>
-                                <th>Paket</th>
+                                <th>Paket</</th>
                                 <th>Tanggal</th>
                                 <th>Total</th>
                                 <th>Status</th>
@@ -140,19 +143,23 @@
                                 <td>{{ \Carbon\Carbon::parse($r->tgl_reservasi_wisata)->format('d M Y') }}</td>
                                 <td>Rp{{ number_format($r->total_bayar,0,',','.') }}</td>
                                 <td>
-                                  @if($r->status_reservasi == 'pesan')
-                                    <div class="badge badge-opacity-warning">Menunggu</div>
-                                  @elseif($r->status_reservasi == 'dibayar')
-                                    <div class="badge badge-opacity-success">Dibayar</div>
-                                  @elseif($r->status_reservasi == 'selesai')
-                                    <div class="badge badge-opacity-info">Selesai</div>
-                                  @endif
-                                </td>
-                                <td>
-                                  <button class="btn btn-outline-secondary btn-sm">
-                                    <i class="mdi mdi-eye"></i>
+                                  <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    @if($r->status_reservasi == 'pesan')
+                                          <i class="mdi mdi-clock-alert-outline"></i> Pending
+                                      @elseif($r->status_reservasi == 'dibayar')
+                                          <i class="mdi mdi-check-all"></i> Confirmed
+                                      @elseif($r->status_reservasi == 'ditolak')
+                                          <i class="mdi mdi-block-helper"></i> Rejected
+                                      @else
+                                          <i class="mdi mdi-history"></i> {{ $r->status_reservasi }}
+                                      @endif
                                   </button>
-                                </td>
+                              </td>
+                                <td>
+                                <button class="btn btn-detail-reservasi" 
+                                      data-url="{{ route('be-reservasi.detail', ['reservasi' => $r->id]) }}">
+                                <i class="mdi mdi-eye"></i>
+                                </button>
                               </tr>
                               @endforeach
                             </tbody>
@@ -270,16 +277,25 @@
                                 <div class="badge badge-opacity-success">Dibayar</div>
                               @elseif($r->status_reservasi == 'selesai')
                                 <div class="badge badge-opacity-info">Selesai</div>
+                              @elseif($r->status_reservasi == 'ditolak')
+                                <div class="badge badge-opacity-danger">Ditolak</div>
                               @endif
                             </td>
                             <td>
-                              <button class="btn btn-outline-secondary btn-sm">
-                                <i class="mdi mdi-eye"></i>
-                              </button>
-                              <button class="btn btn-outline-primary btn-sm">
-                                <i class="mdi mdi-pencil"></i>
-                              </button>
-                            </td>
+                              @if($r->status_reservasi == 'pesan')
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="mdi mdi-clock-alert-outline"></i>
+                                </button>
+                              @elseif($r->status_reservasi == 'ditolak')
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="mdi mdi-close"></i>
+                                </button>
+                              @else
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="mdi mdi-check-all"></i>
+                                </button>
+                              @endif
+                          </td>
                           </tr>
                           @endforeach
                         </tbody>
@@ -306,11 +322,12 @@
                     <h5 class="card-title">{{ $p->nama_paket }}</h5>
                     <p class="card-text text-muted">{{ Str::limit($p->deskripsi, 100) }}</p>
                     <div class="d-flex justify-content-between align-items-center">
-                      <div>
+                      {{-- <div>
                         <i class="mdi mdi-account-group me-1"></i> 
-                        <small>{{ $p->minimal_orang }} orang</small>
-                      </div>
-                      <a href="{{ route('wisata.show', $p->id) }}" class="btn btn-sm btn-primary">
+                        <small>{{ $p->jumlah_peserta }} orang</small>
+                      </div> --}}
+                      <a href="#" class="btn btn-sm btn-secondary btn-detail-paket" 
+                        data-url="{{ route('be-paket.detail', ['paket' => $p->id]) }}">
                         Detail
                       </a>
                     </div>
@@ -326,106 +343,123 @@
   </div>
 </div>
 
+<!-- Modal Detail Reservasi -->
+<div class="modal fade" id="reservasiDetailModal" tabindex="-1" aria-labelledby="reservasiDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reservasiDetailModalLabel">Detail Reservasi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Informasi Pelanggan</h6>
+            <table class="table table-sm">
+              <tr>
+                <th>Nama</th>
+                <td id="detail-nama"></td>
+              </tr>
+              <tr>
+                <th>No. Telepon</th>
+                <td id="detail-telepon"></td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6>Detail Reservasi</h6>
+            <table class="table table-sm">
+              <tr>
+                <th>Paket</th>
+                <td id="detail-paket"></td>
+              </tr>
+              <tr>
+                <th>Jumlah Peserta</th>
+                <td id="detail-peserta"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <h6>Informasi Pembayaran</h6>
+            <table class="table table-sm">
+              <tr>
+                <th>Total Bayar</th>
+                <td id="detail-total"></td>
+              </tr>
+              <tr>
+                <th>Status</th>
+                <td id="detail-status"></td>
+              </tr>
+              <tr>
+                <th>Waktu Reservasi</th>
+                <td id="detail-waktu"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detail Paket -->
+<div class="modal fade" id="paketDetailModal" tabindex="-1" aria-labelledby="paketDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paketDetailModalLabel">Detail Paket Wisata</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-8">
+            <div id="paketCarousel" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-inner" id="carousel-inner">
+                <!-- Images will be inserted here -->
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#paketCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#paketCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <h4 id="paket-nama"></h4>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="text-primary">Rp <span id="paket-harga"></span></h5>
+              <span class="badge bg-info">
+                <i class="mdi mdi-account-group"></i> 
+                Min. <span id="paket-min-orang"></span> orang
+              </span>
+            </div>
+            <p id="paket-deskripsi" class="text-muted"></p>
+            <h6>Fasilitas:</h6>
+            <ul id="paket-fasilitas" class="list-unstyled">
+              <!-- Facilities will be inserted here -->
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Chart JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Revenue Chart
-const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-const revenueLabels = {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
-  try {
-    return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
-  } catch (\Exception $e) {
-    return $item;
-  }
-})) !!};
-const revenueData = {!! json_encode($pendapatanBulanan->pluck('total')) !!};
-const revenueChart = new Chart(revenueCtx, {
-  type: 'bar',
-  data: {
-    labels: revenueLabels,
-    datasets: [{
-      label: 'Pendapatan',
-      data: revenueData,
-      backgroundColor: 'rgba(58, 123, 213, 0.7)',
-      borderColor: 'rgba(58, 123, 213, 1)',
-      borderWidth: 0,
-      borderRadius: 4
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-              return 'Rp ' + context.raw.toLocaleString('id-ID');
-          }
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function(value) {
-            return 'Rp ' + value.toLocaleString('id-ID');
-          }
-        },
-        grid: {
-          drawBorder: false,
-          color: 'rgba(0, 0, 0, 0.05)'
-        }
-      },
-      x: {
-        grid: {
-          display: false
-        }
-      }
-    }
-  }
-});
-
-// Reservation Distribution Chart
-const reservationCtx = document.getElementById('reservationChart').getContext('2d');
-const reservationChart = new Chart(reservationCtx, {
-  type: 'doughnut',
-  data: {
-    labels: ['Dibayar', 'Menunggu', 'Selesai'],
-    datasets: [{
-      data: [
-        {{ $totalReservasiDibayar }}, 
-        {{ $totalReservasiMenunggu }}, 
-        {{ $totalReservasiSelesai ?? 0 }}
-      ],
-      backgroundColor: [
-        'rgba(40, 167, 69, 0.7)',
-        'rgba(255, 193, 7, 0.7)',
-        'rgba(23, 162, 184, 0.7)'
-      ],
-      borderColor: [
-        'rgba(40, 167, 69, 1)',
-        'rgba(255, 193, 7, 1)',
-        'rgba(23, 162, 184, 1)'
-      ],
-      borderWidth: 1
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom'
-      }
-    },
-    cutout: '70%'
-  }
-});
-
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.bulan-filter').forEach(function(item) {
         item.addEventListener('click', function(e) {
@@ -435,6 +469,163 @@ document.addEventListener('DOMContentLoaded', function() {
             url.searchParams.set('bulan', bulan);
             window.location.href = url.toString();
         });
+    });
+
+    // Detail Reservasi
+    document.querySelectorAll('.btn-detail-reservasi').forEach(button => {
+        button.addEventListener('click', function() {
+            const url = this.dataset.url;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('detail-nama').textContent = data.pelanggan?.nama_lengkap ?? '-';
+                    document.getElementById('detail-telepon').textContent = data.pelanggan?.no_hp ?? '-';
+                    document.getElementById('detail-paket').textContent = data.paket_wisata?.nama_paket ?? '-';
+                    document.getElementById('detail-peserta').textContent = data.jumlah_peserta ?? '-';
+                    document.getElementById('detail-total').textContent = 'Rp' + (data.total_bayar ?? 0).toLocaleString('id-ID');
+                    document.getElementById('detail-status').textContent = data.status_reservasi ?? '-';
+                    document.getElementById('detail-waktu').textContent = data.created_at ? new Date(data.created_at).toLocaleString('id-ID') : '-';
+                    new bootstrap.Modal(document.getElementById('reservasiDetailModal')).show();
+                });
+        });
+    });
+
+    // Detail Paket
+    document.querySelectorAll('.btn-detail-paket').forEach(button => {
+        button.addEventListener('click', function(e) { 
+            e.preventDefault();
+            const url = this.dataset.url;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Isi data ke modal paket
+                    document.getElementById('paket-nama').textContent = data.nama_paket ?? '-';
+                    document.getElementById('paket-harga').textContent = (data.harga_per_pack ?? 0).toLocaleString('id-ID');
+                    document.getElementById('paket-min-orang').textContent = data.minimal_orang ?? '-';
+                    document.getElementById('paket-deskripsi').textContent = data.deskripsi ?? '-';
+                    // Fasilitas
+                    const fasilitasList = document.getElementById('paket-fasilitas');
+                    fasilitasList.innerHTML = '';
+                    if (data.fasilitas) {
+                        data.fasilitas.split(',').forEach(fasilitas => {
+                            const li = document.createElement('li');
+                            li.className = 'mb-2';
+                            li.innerHTML = `<i class="mdi mdi-check-circle-outline text-success me-2"></i>${fasilitas.trim()}`;
+                            fasilitasList.appendChild(li);
+                        });
+                    }
+                    // Carousel images
+                    const carouselInner = document.getElementById('carousel-inner');
+                    carouselInner.innerHTML = '';
+                    let images = [];
+                    if (data.foto1) images.push(data.foto1);
+                    if (data.foto2) images.push(data.foto2);
+                    if (data.foto3) images.push(data.foto3);
+                    if (images.length === 0) images.push('assets/images/default-package.jpg');
+                    images.forEach((img, idx) => {
+                        const div = document.createElement('div');
+                        div.className = 'carousel-item' + (idx === 0 ? ' active' : '');
+                        div.innerHTML = `<img src="${img.startsWith('http') ? img : ('/storage/' + img)}" class="d-block w-100" alt="...">`;
+                        carouselInner.appendChild(div);
+                    });
+                    new bootstrap.Modal(document.getElementById('paketDetailModal')).show();
+                });
+        });
+    });
+
+    // Grafik Pendapatan Bulanan
+    @if(isset($pendapatanBulanan) && count($pendapatanBulanan) > 0)
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueLabels = {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
+        try {
+            return \Carbon\Carbon::createFromFormat('Y-m', $item)->translatedFormat('F Y');
+        } catch (\Exception $e) {
+            return $item;
+        }
+    })) !!};
+    const revenueData = {!! json_encode($pendapatanBulanan->pluck('total')) !!};
+    new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+            labels: revenueLabels,
+            datasets: [{
+                label: 'Pendapatan',
+                data: revenueData,
+                backgroundColor: 'rgba(58, 123, 213, 0.7)',
+                borderColor: 'rgba(58, 123, 213, 1)',
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + context.raw.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    },
+                    grid: {
+                        drawBorder: false,
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+    @endif
+
+    // Reservation Distribution Chart
+    const reservationCtx = document.getElementById('reservationChart').getContext('2d');
+    const reservationChart = new Chart(reservationCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Dibayar', 'Menunggu', 'Selesai'],
+            datasets: [{
+                data: [
+                    {{ $totalReservasiDibayar }}, 
+                    {{ $totalReservasiMenunggu }}, 
+                    {{ $totalReservasiSelesai ?? 0 }}
+                ],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)',
+                    'rgba(23, 162, 184, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(23, 162, 184, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            cutout: '70%'
+        }
     });
 });
 </script>
@@ -466,6 +657,19 @@ document.addEventListener('DOMContentLoaded', function() {
     justify-content: center;
     width: 100%;
     height: 100%;
+  }
+  .modal-body table tr th {
+  width: 40%;
+  white-space: nowrap;
+  }
+
+  .carousel-item img {
+    border-radius: 10px;
+  }
+
+  #paket-fasilitas li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
   }
 </style>
 @endsection

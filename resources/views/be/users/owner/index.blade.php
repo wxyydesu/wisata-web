@@ -75,6 +75,8 @@
                             <p class="card-subtitle card-subtitle-dash">Statistik pendapatan bulan {{ date('F Y') }}</p>
                           </div>
                           <div>
+                            {{-- Hapus dropdown filter bulan --}}
+                            {{-- 
                             <div class="dropdown">
                               <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Bulan {{ request('bulan', date('F')) }}
@@ -86,6 +88,7 @@
                                 @endforeach
                               </div>
                             </div>
+                            --}}
                           </div>
                         </div>
                         <div class="chartjs-bar-wrapper mt-3">
@@ -117,7 +120,7 @@
                             <thead>
                               <tr>
                                 <th>Pelanggan</th>
-                                <th>Paket</th>
+                                <th>Paket</</th>
                                 <th>Tanggal</th>
                                 <th>Total</th>
                                 <th>Status</th>
@@ -351,10 +354,10 @@
                     <h5 class="card-title">{{ $p->nama_paket }}</h5>
                     <p class="card-text text-muted">{{ Str::limit($p->deskripsi, 100) }}</p>
                     <div class="d-flex justify-content-between align-items-center">
-                      <div>
+                      {{-- <div>
                         <i class="mdi mdi-account-group me-1"></i> 
-                        <small>{{ $p->minimal_orang }} orang</small>
-                      </div>
+                        <small>{{ $p->jumlah_peserta }} orang</small>
+                      </div> --}}
                       <a href="#" class="btn btn-sm btn-secondary btn-detail-paket" 
                         data-url="{{ route('be-paket.detail', ['paket' => $p->id]) }}">
                         Detail
@@ -390,10 +393,6 @@
                 <td id="detail-nama"></td>
               </tr>
               <tr>
-                <th>Email</th>
-                <td id="detail-email"></td>
-              </tr>
-              <tr>
                 <th>No. Telepon</th>
                 <td id="detail-telepon"></td>
               </tr>
@@ -405,10 +404,6 @@
               <tr>
                 <th>Paket</th>
                 <td id="detail-paket"></td>
-              </tr>
-              <tr>
-                <th>Tanggal</th>
-                <td id="detail-tanggal"></td>
               </tr>
               <tr>
                 <th>Jumlah Peserta</th>
@@ -429,10 +424,6 @@
               <tr>
                 <th>Status</th>
                 <td id="detail-status"></td>
-              </tr>
-              <tr>
-                <th>Metode Pembayaran</th>
-                <td id="detail-metode"></td>
               </tr>
               <tr>
                 <th>Waktu Reservasi</th>
@@ -501,103 +492,6 @@
 <!-- Chart JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Revenue Chart
-const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-const revenueLabels = {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
-  try {
-    return \Carbon\Carbon::createFromFormat('Y-m', $item)->format('M Y');
-  } catch (\Exception $e) {
-    return $item;
-  }
-})) !!};
-const revenueData = {!! json_encode($pendapatanBulanan->pluck('total')) !!};
-const revenueChart = new Chart(revenueCtx, {
-  type: 'bar',
-  data: {
-    labels: revenueLabels,
-    datasets: [{
-      label: 'Pendapatan',
-      data: revenueData,
-      backgroundColor: 'rgba(58, 123, 213, 0.7)',
-      borderColor: 'rgba(58, 123, 213, 1)',
-      borderWidth: 0,
-      borderRadius: 4
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-              return 'Rp ' + context.raw.toLocaleString('id-ID');
-          }
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: function(value) {
-            return 'Rp ' + value.toLocaleString('id-ID');
-          }
-        },
-        grid: {
-          drawBorder: false,
-          color: 'rgba(0, 0, 0, 0.05)'
-        }
-      },
-      x: {
-        grid: {
-          display: false
-        }
-      }
-    }
-  }
-});
-
-// Reservation Distribution Chart
-const reservationCtx = document.getElementById('reservationChart').getContext('2d');
-const reservationChart = new Chart(reservationCtx, {
-  type: 'doughnut',
-  data: {
-    labels: ['Dibayar', 'Menunggu', 'Selesai'],
-    datasets: [{
-      data: [
-        {{ $totalReservasiDibayar }}, 
-        {{ $totalReservasiMenunggu }}, 
-        {{ $totalReservasiSelesai ?? 0 }}
-      ],
-      backgroundColor: [
-        'rgba(40, 167, 69, 0.7)',
-        'rgba(255, 193, 7, 0.7)',
-        'rgba(23, 162, 184, 0.7)'
-      ],
-      borderColor: [
-        'rgba(40, 167, 69, 1)',
-        'rgba(255, 193, 7, 1)',
-        'rgba(23, 162, 184, 1)'
-      ],
-      borderWidth: 1
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom'
-      }
-    },
-    cutout: '70%'
-  }
-});
-
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.bulan-filter').forEach(function(item) {
         item.addEventListener('click', function(e) {
@@ -607,54 +501,164 @@ document.addEventListener('DOMContentLoaded', function() {
             url.searchParams.set('bulan', bulan);
             window.location.href = url.toString();
         });
+    });
 
-        
-
-      // Detail Reservasi
-      document.querySelectorAll('.btn-detail-reservasi').forEach(button => {
+    // Detail Reservasi
+    document.querySelectorAll('.btn-detail-reservasi').forEach(button => {
         button.addEventListener('click', function() {
-        const url = this.dataset.url;
-    
-        fetch(url)
-          .then(response => response.json())
-          .then(data => {
-           
-          new bootstrap.Modal(document.getElementById('reservasiDetailModal')).show();
+            const url = this.dataset.url;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('detail-nama').textContent = data.pelanggan?.nama_lengkap ?? '-';
+                    document.getElementById('detail-telepon').textContent = data.pelanggan?.no_hp ?? '-';
+                    document.getElementById('detail-paket').textContent = data.paket_wisata?.nama_paket ?? '-';
+                    document.getElementById('detail-peserta').textContent = data.jumlah_peserta ?? '-';
+                    document.getElementById('detail-total').textContent = 'Rp' + (data.total_bayar ?? 0).toLocaleString('id-ID');
+                    document.getElementById('detail-status').textContent = data.status_reservasi ?? '-';
+                    document.getElementById('detail-waktu').textContent = data.created_at ? new Date(data.created_at).toLocaleString('id-ID') : '-';
+                    new bootstrap.Modal(document.getElementById('reservasiDetailModal')).show();
+                });
         });
-      });
     });
 
     // Detail Paket
     document.querySelectorAll('.btn-detail-paket').forEach(button => {
-        button.addEventListener('click', function(e) {e.preventDefault();
-          const url = this.dataset.url;
-  
-          fetch(url)
-            .then(response => response.json())
-            .then(data => {
-
-             
-            new bootstrap.Modal(document.getElementById('paketDetailModal')).show();
-            });
+        button.addEventListener('click', function(e) { 
+            e.preventDefault();
+            const url = this.dataset.url;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Isi data ke modal paket
+                    document.getElementById('paket-nama').textContent = data.nama_paket ?? '-';
+                    document.getElementById('paket-harga').textContent = (data.harga_per_pack ?? 0).toLocaleString('id-ID');
+                    document.getElementById('paket-min-orang').textContent = data.minimal_orang ?? '-';
+                    document.getElementById('paket-deskripsi').textContent = data.deskripsi ?? '-';
+                    // Fasilitas
+                    const fasilitasList = document.getElementById('paket-fasilitas');
+                    fasilitasList.innerHTML = '';
+                    if (data.fasilitas) {
+                        data.fasilitas.split(',').forEach(fasilitas => {
+                            const li = document.createElement('li');
+                            li.className = 'mb-2';
+                            li.innerHTML = `<i class="mdi mdi-check-circle-outline text-success me-2"></i>${fasilitas.trim()}`;
+                            fasilitasList.appendChild(li);
+                        });
+                    }
+                    // Carousel images
+                    const carouselInner = document.getElementById('carousel-inner');
+                    carouselInner.innerHTML = '';
+                    let images = [];
+                    if (data.foto1) images.push(data.foto1);
+                    if (data.foto2) images.push(data.foto2);
+                    if (data.foto3) images.push(data.foto3);
+                    if (images.length === 0) images.push('assets/images/default-package.jpg');
+                    images.forEach((img, idx) => {
+                        const div = document.createElement('div');
+                        div.className = 'carousel-item' + (idx === 0 ? ' active' : '');
+                        div.innerHTML = `<img src="${img.startsWith('http') ? img : ('/storage/' + img)}" class="d-block w-100" alt="...">`;
+                        carouselInner.appendChild(div);
+                    });
+                    new bootstrap.Modal(document.getElementById('paketDetailModal')).show();
+                });
         });
+    });
 
-        document.getElementById('paket-nama').textContent = data.nama_paket;
-        document.getElementById('paket-harga').textContent = data.harga_per_pack.toLocaleString('id-ID');
-        document.getElementById('paket-min-orang').textContent = data.minimal_orang;
-        document.getElementById('paket-deskripsi').textContent = data.deskripsi;
-        
-        const fasilitasList = document.getElementById('paket-fasilitas');
-        fasilitasList.innerHTML = '';
-        data.fasilitas.split(',').forEach(fasilitas => {
-          const li = document.createElement('li');
-          li.className = 'mb-2';
-          li.innerHTML = `<i class="mdi mdi-check-circle-outline text-success me-2"></i>${fasilitas.trim()}`;
-          fasilitasList.appendChild(li);
-        });
+    // Grafik Pendapatan Bulanan
+    @if(isset($pendapatanBulanan) && count($pendapatanBulanan) > 0)
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueLabels = {!! json_encode($pendapatanBulanan->pluck('bulan')->map(function($item) {
+        try {
+            return \Carbon\Carbon::createFromFormat('Y-m', $item)->translatedFormat('F Y');
+        } catch (\Exception $e) {
+            return $item;
+        }
+    })) !!};
+    const revenueData = {!! json_encode($pendapatanBulanan->pluck('total')) !!};
+    new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+            labels: revenueLabels,
+            datasets: [{
+                label: 'Pendapatan',
+                data: revenueData,
+                backgroundColor: 'rgba(58, 123, 213, 0.7)',
+                borderColor: 'rgba(58, 123, 213, 1)',
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + context.raw.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    },
+                    grid: {
+                        drawBorder: false,
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+    @endif
 
-        new bootstrap.Modal(document.getElementById('paketDetailModal')).show();
-      });
-  });
+    // Reservation Distribution Chart
+    const reservationCtx = document.getElementById('reservationChart').getContext('2d');
+    const reservationChart = new Chart(reservationCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Dibayar', 'Menunggu', 'Selesai'],
+            datasets: [{
+                data: [
+                    {{ $totalReservasiDibayar }}, 
+                    {{ $totalReservasiMenunggu }}, 
+                    {{ $totalReservasiSelesai ?? 0 }}
+                ],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)',
+                    'rgba(23, 162, 184, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(23, 162, 184, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            cutout: '70%'
+        }
+    });
 });
 </script>
 

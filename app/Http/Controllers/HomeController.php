@@ -4,15 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\PaketWisata;
-use App\Models\Penginapan;
-use App\Models\KategoriWisata;
-use App\Models\Reservasi;
-use App\Models\Berita;
-use App\Models\ObyekWisata;
-use App\Models\Bank;
-use App\Models\DiskonPaket;
-use App\Models\Ulasan;
+use App\Models\{PaketWisata, Penginapan, KategoriWisata, Reservasi, Berita, ObyekWisata, Bank, DiskonPaket, Ulasan, KategoriBerita};
 
 class HomeController extends Controller
 {
@@ -20,148 +12,196 @@ class HomeController extends Controller
     {
         $user = Auth::user();
         
-        // Get data for slider - latest 3 items from each category
-        $sliderPackages = PaketWisata::latest()->take(3)->get();
-        $sliderAccommodations = Penginapan::latest()->take(3)->get();
-        $sliderAttractions = ObyekWisata::latest()->take(3)->get();
+        // Optimized slider data fetching
+        $sliderItems = $this->getSliderItems();
         
-        // Merge all slider items and shuffle for variety
-        $sliderItems = collect()
-            ->merge($sliderPackages->map(function($item) { 
-                $item->type = 'package'; 
-                return $item; 
-            }))
-            ->merge($sliderAccommodations->map(function($item) { 
-                $item->type = 'accommodation'; 
-                return $item; 
-            }))
-            ->merge($sliderAttractions->map(function($item) { 
-                $item->type = 'attraction'; 
-                return $item; 
-            }))
-            ->shuffle();
-
-        // Existing data for other sections
-        $paketWisata = PaketWisata::latest()->paginate(8);
-        $penginapan = Penginapan::latest()->take(8)->get();
-        $kategoriWisata = KategoriWisata::where('aktif', 1)
-            ->with(['obyekWisata' => function($q) {
+        // Cached data for better performance
+        $paketWisata = cache()->remember('home_paket_wisata', now()->addHours(1), function() {
+            return PaketWisata::latest()->paginate(8);
+        });
+        
+        $penginapan = cache()->remember('home_penginapan', now()->addHours(1), function() {
+            return Penginapan::latest()->take(8)->get();
+        });
+        
+        $kategoriWisata = cache()->remember('home_kategori_wisata', now()->addHours(1), function() {
+            return KategoriWisata::with(['obyekWisata' => function($q) {
                 $q->latest()->take(8);
-            }])->get();
-        $topPaket = PaketWisata::orderBy('created_at', 'desc')->take(5)->get();
+            }])->where('aktif', 1)->get();
+        });
+        
+        $topPaket = cache()->remember('top_paket', now()->addHours(1), function() {
+            return PaketWisata::orderBy('created_at', 'desc')->take(5)->get();
+        });
+        
+        $topPenginapan = cache()->remember('top_penginapan', now()->addHours(1), function() {
+            return Penginapan::orderBy('created_at', 'desc')->take(3)->get();
+        });
 
-        return view('fe.home.index', [
-            'title' => 'Home',
-            'user' => $user,
-            'sliderItems' => $sliderItems,
-            'paketWisata' => $paketWisata,
-            'penginapan' => $penginapan,
-            'kategoriWisata' => $kategoriWisata,
-            'topPaket' => $topPaket
-        ]);
+        // Ambil 3 berita terbaru untuk related berita
+        $relatedBerita = Berita::with('kategoriBerita')
+            ->latest('tgl_post')
+            ->take(3)
+            ->get();
+
+        return view('fe.home.index', compact(
+            'user', 'sliderItems', 'paketWisata', 'penginapan', 
+            'kategoriWisata', 'topPaket', 'topPenginapan', 'relatedBerita'
+        ))->with('title', 'Home');
+    }
+
+    protected function getSliderItems()
+    {
+        return cache()->remember('slider_items', now()->addHours(1), function() {
+            $packages = PaketWisata::latest()->take(3)->get()->map(function($item) {
+                $item->type = 'package';
+                $item->route = route('paket.detail', $item->id);
+                return $item;
+            });
+            
+            $accommodations = Penginapan::latest()->take(3)->get()->map(function($item) {
+                $item->type = 'accommodation';
+                $item->route = route('detail.penginapan', $item->id);
+                return $item;
+            });
+            
+            $attractions = ObyekWisata::latest()->take(3)->get()->map(function($item) {
+                $item->type = 'attraction';
+                $item->route = route('detail.obyekwisata', $item->id);
+                return $item;
+            });
+            
+            return $packages->merge($accommodations)->merge($attractions)->shuffle();
+        });
     }
 
     public function paketWisata()
     {
-        $user = Auth::user();
-        $paketWisata = PaketWisata::paginate(9);
+        $paketWisata = PaketWisata::with('diskonAktif')->paginate(9);
         return view('fe.paket_wisata.index', [
             'title' => 'Paket Wisata',
-            'user' => $user,
+            'user' => Auth::user(),
             'paketWisata' => $paketWisata
         ]);
     }
 
     public function detailPaket($id)
     {
-        $user = Auth::user();
-        $paket = PaketWisata::findOrFail($id);
-        $related = PaketWisata::where('id', '!=', $id)
-                    ->take(4) // Hapus where('aktif', 1)
-                    ->get();
-                    
+        $paket = PaketWisata::with(['diskonAktif'])->findOrFail($id);
+        
         return view('fe.detail_paket.index', [
             'title' => $paket->nama_paket,
             'paket' => $paket,
-            'user' => $user,
-            'related' => $related
+            'user' => Auth::user(),
+            'related' => $this->getRelatedPackages($paket)
         ]);
+    }
+
+    protected function getRelatedPackages($currentPackage)
+    {
+        return PaketWisata::where('id', '!=', $currentPackage->id)
+            ->take(4)
+            ->get();
     }
 
     public function penginapan()
     {
+        $user = Auth::user();
         $penginapan = Penginapan::paginate(9);
+        
         return view('fe.penginapan.index', [
             'title' => 'Penginapan',
+            'user' => $user,
             'penginapan' => $penginapan
         ]);
     }
 
     public function detailPenginapan($id)
     {
-        $penginapan = Penginapan::with(['ulasan.user'])->findOrFail($id); // Ensure reviews and user data are loaded
-        $related = Penginapan::where('id', '!=', $id)
-                    ->take(4)
-                    ->get(); // Fetch related accommodations
+        $user = Auth::user();
+        $penginapan = Penginapan::findOrFail($id);
 
         return view('fe.penginapan.detail', [
             'title' => $penginapan->nama_penginapan,
+            'user' => $user,
             'penginapan' => $penginapan,
-            'related' => $related
+            'related' => Penginapan::where('id', '!=', $id)
+                // ->where('id_kategori_penginapan', $penginapan->id_kategori_penginapan) // Hapus baris ini jika kolom tidak ada
+                ->take(4)
+                ->get()
         ]);
     }
 
-        public function berita()
+    public function berita()
     {
-        $user = Auth::user();
-        $berita = Berita::with('kategori')
-                    ->orderBy('tgl_post', 'desc')
-                    ->paginate(9);
-                    
         return view('fe.berita.index', [
             'title' => 'Berita Wisata',
-            'user' => $user,
-            'berita' => $berita
+            'user' => Auth::user(),
+            'berita' => Berita::with('kategoriBerita')
+                ->latest('tgl_post')
+                ->paginate(9)
         ]);
     }
 
     public function detailBerita($id)
     {
-        $berita = Berita::with('kategori')->findOrFail($id);
-        $related = Berita::where('id', '!=', $id)
-                    ->where('id_kategori_berita', $berita->id_kategori_berita)
-                    ->orderBy('tgl_post', 'desc')
-                    ->take(4)
-                    ->get();
-                    
-        return view('fe.detail_berita.index', [
+        $user = Auth::user();
+    $berita = Berita::with('kategoriBerita')->findOrFail($id);
+        
+        // Get popular news - ordered by most recent first
+        $popularNews = Berita::with('kategoriBerita')
+            ->latest('tgl_post')
+            ->take(4)
+            ->get();
+        
+        // Get news categories with count
+        $newsCategories = KategoriBerita::withCount('beritas')->get();
+        
+        return view('fe.berita.detail', [
             'title' => $berita->judul,
             'berita' => $berita,
-            'related' => $related
+            'popularNews' => $popularNews,
+            'newsCategories' => $newsCategories,
+            'user' => $user,
+            'related' => Berita::where('id', '!=', $id)
+                ->where('id_kategori_berita', $berita->id_kategori_berita)
+                ->latest('tgl_post')
+                ->take(4)
+                ->get()
         ]);
     }
 
     public function objekWisata()
     {
-        $kategoriWisata = KategoriWisata::where('aktif', 1)->with('obyekWisata')->get();
         return view('fe.objek-wisata', [
             'title' => 'Objek Wisata',
-            'kategoriWisata' => $kategoriWisata
+            'kategoriWisata' => KategoriWisata::with(['obyekWisata' => function($query) {
+                $query->where('aktif', 1);
+            }])->where('aktif', 1)->get()
         ]);
     }
 
     public function detailObjekWisata($id)
     {
-        $obyekWisata = ObyekWisata::with('kategoriWisata')->findOrFail($id);
+        $obyekWisata = ObyekWisata::with(['kategoriWisata', 'fasilitas'])->findOrFail($id);
+        
         return view('fe.detail-obyek-wisata', [
             'title' => $obyekWisata->nama_obyek_wisata,
-            'obyekWisata' => $obyekWisata
+            'obyekWisata' => $obyekWisata,
+            'nearby' => ObyekWisata::where('id_kategori_wisata', $obyekWisata->id_kategori_wisata)
+                ->where('id', '!=', $id)
+                ->take(4)
+                ->get()
         ]);
     }
 
     public function checkoutSuccess($id)
     {
-        $reservasi = Reservasi::with('paketWisata')->findOrFail($id);
+        $reservasi = Reservasi::with(['paketWisata', 'pelanggan'])
+            ->where('id', $id)
+            ->where('id_pelanggan', Auth::id())
+            ->firstOrFail();
+
         return view('fe.checkout-success', [
             'title' => 'Checkout Success',
             'reservasi' => $reservasi

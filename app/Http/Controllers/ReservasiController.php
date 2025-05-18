@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ReservasiController extends Controller
 {
@@ -130,9 +131,10 @@ class ReservasiController extends Controller
         $validated['lama_reservasi'] = $tglAkhir->diffInDays($tglMulai) + 1;
         
         // Format tanggal untuk database
-        $validated['tgl_reservasi'] = now();
         $validated['tgl_mulai'] = $tglMulai->format('Y-m-d');
         $validated['tgl_akhir'] = $tglAkhir->format('Y-m-d');
+        // Perbaiki: tgl_reservasi diisi dengan tanggal mulai reservasi
+        $validated['tgl_reservasi'] = $validated['tgl_mulai'];
 
         // Hitung total bayar
         $validated['total_bayar'] = $validated['harga'] * $validated['jumlah_peserta'];
@@ -393,6 +395,16 @@ class ReservasiController extends Controller
             ->get();
 
         return response()->json($reservasis);
+    }
+
+    /**
+     * API detail reservasi untuk modal (pastikan route-nya mengarah ke sini)
+     */
+    public function detail(Reservasi $reservasi)
+    {
+
+        $reservasi->load(['pelanggan', 'paketWisata', 'bank']);
+        return response()->json($reservasi);
     }
 
     /**

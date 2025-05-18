@@ -20,14 +20,13 @@ Route::middleware('guest')->group(function () {
 
 // Public Content
 Route::get('/berita', [App\Http\Controllers\HomeController::class, 'berita'])->name('berita');
-Route::get('/berita/{id}', [App\Http\Controllers\HomeController::class, 'detailBerita'])->name('detail.berita');
+Route::get('/berita/{id}', [App\Http\Controllers\HomeController::class, 'detailBerita'])->name('detail-berita');
 Route::get('/paket', [App\Http\Controllers\HomeController::class, 'paketWisata'])->name('paket');
 Route::get('/paket/{id}', [App\Http\Controllers\HomeController::class, 'detailpaket'])->name('paket.detail');
 Route::get('/stay-cation', [App\Http\Controllers\HomeController::class, 'penginapan'])->name('penginapan');
 Route::get('/stay-cation/{id}', [App\Http\Controllers\HomeController::class, 'detailPenginapan'])->name('detail.penginapan');
 Route::get('/objek-wisata', [App\Http\Controllers\HomeController::class, 'objekWisata'])->name('objekwisata.front');
-Route::get('/objek-wisata/{id}', [App\Http\Controllers\HomeController::class, 'detailWisata'])->name('detail.objekwisata');
-
+Route::get('/objek-wisata/{id}', [App\Http\Controllers\HomeController::class, 'detailObjekWisata'])->name('detail.objekwisata');
 // Authenticated User Routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
@@ -150,6 +149,7 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
         'update' => 'paket.update',
         'destroy' => 'paket.destroy',
     ]);
+    Route::delete('/paket/{id}/delete-image/{field}', [App\Http\Controllers\PaketWisataController::class, 'deleteImage'])->name('paket.deleteImage');
     Route::get('/paket/{paket}/detail', [App\Http\Controllers\OwnerController::class, 'showPaket'])->name('be-paket.detail');
 
     Route::prefix('reservasi')->group(function () {

@@ -79,11 +79,11 @@ class AuthController extends Controller
 
         switch ($user->level) {
             case 'admin':
-                return redirect()->intended('/admin')->with('success', 'Registrasi berhasil!');
+                return redirect()->intended('/dashboard/admin')->with('success', 'Registrasi berhasil!');
             case 'bendahara':
-                return redirect()->intended('/bendahara')->with('success', 'Registrasi berhasil!');
+                return redirect()->intended('/dashboard/bendahara')->with('success', 'Registrasi berhasil!');
             case 'owner':
-                return redirect()->intended('/owner')->with('success', 'Registrasi berhasil!');
+                return redirect()->intended('/dashboard/owner')->with('success', 'Registrasi berhasil!');
             case 'pelanggan':
                 return redirect('/home')->with('success', 'Registrasi berhasil!');
             default:

@@ -20,9 +20,9 @@ class CheckUserLevel
         if (!in_array($userLevel, $levels)) {
             // Cegah redirect loop: jika sudah di dashboard sesuai level, lanjutkan saja
             $dashboard = match($userLevel) {
-                'admin' => '/admin',
-                'bendahara' => '/bendahara',
-                'pemilik' => '/owner', // level 'pemilik' route '/owner'
+                'admin' => '/dashboard/admin',
+                'bendahara' => '/dashboard/bendahara',
+                'pemilik' => '/dashboard/owner', // level 'pemilik' route '/owner'
                 'pelanggan' => '/',
                 default => '/login'
             };

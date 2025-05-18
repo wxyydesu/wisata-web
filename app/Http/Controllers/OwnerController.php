@@ -175,7 +175,7 @@ class OwnerController extends Controller
     }
     public function exportExcel()
     {
-        $reservasi = Reservasi::with(['pelanggan', 'paket'])
+        $reservasi = Reservasi::with(['pelanggan', 'paketWisata'])
             ->whereIn('status_reservasi', ['dibayar', 'selesai'])
             ->orderByDesc('created_at')
             ->get();

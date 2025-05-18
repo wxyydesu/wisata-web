@@ -23,10 +23,10 @@
                         <a class="nav-link" href="{{ route('paket') }}">Paket Wisata</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">Penginapan</a>
+                        <a class="nav-link" href="{{ route('penginapan') }}">Penginapan</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">Berita</a>
+                        <a class="nav-link" href="{{ route('berita') }}">Berita</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('pesanan.index') }}">
@@ -73,9 +73,26 @@
                             
                             @if(auth()->user()->pelanggan && method_exists(auth()->user()->pelanggan, 'reservasis'))
                                 @forelse(auth()->user()->pelanggan->reservasis()->where('status_reservasi', 'pesan')->with('paketWisata')->get() as $reservasi)
-                                <!-- ... reservasi item display ... -->
+                                <li class="reservasi-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">{{ $reservasi->paketWisata->nama_paket ?? 'Paket Tidak Tersedia' }}</h6>
+                                            <small class="text-muted">Kode: {{ $reservasi->kode_reservasi }}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">{{ $reservasi->tgl_reservasi->format('d M Y') }}</small>
+                                            <div>
+                                                <span class="badge bg-warning">{{ ucfirst($reservasi->status_reservasi) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
                                 @empty
-                                <!-- ... empty state ... -->
+                                <li class="reservasi-item">
+                                    <div class="text-center text-muted py-2">
+                                        Tidak ada reservasi pending
+                                    </div>
+                                </li>
                                 @endforelse
                             @else
                                 <!-- ... not a pelanggan state ... -->

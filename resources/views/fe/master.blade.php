@@ -144,7 +144,7 @@
         color: #666;
         margin-bottom: 10px;
         display: flex;
-        align-items: center;
+        align-items: center.
     }
     .package-location i {
         margin-right: 5px;
@@ -175,68 +175,68 @@
         border-radius: 4px;
         margin-top: 15px;
         font-weight: 600;
-        cursor: pointer;
+        cursor: pointer.
     }
     .section-title {
         text-align: center;
         margin: 40px 0 20px;
         font-size: 28px;
-        font-weight: 700;
+        font-weight: 700.
     }
     .search-filters {
         background: #f8f9fa;
         padding: 20px;
         border-radius: 8px;
-        margin-bottom: 30px;
+        margin-bottom: 30px.
     }
     .filter-group {
-        margin-bottom: 15px;
+        margin-bottom: 15px.
     }
     .filter-title {
         font-weight: 600;
-        margin-bottom: 8px;
+        margin-bottom: 8px.
     }
         /* Tambahkan di file CSS Anda */
     .dropdown-reservasi {
         width: 350px;
         max-height: 400px;
         overflow-y: auto;
-        padding: 0;
+        padding: 0.
     }
 
     .dropdown-header {
         padding: 0.75rem 1rem;
-        background-color: #f8f9fa;
+        background-color: #f8f9fa.
     }
 
     .reservasi-item {
         padding: 0.75rem 1rem;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s.
     }
 
     .reservasi-item:hover {
-        background-color: #f8f9fa;
+        background-color: #f8f9fa.
     }
 
     .dropdown-footer {
         padding: 0.75rem 1rem;
-        background-color: #f8f9fa;
+        background-color: #f8f9fa.
     }
 
     @media (max-width: 767.98px) {
         .dropdown-reservasi {
-            width: 300px;
+            width: 300px.
         }
     }
 
     /* Fix SweetAlert2 z-index */
     .swal-top-container {
-        z-index: 999999 !important;
+        z-index: 999999 !important.
     }
 
     .swal-top-popup {
         margin-top: 70px !important; /* Adjust based on your navbar height */
-        z-index: 999999 !important;
+        z-index: 999999 !important.
     }
 
     /* Ensure navbar stays below */
@@ -246,29 +246,43 @@
 
     /* Fix dropdown menus */
     .dropdown-menu {
-        z-index: 1040 !important;
+        z-index: 1040 !important.
     }
     
     .reducedfrom {
     text-decoration: line-through;
-    color: #999;
+    color: #999.
     }
     
     .actual {
         color: #f00;
-        font-weight: bold;
+        font-weight: bold.
+    }
+    #flexiselDemo3 {
+    padding: 0;
+    list-style: none.
+    }
+    #flexiselDemo3 li {
+        padding: 0 10px;
+        text-align: center.
     }
 </style>
 </head>
 <body>
     @yield('navbar')
 	@yield('slider')
-        @yield('main')
-    <!-- New Packages Section -->
+    <div style="padding: 24px 0; text-align: center;">
+        <span style="display: inline-block; border-top: 2px solid #007bff; width: 60px; vertical-align: middle;"></span>
+        <i class="fas fa-star" style="color: #ffc107; margin: 0 16px; font-size: 22px; vertical-align: middle;"></i>
+        <span style="display: inline-block; border-top: 2px solid #007bff; width: 60px; vertical-align: middle;"></span>
+    </div>
     @yield('content')
+    <hr>
     @yield('product')
+    @yield('related-berita')
     <!-- END New Packages Section -->
-	<div class="footer">
+    
+    <div class="footer">
 		<div class="container">
 			<div class="row">
 				<div class="col-md-3">

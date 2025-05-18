@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reservasi;
 use App\Models\PaketWisata;
+use App\Models\Bank;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Carbon\Carbon;
@@ -17,7 +18,7 @@ class BendaharaController extends Controller
      */
     public function index(Request $request)
     {
-        $totalPendapatan = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar');
+$totalPendapatan = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar');
         $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->count();
         $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'pesan')->count();
         $totalReservasiSelesai = Reservasi::where('status_reservasi', 'selesai')->count();
@@ -35,11 +36,11 @@ class BendaharaController extends Controller
             ->get();
         
         $paket = PaketWisata::all();
-         $pendapatanBulanan = Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
-            ->whereIn('status_reservasi', ['dibayar', 'selesai'])
-            ->groupBy('bulan')
-            ->orderBy('bulan')
-            ->get();
+        $pendapatanBulanan = Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
+        ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+        ->groupBy('bulan')
+        ->orderBy('bulan')
+        ->get();
 
         $bulanRequest = $request->get('bulan', date('F'));
         $bulanMap = [
@@ -48,13 +49,19 @@ class BendaharaController extends Controller
         ];
         $bulanAngka = $bulanMap[$bulanRequest] ?? date('n');
 
-        if ($bulanRequest) {
+        // Filter pendapatanBulanan sesuai bulan jika ada filter
+        if ($request->has('bulan') && isset($bulanMap[$bulanRequest])) {
             $pendapatanBulanan = $pendapatanBulanan->filter(function($item) use ($bulanAngka) {
-                return \Carbon\Carbon::createFromFormat('Y-m', $item->bulan)->month == $bulanAngka;
+                try {
+                    return \Carbon\Carbon::createFromFormat('Y-m', $item->bulan)->month == $bulanAngka;
+                } catch (\Exception $e) {
+                    return false;
+                }
             })->values();
         }
 
         $now = Carbon::now();
+        $bank = Bank::all();
 
         $greeting = '';
 
@@ -66,10 +73,8 @@ class BendaharaController extends Controller
             $greeting = 'Good Night';
         }
 
-       
-
         return view('be.users.bendahara.index', [
-            'title' => 'Admin',
+            'title' => 'Bendahara',
             'greeting' => $greeting,
             'totalPendapatan' => $totalPendapatan,
             'totalReservasiDibayar' => $totalReservasiDibayar,
@@ -78,6 +83,7 @@ class BendaharaController extends Controller
             'paketLaris' => $paketLaris,
             'reservasi' => $reservasi,
             'paket' => $paket,
+            'bank' => $bank,
             'pendapatanBulanan' => $pendapatanBulanan,
         ]);
     }

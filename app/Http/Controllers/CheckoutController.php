@@ -172,7 +172,9 @@ class CheckoutController extends Controller
                 'nilai_diskon' => $nilaiDiskon,
                 'harga' => $paket->harga_per_pack,
                 'status_reservasi' => 'pesan',
-                'lama_reservasi' => $paket->durasi
+                'lama_reservasi' => $paket->durasi,
+                // Perbaiki: tgl_reservasi diisi dengan tanggal mulai reservasi
+                'tgl_reservasi' => $request->tgl_mulai
             ]);
 
             // Redirect to success page

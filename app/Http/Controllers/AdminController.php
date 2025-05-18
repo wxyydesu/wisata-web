@@ -36,31 +36,26 @@ class AdminController extends Controller
             ->get();
         
         $paket = PaketWisata::all();
-        $pendapatanBulanan = Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
-        ->whereIn('status_reservasi', ['dibayar', 'selesai'])
-        ->groupBy('bulan')
-        ->orderBy('bulan')
-        ->get();
 
-        $bulanRequest = $request->get('bulan', date('F'));
-        $bulanMap = [
-            'Januari' => 1, 'Februari' => 2, 'Maret' => 3, 'April' => 4, 'Mei' => 5, 'Juni' => 6,
-            'Juli' => 7, 'Agustus' => 8, 'September' => 9, 'Oktober' => 10, 'November' => 11, 'Desember' => 12
-        ];
-        $bulanAngka = $bulanMap[$bulanRequest] ?? date('n');
-
-        // Filter pendapatanBulanan sesuai bulan jika ada filter
-        if ($request->has('bulan') && isset($bulanMap[$bulanRequest])) {
-            $pendapatanBulanan = $pendapatanBulanan->filter(function($item) use ($bulanAngka) {
-                try {
-                    return \Carbon\Carbon::createFromFormat('Y-m', $item->bulan)->month == $bulanAngka;
-                } catch (\Exception $e) {
-                    return false;
-                }
-            })->values();
-        }
-
+        // Ambil pendapatan hanya untuk bulan berjalan
         $now = Carbon::now();
+        $pendapatanBulanan = Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
+            ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+            ->whereMonth('tgl_reservasi', $now->month)
+            ->whereYear('tgl_reservasi', $now->year)
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        // Jika tidak ada data, buat data kosong agar grafik tetap muncul
+        if ($pendapatanBulanan->isEmpty()) {
+            $pendapatanBulanan = collect([
+                (object)[
+                    'bulan' => $now->format('Y-m'),
+                    'total' => 0
+                ]
+            ]);
+        }
 
         $greeting = '';
 

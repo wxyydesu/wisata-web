@@ -16,6 +16,6 @@ class Bank extends Model
 
     public function reservasi()
     {
-        return $this->hasMany(Reservasi::class, 'bank_id');
+        return $this->hasMany(Reservasi::class, 'id_bank');
     }
 }
