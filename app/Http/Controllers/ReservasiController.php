@@ -27,18 +27,23 @@ class ReservasiController extends Controller
      */
     public function index()
     {
+        $status = request('status'); // Ambil status dari query string
+
         // Untuk admin melihat semua reservasi
         if (Auth::check() && in_array(Auth::user()->level, ['admin', 'bendahara', 'owner'])) {
-            $reservasi = Reservasi::with(['pelanggan', 'paketWisata'])
-                ->latest()
-                ->paginate(10); // Use paginate() instead of get()
+            $query = Reservasi::with(['pelanggan', 'paketWisata'])->latest();
+            if ($status) {
+                $query->where('status_reservasi', $status);
+            }
+            $reservasi = $query->paginate(10);
         } 
         // Untuk pelanggan hanya melihat reservasi mereka sendiri
         elseif (Auth::check() && Auth::user()->level === 'pelanggan') {
-            $reservasi = Auth::user()->pelanggan->reservasis()
-                ->with('paketWisata')
-                ->latest()
-                ->paginate(10); // Use paginate() instead of get()
+            $query = Auth::user()->pelanggan->reservasis()->with('paketWisata')->latest();
+            if ($status) {
+                $query->where('status_reservasi', $status);
+            }
+            $reservasi = $query->paginate(10);
         }
         // Untuk guest (jika diperlukan)
         else {

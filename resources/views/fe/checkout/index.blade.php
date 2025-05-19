@@ -36,8 +36,18 @@
                             <h5>Detail Reservasi</h5>
                             <div class="card">
                                 <div class="card-body">
-                                    <p><strong>Tanggal Mulai:</strong> {{ $request->tgl_mulai }}</p>
-                                    <p><strong>Tanggal Selesai:</strong> {{ $request->tgl_akhir }}</p>
+                                    {{-- Tanggal Mulai --}}
+                                    <p>
+                                        <strong>Tanggal Mulai:</strong>
+                                        <input type="date" id="tgl_mulai" name="tgl_mulai" class="form-control" value="{{ $request->tgl_mulai ?? '' }}">
+                                        <small class="text-muted text-danger" id="tgl_mulai_warning" style="display:none;">Tanggal ini sudah dibooking, silakan pilih tanggal lain.</small>
+                                    </p>
+                                    {{-- Tanggal Selesai --}}
+                                    <p>
+                                        <strong>Tanggal Selesai:</strong>
+                                        <input type="date" id="tgl_akhir" name="tgl_akhir" class="form-control" value="{{ $request->tgl_akhir ?? '' }}">
+                                        <small class="text-muted text-danger" id="tgl_akhir_warning" style="display:none;">Tanggal ini sudah dibooking, silakan pilih tanggal lain.</small>
+                                    </p>
                                     <p><strong>Total Harga:</strong> Rp{{ number_format($totalBayar, 0, ',', '.') }}</p>
                                     @if($diskon > 0)
                                         <p class="text-success"><strong>Diskon:</strong> {{ $diskon }}% (Rp{{ number_format($nilaiDiskon, 0, ',', '.') }})</p>
@@ -48,12 +58,13 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('checkout') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('checkout') }}" method="POST" enctype="multipart/form-data" id="checkoutForm">
                         @csrf
                         <input type="hidden" name="id_paket" value="{{ $paket->id }}">
-                        <input type="hidden" name="tgl_mulai" value="{{ $request->tgl_mulai }}">
-                        <input type="hidden" name="tgl_akhir" value="{{ $request->tgl_akhir }}">
                         <input type="hidden" name="jumlah_peserta" value="{{ $request->jumlah_peserta }}">
+                        {{-- Tanggal akan diisi oleh JS --}}
+                        <input type="hidden" name="tgl_mulai" id="form_tgl_mulai" value="{{ $request->tgl_mulai ?? '' }}">
+                        <input type="hidden" name="tgl_akhir" id="form_tgl_akhir" value="{{ $request->tgl_akhir ?? '' }}">
 
                         <div class="mb-4">
                             <h5>Metode Pembayaran</h5>
@@ -97,4 +108,76 @@
         </div>
     </div>
 </div>
+{{-- Script untuk disable tanggal yang sudah dibooking --}}
+<script>
+    const bookedDates = @json($bookedDates ?? []);
+    function isBooked(dateStr) {
+        return bookedDates.includes(dateStr);
+    }
+
+    function setMinMaxDate() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('tgl_mulai').setAttribute('min', today);
+        document.getElementById('tgl_akhir').setAttribute('min', today);
+    }
+
+    function disableBookedDates(inputId, warningId) {
+        const input = document.getElementById(inputId);
+        const warning = document.getElementById(warningId);
+
+        // Disable all booked dates
+        input.addEventListener('focus', function() {
+            // Save current value
+            const prev = input.value;
+            input.addEventListener('input', function handler() {
+                if (isBooked(input.value)) {
+                    warning.style.display = '';
+                    input.value = '';
+                } else {
+                    warning.style.display = 'none';
+                }
+                input.removeEventListener('input', handler);
+            });
+        });
+
+        // On page load, disable booked dates by setting max/min and step
+        input.addEventListener('keydown', function(e) {
+            // Prevent manual typing
+            e.preventDefault();
+        });
+
+        // Prevent picking booked date via mouse
+        input.addEventListener('change', function() {
+            if (isBooked(input.value)) {
+                warning.style.display = '';
+                input.value = '';
+            } else {
+                warning.style.display = 'none';
+            }
+        });
+    }
+
+    function disableBookedDatesNative(inputId) {
+        // For native input[type=date], we can't truly disable dates, but we can block on change
+        const input = document.getElementById(inputId);
+        input.addEventListener('change', function() {
+            if (isBooked(input.value)) {
+                input.value = '';
+                document.getElementById(inputId + '_warning').style.display = '';
+            } else {
+                document.getElementById(inputId + '_warning').style.display = 'none';
+            }
+        });
+    }
+
+    function updateDateInputs() {
+        setMinMaxDate();
+        disableBookedDatesNative('tgl_mulai');
+        disableBookedDatesNative('tgl_akhir');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateDateInputs();
+    });
+</script>
 @endsection

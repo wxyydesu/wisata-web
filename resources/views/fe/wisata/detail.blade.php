@@ -47,4 +47,31 @@
     </div>
     <a href="{{ route('objekwisata.front') }}" class="btn btn-dark mt-4">Kembali</a>
 </div>
+
+{{-- Related Paket Section --}}
+@if(isset($relatedPaket) && count($relatedPaket) > 0)
+<div class="container pb-5">
+    <div class="row">
+        <div class="col-12 mb-3">
+            <h4 class="fw-bold">Paket Terkait</h4>
+        </div>
+        @foreach($relatedPaket as $rel)
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                <a href="{{ route('paket.detail', $rel->id) }}" class="text-decoration-none text-dark">
+                    <img src="{{ asset('storage/' . $rel->foto1) }}" class="card-img-top" alt="{{ $rel->nama_paket }}" style="height: 150px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title mb-1">{{ $rel->nama_paket }}</h6>
+                        <div class="small text-muted mb-2">
+                            <i class="fas fa-clock me-1"></i> {{ $rel->durasi }} Hari
+                        </div>
+                        <div class="fw-bold text-primary">Rp{{ number_format($rel->harga, 0, ',', '.') }}</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
 @endsection

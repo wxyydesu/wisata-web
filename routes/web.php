@@ -16,6 +16,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [App\Http\Controllers\AuthController::class, 'loginUser'])->name('login-user');
     Route::get('/register', [App\Http\Controllers\AuthController::class, 'register'])->name('register');
     Route::post('/register', [App\Http\Controllers\AuthController::class, 'registerUser'])->name('register-user');
+
+    // Forgot Password
+    Route::get('/forgot-password', [App\Http\Controllers\AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [App\Http\Controllers\AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [App\Http\Controllers\AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [App\Http\Controllers\AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 // Public Content
@@ -42,14 +48,14 @@ Route::middleware('auth')->group(function () {
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
-    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    // Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/pesanan/print/all', [App\Http\Controllers\PesananController::class, 'printAll'])->name('pesanan.printAll');
     Route::get('/pesanan/{id}/print', [App\Http\Controllers\PesananController::class, 'print'])->name('pesanan.print');
 
-    Route::get('/info', function () {
-        return view('auth.info');
-    })->name('auth.info');
+    Route::get('/info', [App\Http\Controllers\InfoController::class, 'index'])->name('auth.info');
+    Route::put('/info/update', [App\Http\Controllers\InfoController::class, 'update'])->name('info.update');
 });
 
 Route::middleware(CheckUserLevel::class . ':pelanggan')->group(function () {

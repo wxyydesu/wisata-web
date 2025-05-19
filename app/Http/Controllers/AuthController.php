@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Pelanggan;
 use App\Models\Karyawan;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -30,9 +35,9 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
-            'level' => 'required|in:admin,bendahara,pelanggan,owner',
             'no_hp' => 'required|string|max:15',
             'alamat' => 'nullable|string',
+            'terms' => 'accepted',
         ]);
 
         $user = User::create([
@@ -41,54 +46,22 @@ class AuthController extends Controller
             'no_hp' => $request->no_hp,
             'alamat' => $request->alamat ?? '',
             'password' => Hash::make($request->password),
-            'level' => $request->level,
+            'level' => 'pelanggan',
             'aktif' => 1,
         ]);
-    
-        if ($request->level == 'pelanggan') {
-            Pelanggan::create([
-                'id_user' => $user->id,
-                'nama_lengkap' => $request->name,
-                'no_hp' => $request->no_hp,
-                'alamat' => $request->alamat ?? '',
-            ]);
-        } else {
-            $mappingLevelToJabatan = [
-                'admin' => 'administrasi',
-                'bendahara' => 'bendahara',
-                'owner' => 'pemilik',
-            ];
 
-            $jabatan = $mappingLevelToJabatan[$request->level] ?? null;
-
-            if (!$jabatan) {
-                return back()->with('error', 'Invalid role for karyawan.');
-            }
-
-            Karyawan::create([
-                'id_user' => $user->id,
-                'nama_karyawan' => $request->name,
-                'no_hp' => $request->no_hp,
-                'alamat' => $request->alamat ?? '',
-                'jabatan' => $jabatan,
-            ]);
-        }
+        Pelanggan::create([
+            'id_user' => $user->id,
+            'nama_lengkap' => $request->name,
+            'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat ?? '',
+        ]);
 
         Auth::login($user);
         $request->session()->put('loginId', $user->id);
 
-        switch ($user->level) {
-            case 'admin':
-                return redirect()->intended('/dashboard/admin')->with('success', 'Registrasi berhasil!');
-            case 'bendahara':
-                return redirect()->intended('/dashboard/bendahara')->with('success', 'Registrasi berhasil!');
-            case 'owner':
-                return redirect()->intended('/dashboard/owner')->with('success', 'Registrasi berhasil!');
-            case 'pelanggan':
-                return redirect('/home')->with('success', 'Registrasi berhasil!');
-            default:
-                return redirect('/')->with('success', 'Registrasi berhasil!');
-        }
+        // Redirect ke halaman tambahan informasi user
+        return redirect()->route('auth.info')->with('success', 'Registrasi berhasil! Silakan lengkapi data profil Anda.');
     }
 
     // Handle login request
@@ -98,6 +71,8 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
+
+        $remember = $request->has('remember');
 
         $user = User::where('email', $request->email)->first();
 
@@ -109,7 +84,7 @@ class AuthController extends Controller
             return back()->withErrors(['password' => 'Password salah.'])->withInput();
         }
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             $request->session()->put('loginId', $user->id);
 
@@ -128,6 +103,78 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
+    }
+
+    // Show forgot password form
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot');
+    }
+
+    // Send reset link email
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email tidak ditemukan.']);
+        }
+
+        $token = Str::random(64);
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => $token,
+                'created_at' => Carbon::now()
+            ]
+        );
+
+        $resetLink = url('/reset-password/' . $token . '?email=' . urlencode($request->email));
+        // Kirim email manual (atau gunakan Mail::to()->send() jika ada view email)
+        Mail::raw("Klik link berikut untuk reset password Anda: $resetLink", function ($message) use ($request) {
+            $message->to($request->email)
+                ->subject('Reset Password');
+        });
+
+        return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
+    }
+
+    // Show reset password form
+    public function showResetForm(Request $request, $token)
+    {
+        $email = $request->query('email');
+        return view('auth.reset', compact('token', 'email'));
+    }
+
+    // Handle reset password
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:6|confirmed',
+            'token' => 'required'
+        ]);
+
+        $reset = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->token)
+            ->first();
+
+        if (!$reset) {
+            return back()->withErrors(['email' => 'Token reset tidak valid atau sudah digunakan.']);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email tidak ditemukan.']);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return redirect()->route('login')->with('success', 'Password berhasil direset. Silakan login.');
     }
 
     // Handle logout

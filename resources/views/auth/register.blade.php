@@ -61,21 +61,12 @@
                     @endif
                   </div>
                   <div class="form-group">
-                    <input name="no_hp" type="no_hp" class="form-control form-control-lg" id="no_hp" placeholder="Phone Number" required>
+                    <input name="no_hp" type="text" maxlength="15" class="form-control form-control-lg" id="no_hp" placeholder="Phone Number" required value="{{ old('no_hp') }}">
                     @if ($errors->has('no_hp'))
                         <span class="invalid-feedback" style="display: block;" role="alert">
                             <strong>{{ $errors->first('no_hp') }}</strong>
                         </span>
                     @endif
-                  </div>
-                  <div class="form-group">
-                    <select class="form-select form-select-lg" id="level" name="level" placeholder="Role" required>
-                      <option selected>Select Role</option>
-                      <option value="admin">Admin</option>
-                      <option value="bendahara">Bendahara</option>
-                      <option value="owner">Owner</option>
-                      <option value="pelanggan">Pelanggan</option>
-                    </select>
                   </div>
                   <div class="form-group">
                     <input name="password" type="password" class="form-control form-control-lg" id="password" placeholder="Password">
@@ -88,7 +79,13 @@
                   <div class="mb-4">
                     <div class="form-check">
                       <label class="form-check-label text-muted">
-                        <input type="checkbox" class="form-check-input"> I agree to all Terms & Conditions </label>
+                        <input type="checkbox" class="form-check-input" name="terms" id="terms-checkbox" {{ old('terms') ? 'checked' : '' }} required> I agree to all Terms & Conditions
+                      </label>
+                      @if ($errors->has('terms'))
+                        <span class="invalid-feedback" style="display: block;" role="alert">
+                          <strong>{{ $errors->first('terms') }}</strong>
+                        </span>
+                      @endif
                     </div>
                   </div>
                    <!-- Display Validation Errors -->
@@ -118,6 +115,35 @@
       </div>
       <!-- page-body-wrapper ends -->
     </div>
+
+
+
+    <!-- Modal Persetujuan -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="border:none;background:transparent;font-size:1.5rem;">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height:300px;overflow:auto;">
+        {{-- Isi persetujuan di sini --}}
+        <p>
+          Dengan mendaftar, Anda menyetujui semua syarat dan ketentuan yang berlaku di website ini. Silakan baca dengan seksama sebelum melanjutkan.
+        </p>
+        <ul>
+          <li>Data yang Anda masukkan harus benar dan dapat dipertanggungjawabkan.</li>
+          <li>Penggunaan layanan tunduk pada kebijakan privasi dan aturan yang berlaku.</li>
+          <li>Setiap pelanggaran dapat mengakibatkan penonaktifan akun.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="decline-terms" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" id="accept-terms">Saya Setuju</button>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- container-scroller -->
     <!-- plugins:js -->
     <script src="{{ asset('be/assets/vendors/js/vendor.bundle.base.js') }}"></script>
@@ -131,6 +157,47 @@
     <script src="{{ asset('be/assets/js/settings.js') }}"></script>
     <script src="{{ asset('be/assets/js/hoverable-collapse.js') }}"></script>
     <script src="{{ asset('be/assets/js/todolist.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var termsCheckbox = document.getElementById('terms-checkbox');
+  var termsModal = new bootstrap.Modal(document.getElementById('termsModal'));
+  var acceptBtn = document.getElementById('accept-terms');
+  var declineBtn = document.getElementById('decline-terms');
+  var isModalAccepted = false;
+
+  // Only show modal when user tries to check (not uncheck) the checkbox
+  termsCheckbox.addEventListener('change', function(e) {
+    if (!termsCheckbox.checked && !isModalAccepted) {
+      // User is unchecking, allow
+      return;
+    }
+    if (termsCheckbox.checked && !isModalAccepted) {
+      // User is checking, show modal and revert checkbox
+      e.preventDefault();
+      termsCheckbox.checked = false;
+      termsModal.show();
+    }
+  });
+
+  acceptBtn.addEventListener('click', function() {
+    isModalAccepted = true;
+    termsCheckbox.checked = true;
+    termsModal.hide();
+  });
+
+  declineBtn.addEventListener('click', function() {
+    isModalAccepted = false;
+    termsCheckbox.checked = false;
+    termsModal.hide();
+  });
+
+  // Reset modal state on form reset
+  document.querySelector('form').addEventListener('reset', function() {
+    isModalAccepted = false;
+    termsCheckbox.checked = false;
+  });
+});
+</script>
     <!-- endinject -->
   </body>
 </html>

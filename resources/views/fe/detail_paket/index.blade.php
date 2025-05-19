@@ -286,24 +286,25 @@
             <div class="row">
                 @foreach($related as $r)
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="package-card card h-100">
-                        <div class="package-badge">
+                    <div class="package-card card h-100 position-relative">
+                        <div class="package-badge position-absolute" style="top:10px;left:10px;z-index:2;">
                             @if($r->diskonAktif && $r->diskonAktif->persen > 0)
                                 <span class="badge bg-danger">Diskon {{ $r->diskonAktif->persen }}%</span>
                             @endif
                             <span class="badge bg-success">Populer</span>
                         </div>
-                        <div class="package-image-container">
-                            <img src="{{ asset('storage/' . $r->foto1) }}" class="card-img-top package-image" alt="{{ $r->nama_paket }}">
+                        <div class="package-image-container" style="height:180px;overflow:hidden;">
+                            <a href="{{ route('paket.detail', $r->id) }}">
+                                <img src="{{ asset('storage/' . $r->foto1) }}" class="card-img-top package-image" alt="{{ $r->nama_paket }}" style="width:100%;height:100%;object-fit:cover;">
+                            </a>
                         </div>
                         <div class="card-body d-flex flex-column">
                             <div class="package-meta mb-2">
                                 <span class="package-duration"><i class="fas fa-clock me-1"></i> {{ $r->durasi }} Hari</span>
                                 <span class="package-destination"><i class="fas fa-map-marker-alt me-1"></i> {{ $r->destinasi }}</span>
                             </div>
-                            <h5 class="package-title"><a href="{{ route('paket.detail', $r->id) }}">{{ $r->nama_paket }}</a></h5>
+                            <h5 class="package-title mb-1"><a href="{{ route('paket.detail', $r->id) }}">{{ $r->nama_paket }}</a></h5>
                             <p class="package-excerpt">{{ \Illuminate\Support\Str::limit($r->deskripsi_singkat, 80) }}</p>
-                            
                             @php
                                 $diskonR = $r->diskonAktif ?? null;
                                 $hargaNormalR = $r->harga_per_pack;
@@ -312,17 +313,69 @@
                                     $hargaDiskonR = $hargaNormalR - ($hargaNormalR * $diskonR->persen / 100);
                                 }
                             @endphp
-                            
                             <div class="package-price mt-auto">
                                 @if($diskonR && $diskonR->persen > 0)
-                                    <span class="original-price">Rp{{ number_format($hargaNormalR, 0, ',', '.') }}</span>
+                                    <span class="original-price d-block">Rp{{ number_format($hargaNormalR, 0, ',', '.') }}</span>
                                     <span class="discounted-price">Rp{{ number_format($hargaDiskonR, 0, ',', '.') }}</span>
                                 @else
                                     <span class="current-price">Rp{{ number_format($hargaNormalR, 0, ',', '.') }}</span>
                                 @endif
                             </div>
                         </div>
-                        <div class="card-footer bg-transparent">
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ route('paket.detail', $r->id) }}" class="btn btn-sm btn-outline-primary">Detail</a>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="addToWishlist({{ $r->id }})">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach@if($related->count() > 0)
+        <div class="related-packages mt-5">
+            <h3 class="section-title mb-4">Paket Lainnya yang Mungkin Anda Suka</h3>
+            
+            <div class="row">
+                @foreach($related as $r)
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="package-card card h-100 position-relative">
+                        <div class="package-badge position-absolute" style="top:10px;left:10px;z-index:2;">
+                            @if($r->diskonAktif && $r->diskonAktif->persen > 0)
+                                <span class="badge bg-danger">Diskon {{ $r->diskonAktif->persen }}%</span>
+                            @endif
+                            <span class="badge bg-success">Populer</span>
+                        </div>
+                        <div class="package-image-container" style="height:180px;overflow:hidden;">
+                            <a href="{{ route('paket.detail', $r->id) }}">
+                                <img src="{{ asset('storage/' . $r->foto1) }}" class="card-img-top package-image" alt="{{ $r->nama_paket }}" style="width:100%;height:100%;object-fit:cover;">
+                            </a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="package-meta mb-2">
+                                <span class="package-duration"><i class="fas fa-clock me-1"></i> {{ $r->durasi }} Hari</span>
+                                <span class="package-destination"><i class="fas fa-map-marker-alt me-1"></i> {{ $r->destinasi }}</span>
+                            </div>
+                            <h5 class="package-title mb-1"><a href="{{ route('paket.detail', $r->id) }}">{{ $r->nama_paket }}</a></h5>
+                            <p class="package-excerpt">{{ \Illuminate\Support\Str::limit($r->deskripsi_singkat, 80) }}</p>
+                            @php
+                                $diskonR = $r->diskonAktif ?? null;
+                                $hargaNormalR = $r->harga_per_pack;
+                                $hargaDiskonR = $hargaNormalR;
+                                if ($diskonR && $diskonR->persen > 0) {
+                                    $hargaDiskonR = $hargaNormalR - ($hargaNormalR * $diskonR->persen / 100);
+                                }
+                            @endphp
+                            <div class="package-price mt-auto">
+                                @if($diskonR && $diskonR->persen > 0)
+                                    <span class="original-price d-block">Rp{{ number_format($hargaNormalR, 0, ',', '.') }}</span>
+                                    <span class="discounted-price">Rp{{ number_format($hargaDiskonR, 0, ',', '.') }}</span>
+                                @else
+                                    <span class="current-price">Rp{{ number_format($hargaNormalR, 0, ',', '.') }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
                             <div class="d-flex justify-content-between align-items-center">
                                 <a href="{{ route('paket.detail', $r->id) }}" class="btn btn-sm btn-outline-primary">Detail</a>
                                 <button class="btn btn-sm btn-outline-secondary" onclick="addToWishlist({{ $r->id }})">
@@ -333,9 +386,6 @@
                     </div>
                 </div>
                 @endforeach
-            </div>
-        </div>
-        @endif
     </div>
 </div>
 
@@ -585,74 +635,88 @@
         display: flex;
         flex-direction: column;
         height: 100%;
+        background: #fff;
+        position: relative;
     }
-    
     .package-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-    
     .package-image-container {
         height: 180px;
         overflow: hidden;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
     }
-    
+    .package-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
     .package-badge {
-        position: absolute;
-        top: 10px;
-        left: 10px;
         z-index: 2;
     }
-    
     .package-badge .badge {
         margin-right: 5px;
     }
-    
-    .package-meta {
-        font-size: 13px;
-        color: #7f8c8d;
-    }
-    
     .package-title {
         font-size: 18px;
-        margin: 10px 0;
+        margin: 10px 0 5px 0;
+        font-weight: 600;
     }
-    
     .package-title a {
         color: #2c3e50;
         text-decoration: none;
     }
-    
     .package-title a:hover {
         color: #3498db;
     }
-    
+    .package-meta {
+        font-size: 13px;
+        color: #7f8c8d;
+    }
     .package-excerpt {
         font-size: 14px;
         color: #7f8c8d;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
-    
     .package-price {
         font-weight: 600;
         margin-top: auto;
     }
-    
     .original-price {
         font-size: 14px;
         text-decoration: line-through;
         color: #95a5a6;
         display: block;
     }
-    
     .discounted-price {
         font-size: 18px;
         color: #e74c3c;
     }
-    
     .current-price {
         font-size: 18px;
         color: #2c3e50;
+    }
+    .card-footer {
+        border-top: none;
+        background: transparent;
+    }
+    @media (max-width: 991px) {
+        .package-image-container {
+            height: 160px;
+        }
+    }
+    @media (max-width: 767px) {
+        .package-image-container {
+            height: 140px;
+        }
+    }
+    @media (max-width: 575px) {
+        .package-image-container {
+            height: 120px;
+        }
     }
     
     /* Floating Buttons */

@@ -8,21 +8,21 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Pelanggan;
 use App\Models\Karyawan;
 
-class ProfileController extends Controller
+
+class InfoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+public function index()
     {
         $users = Auth::user();
         
-        return view('fe.profile.index', [
+        return view('auth.info', [
             'title' => 'Profile',
             'user' => $users,
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -65,15 +65,15 @@ class ProfileController extends Controller
         
         try {
             $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email,'.$user->id,
+                'nama_lengkap' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
                 'no_hp' => 'required|string|max:15',
                 'alamat' => 'required|string',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
             
             // Update user basic info (without foto)
-            $user->name = $request->name;
+            $user->name = $request->nama_lengkap;
             $user->email = $request->email;
             $user->no_hp = $request->no_hp;
             $user->alamat = $request->alamat;
@@ -92,7 +92,7 @@ class ProfileController extends Controller
                     }
                     
                     $path = $request->file('foto')->store('profile-photos');
-                    $pelanggan->nama_lengkap = $request->name;
+                    $pelanggan->nama_lengkap = $request->nama_lengkap;
                     $pelanggan->no_hp = $request->no_hp;
                     $pelanggan->alamat = $request->alamat;
                     $pelanggan->foto = $path;
@@ -107,7 +107,7 @@ class ProfileController extends Controller
                     }
                     
                     $path = $request->file('foto')->store('profile-photos');
-                    $karyawan->nama_karyawan = $request->name;
+                    $karyawan->nama_karyawan = $request->nama_lengkap;
                     $karyawan->no_hp = $request->no_hp;
                     $karyawan->alamat = $request->alamat;
                     $karyawan->foto = $path;
@@ -117,20 +117,20 @@ class ProfileController extends Controller
                 // Update without photo
                 if ($user->level === 'pelanggan') {
                     $pelanggan = Pelanggan::where('id_user', $user->id)->firstOrFail();
-                    $pelanggan->nama_lengkap = $request->name;
+                    $pelanggan->nama_lengkap = $request->nama_lengkap;
                     $pelanggan->no_hp = $request->no_hp;
                     $pelanggan->alamat = $request->alamat;
                     $pelanggan->save();
                 } elseif (in_array($user->level, ['admin', 'bendahara', 'owner'])) {
                     $karyawan = Karyawan::where('id_user', $user->id)->firstOrFail();
-                    $karyawan->nama_karyawan = $request->name;
+                    $karyawan->nama_karyawan = $request->nama_lengkap;
                     $karyawan->no_hp = $request->no_hp;
                     $karyawan->alamat = $request->alamat;
                     $karyawan->save();
                 }
             }
             
-            return redirect()->route('profile.index')->with([
+            return redirect()->route('home')->with([
                 'swal' => [
                     'icon' => 'success',
                     'title' => 'Berhasil!',
@@ -150,7 +150,6 @@ class ProfileController extends Controller
             ])->withInput();
         }
     }
-
     /**
      * Remove the specified resource from storage.
      */

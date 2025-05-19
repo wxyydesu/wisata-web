@@ -10,6 +10,9 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\DB;
 use PDF;
+use App\Models\Penginapan;
+use App\Models\Berita;
+use App\Models\ObyekWisata;
 
 class OwnerController extends Controller
 {
@@ -72,6 +75,51 @@ class OwnerController extends Controller
             $greeting = 'Good Night';
         }
 
+        // Notifikasi: ambil 2 terbaru dari tiap tipe, lalu gabung dan urutkan
+        $notifications = collect([]);
+
+        foreach (Reservasi::latest()->limit(2)->get() as $r) {
+            $notifications->push([
+                'type' => 'reservasi',
+                'title' => 'Reservasi Baru',
+                'desc' => 'Reservasi oleh ' . ($r->pelanggan->nama_lengkap ?? 'Pelanggan') . ' dibuat.',
+                'created_at' => $r->created_at,
+            ]);
+        }
+        foreach (PaketWisata::latest()->limit(2)->get() as $p) {
+            $notifications->push([
+                'type' => 'paket',
+                'title' => 'Paket Baru',
+                'desc' => 'Paket "' . $p->nama_paket . '" telah dibuat.',
+                'created_at' => $p->created_at,
+            ]);
+        }
+        foreach (Penginapan::latest()->limit(2)->get() as $p) {
+            $notifications->push([
+                'type' => 'penginapan',
+                'title' => 'Penginapan Baru',
+                'desc' => 'Penginapan "' . $p->nama_penginapan . '" telah dibuat.',
+                'created_at' => $p->created_at,
+            ]);
+        }
+        foreach (Berita::latest()->limit(2)->get() as $b) {
+            $notifications->push([
+                'type' => 'berita',
+                'title' => 'Berita Baru',
+                'desc' => 'Berita "' . $b->judul . '" telah diposting.',
+                'created_at' => $b->created_at,
+            ]);
+        }
+        foreach (ObyekWisata::latest()->limit(2)->get() as $o) {
+            $notifications->push([
+                'type' => 'obyek',
+                'title' => 'Obyek Wisata Baru',
+                'desc' => 'Obyek wisata "' . $o->nama_wisata . '" telah dibuat.',
+                'created_at' => $o->created_at,
+            ]);
+        }
+        $notifications = $notifications->sortByDesc('created_at')->take(5)->values();
+
         return view('be.users.owner.index', [
             'title' => 'Owner',
             'greeting' => $greeting,
@@ -83,6 +131,7 @@ class OwnerController extends Controller
             'reservasi' => $reservasi,
             'paket' => $paket,
             'pendapatanBulanan' => $pendapatanBulanan,
+            'notifications' => $notifications,
         ]);
     }
 

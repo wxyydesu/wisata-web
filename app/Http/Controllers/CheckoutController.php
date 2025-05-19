@@ -38,6 +38,20 @@ class CheckoutController extends Controller
 
         $banks = Bank::all();
 
+        // Ambil semua tanggal yang sudah dibooking untuk paket ini (status pesan/dibayar/selesai)
+        $bookedRanges = Reservasi::where('id_paket', $paket->id)
+            ->whereIn('status_reservasi', ['pesan', 'dibayar', 'selesai'])
+            ->get(['tgl_mulai', 'tgl_akhir']);
+
+        $bookedDates = [];
+        foreach ($bookedRanges as $range) {
+            $start = \Carbon\Carbon::parse($range->tgl_mulai);
+            $end = \Carbon\Carbon::parse($range->tgl_akhir);
+            for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+                $bookedDates[] = $date->format('Y-m-d');
+            }
+        }
+
         return view('fe.checkout.index', [
             'title' => 'Checkout',
             'paket' => $paket,
@@ -46,7 +60,8 @@ class CheckoutController extends Controller
             'totalBayar' => $totalBayar,
             'diskon' => $diskon,
             'nilaiDiskon' => $nilaiDiskon,
-            'banks' => $banks
+            'banks' => $banks,
+            'bookedDates' => $bookedDates
         ]);
     }
     /**
@@ -130,9 +145,26 @@ class CheckoutController extends Controller
 
         try {
 
+            // CEK BENTROK TANGGAL BOOKING
+            $bookedRanges = Reservasi::where('id_paket', $request->id_paket)
+                ->whereIn('status_reservasi', ['pesan', 'dibayar', 'selesai'])
+                ->get(['tgl_mulai', 'tgl_akhir']);
+
+            $tglMulai = \Carbon\Carbon::parse($request->tgl_mulai);
+            $tglAkhir = \Carbon\Carbon::parse($request->tgl_akhir);
+
+            foreach ($bookedRanges as $range) {
+                $bookedStart = \Carbon\Carbon::parse($range->tgl_mulai);
+                $bookedEnd = \Carbon\Carbon::parse($range->tgl_akhir);
+                // Jika ada overlap
+                if ($tglMulai->lte($bookedEnd) && $tglAkhir->gte($bookedStart)) {
+                    return back()->with('error', 'Tanggal yang Anda pilih sudah dibooking. Silakan pilih tanggal lain.');
+                }
+            }
+
             $pelanggan = Pelanggan::where('id_user', Auth::id())->first();
             if (!$pelanggan) {
-            $user = Auth::user();
+                $user = Auth::user();
                 $pelanggan = Pelanggan::create([
                     'id_user' => $user->id,
                     'nama_lengkap' => $user->name,

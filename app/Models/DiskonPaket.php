@@ -16,6 +16,6 @@ class DiskonPaket extends Model
 
     public function paket()
     {
-        return $this->belongsTo(PaketWisata::class, 'paket_id');
+        return $this->belongsTo(PaketWisata::class, 'paket_id', 'id');
     }
 }

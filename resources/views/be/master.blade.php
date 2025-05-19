@@ -79,88 +79,57 @@
                 <input type="text" class="form-control">
               </div>
             </li>
-            <li class="nav-item">
-              <form class="search-form" action="#">
-                <i class="icon-search"></i>
-                <input type="search" class="form-control" placeholder="Search Here" title="Search here">
-              </form>
-            </li>
+            {{-- Notifikasi --}}
             <li class="nav-item dropdown">
               <a class="nav-link count-indicator" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
                 <i class="icon-bell"></i>
-                <span class="count"></span>
+                <span class="count">
+                  {{ isset($notifications) ? count($notifications) : 0 }}
+                </span>
               </a>
               <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0" aria-labelledby="notificationDropdown">
                 <a class="dropdown-item py-3 border-bottom">
-                  <p class="mb-0 fw-medium float-start">You have 4 new notifications </p>
-                  <span class="badge badge-pill badge-primary float-end">View all</span>
+                  <p class="mb-0 fw-medium float-start">
+                    You have {{ isset($notifications) ? count($notifications) : 0 }} new notifications
+                  </p>
+                  {{-- <span class="badge badge-pill badge-primary float-end">View all</span> --}}
                 </a>
-                <a class="dropdown-item preview-item py-3">
-                  <div class="preview-thumbnail">
-                    <i class="mdi mdi-alert m-auto text-primary"></i>
-                  </div>
-                  <div class="preview-item-content">
-                    <h6 class="preview-subject fw-normal text-dark mb-1">Application Error</h6>
-                    <p class="fw-light small-text mb-0"> Just now </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item py-3">
-                  <div class="preview-thumbnail">
-                    <i class="mdi mdi-lock-outline m-auto text-primary"></i>
-                  </div>
-                  <div class="preview-item-content">
-                    <h6 class="preview-subject fw-normal text-dark mb-1">Settings</h6>
-                    <p class="fw-light small-text mb-0"> Private message </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item py-3">
-                  <div class="preview-thumbnail">
-                    <i class="mdi mdi-airballoon m-auto text-primary"></i>
-                  </div>
-                  <div class="preview-item-content">
-                    <h6 class="preview-subject fw-normal text-dark mb-1">New user registration</h6>
-                    <p class="fw-light small-text mb-0"> 2 days ago </p>
-                  </div>
-                </a>
-              </div>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link count-indicator" id="countDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="icon-mail icon-lg"></i>
-              </a>
-              <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0" aria-labelledby="countDropdown">
-                <a class="dropdown-item py-3">
-                  <p class="mb-0 fw-medium float-start">You have 7 unread mails </p>
-                  <span class="badge badge-pill badge-primary float-end">View all</span>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <img src="{{ asset('be/assets/images/faces/face10.jpg') }}" alt="image" class="img-sm profile-pic">
-                  </div>
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">Marian Garner </p>
-                    <p class="fw-light small-text mb-0"> The meeting is cancelled </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <img src="{{ asset('be/assets/images/faces/face12.jpg') }}" alt="image" class="img-sm profile-pic">
-                  </div>
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">David Grey </p>
-                    <p class="fw-light small-text mb-0"> The meeting is cancelled </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <img src="{{ asset('be/assets/images/faces/face1.jpg') }}" alt="image" class="img-sm profile-pic">
-                  </div>
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">Travis Jenkins </p>
-                    <p class="fw-light small-text mb-0"> The meeting is cancelled </p>
-                  </div>
-                </a>
+                @if(isset($notifications) && count($notifications) > 0)
+                  @foreach($notifications as $notif)
+                    <a class="dropdown-item preview-item py-3">
+                      <div class="preview-thumbnail">
+                        @if($notif['type'] === 'reservasi')
+                          <i class="mdi mdi-calendar-check m-auto text-primary"></i>
+                        @elseif($notif['type'] === 'paket')
+                          <i class="mdi mdi-package-variant m-auto text-success"></i>
+                        @elseif($notif['type'] === 'penginapan')
+                          <i class="mdi mdi-shield-home-outline m-auto text-info"></i>
+                        @elseif($notif['type'] === 'berita')
+                          <i class="mdi mdi-newspaper m-auto text-warning"></i>
+                        @elseif($notif['type'] === 'obyek')
+                          <i class="mdi mdi-map-marker-radius m-auto text-danger"></i>
+                        @else
+                          <i class="mdi mdi-bell m-auto"></i>
+                        @endif
+                      </div>
+                      <div class="preview-item-content">
+                        <h6 class="preview-subject fw-normal text-dark mb-1">
+                          {{ $notif['title'] }}
+                        </h6>
+                        <p class="fw-light small-text mb-0">
+                          {{ $notif['desc'] }}
+                        </p>
+                        <span class="fw-light small-text text-muted">{{ $notif['created_at']->diffForHumans() }}</span>
+                      </div>
+                    </a>
+                  @endforeach
+                @else
+                  <a class="dropdown-item preview-item py-3">
+                    <div class="preview-item-content">
+                      <p class="fw-light small-text mb-0">No new notifications</p>
+                    </div>
+                  </a>
+                @endif
               </div>
             </li>
             <li class="nav-item dropdown d-none d-lg-block user-dropdown">
@@ -182,10 +151,8 @@
                   <p class="mb-1 mt-3 fw-semibold">{{ Auth::user()->name }}</p>
                   <p class="fw-light text-muted mb-0">{{ Auth::user()->level, Auth::user()->email}}</p>
                 </div>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
+                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile</a>
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
               @if(session('loginId'))
                 <?php
                     $user = \App\Models\User::find(session('loginId'));

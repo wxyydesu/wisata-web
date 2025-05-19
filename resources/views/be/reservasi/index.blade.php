@@ -16,17 +16,37 @@
                     <i class="mdi mdi-plus-circle me-2"></i>Tambah Reservasi
                 </a>
                 <div class="btn-group ms-2">
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="mdi mdi-filter-variant me-1"></i> Filter
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header">Status Reservasi</h6></li>
-                        <li><a class="dropdown-item" href="?status=pesan"><span class="badge bg-warning me-2">●</span>Pesan</a></li>
-                        <li><a class="dropdown-item" href="?status=dibayar"><span class="badge bg-success me-2">●</span>Dibayar</a></li>
-                        <li><a class="dropdown-item" href="?status=selesai"><span class="badge bg-primary me-2">●</span>Selesai</a></li>
-                        <li><a class="dropdown-item" href="?status=ditolak"><span class="badge bg-danger me-2">●</span>Ditolak</a></li>
+                        <li>
+                            <a class="dropdown-item @if(request('status')=='pesan') active @endif" href="{{ route('reservasi.index', ['status'=>'pesan']) }}">
+                                <span class="badge bg-warning me-2">●</span>Pesan
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item @if(request('status')=='dibayar') active @endif" href="{{ route('reservasi.index', ['status'=>'dibayar']) }}">
+                                <span class="badge bg-success me-2">●</span>Dibayar
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item @if(request('status')=='selesai') active @endif" href="{{ route('reservasi.index', ['status'=>'selesai']) }}">
+                                <span class="badge bg-primary me-2">●</span>Selesai
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item @if(request('status')=='ditolak') active @endif" href="{{ route('reservasi.index', ['status'=>'ditolak']) }}">
+                                <span class="badge bg-danger me-2">●</span>Ditolak
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ route('reservasi.index') }}"><i class="mdi mdi-filter-remove me-2"></i>Reset Filter</a></li>
+                        <li>
+                            <a class="dropdown-item @if(!request('status')) active @endif" href="{{ route('reservasi.index') }}">
+                                <i class="mdi mdi-filter-remove me-2"></i>Reset Filter
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
