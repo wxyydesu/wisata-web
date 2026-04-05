@@ -38,9 +38,9 @@ class CheckoutController extends Controller
 
         $banks = Bank::all();
 
-        // Ambil semua tanggal yang sudah dibooking untuk paket ini (status pesan/dibayar/selesai)
+        // Ambil semua tanggal yang sudah dibooking untuk paket ini (status menunggu konfirmasi/booking/selesai)
         $bookedRanges = Reservasi::where('id_paket', $paket->id)
-            ->whereIn('status_reservasi', ['pesan', 'dibayar', 'selesai'])
+            ->whereIn('status_reservasi', ['menunggu konfirmasi', 'booking', 'selesai'])
             ->get(['tgl_mulai', 'tgl_akhir']);
 
         $bookedDates = [];
@@ -52,8 +52,8 @@ class CheckoutController extends Controller
             }
         }
 
-        return view('fe.checkout.index', [
-            'title' => 'Checkout',
+        return view('fe.checkout.payment', [
+            'title' => 'Pembayaran Pesanan',
             'paket' => $paket,
             'user' => $users,
             'request' => $request,
@@ -61,7 +61,9 @@ class CheckoutController extends Controller
             'diskon' => $diskon,
             'nilaiDiskon' => $nilaiDiskon,
             'banks' => $banks,
-            'bookedDates' => $bookedDates
+            'bookedDates' => $bookedDates,
+            'midtrans_client_key' => config('midtrans.client_key'),
+            'reservasi' => null  // Will be set after checkout
         ]);
     }
     /**
@@ -138,16 +140,13 @@ class CheckoutController extends Controller
             'id_paket' => 'required|exists:paket_wisatas,id',
             'tgl_mulai' => 'required|date|after_or_equal:today',
             'tgl_akhir' => 'required|date|after_or_equal:tgl_mulai',
-            'jumlah_peserta' => 'required|integer|min:1',
-            'bank_id' => 'required|exists:banks,id',
-            'file_bukti_tf' => 'required|file|mimes:jpg,png,pdf|max:2048'
+            'jumlah_peserta' => 'required|integer|min:1'
         ]);
 
         try {
-
             // CEK BENTROK TANGGAL BOOKING
             $bookedRanges = Reservasi::where('id_paket', $request->id_paket)
-                ->whereIn('status_reservasi', ['pesan', 'dibayar', 'selesai'])
+                ->whereIn('status_reservasi', ['menunggu konfirmasi', 'booking', 'selesai', 'dibayar'])
                 ->get(['tgl_mulai', 'tgl_akhir']);
 
             $tglMulai = \Carbon\Carbon::parse($request->tgl_mulai);
@@ -162,6 +161,7 @@ class CheckoutController extends Controller
                 }
             }
 
+            // Ensure pelanggan exists
             $pelanggan = Pelanggan::where('id_user', Auth::id())->first();
             if (!$pelanggan) {
                 $user = Auth::user();
@@ -173,7 +173,8 @@ class CheckoutController extends Controller
                     'foto' => null
                 ]);
             }
-            // Process payment and create reservation
+
+            // Get package
             $paket = PaketWisata::findOrFail($request->id_paket);
             
             // Calculate total price
@@ -187,31 +188,30 @@ class CheckoutController extends Controller
                 $nilaiDiskon = $totalBayar * $diskon / 100;
             }
 
-            // Upload payment proof
-            $filePath = $request->file('file_bukti_tf')->store('payment_proofs', 'public');
+            // Calculate lama_reservasi
+            $lamaReservasi = $tglAkhir->diffInDays($tglMulai) + 1;
 
-            // Create reservation
+            // Create reservation dengan status 'menunggu konfirmasi' (unpaid/pending payment)
             $reservasi = Reservasi::create([
                 'id_pelanggan' => $pelanggan->id,
                 'id_paket' => $request->id_paket,
                 'tgl_mulai' => $request->tgl_mulai,
                 'tgl_akhir' => $request->tgl_akhir,
                 'jumlah_peserta' => $request->jumlah_peserta,
-                'id_bank' => $request->bank_id,
-                'file_bukti_tf' => $filePath,
+                'file_bukti_tf' => null,
                 'total_bayar' => $totalBayar - $nilaiDiskon,
                 'diskon' => $diskon,
                 'nilai_diskon' => $nilaiDiskon,
                 'harga' => $paket->harga_per_pack,
-                'status_reservasi' => 'pesan',
-                'lama_reservasi' => $paket->durasi,
-                // Perbaiki: tgl_reservasi diisi dengan tanggal mulai reservasi
+                'status_reservasi' => 'menunggu konfirmasi', // Status unpaid - waiting for payment
+                'lama_reservasi' => $lamaReservasi,
                 'tgl_reservasi' => $request->tgl_mulai
             ]);
 
-            // Redirect to success page
-            return redirect()->route('pesanan.index')->with('success', 'Reservasi berhasil dibuat!');
+            // Redirect to payment page
+            return redirect()->route('pesanan.payment', $reservasi->id)->with('info', 'Silakan lanjutkan pembayaran');
         } catch (\Exception $e) {
+            Log::error('Checkout error: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }

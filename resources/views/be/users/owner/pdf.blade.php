@@ -315,10 +315,11 @@
                     </td>
                     <td class="text-right">Rp{{ number_format($r->total_bayar, 0, ',', '.') }}</td>
                     <td class="text-center">
-                        @switch($r->status_reservasi_wisata)
-                            @case('pesan') <span class="status status-pesan">Pesan</span> @break
-                            @case('dibayar') <span class="status status-dibayar">Dibayar</span> @break
-                            @case('selesai') <span class="status status-selesai">Selesai</span> @break
+                        @switch($r->status_reservasi)
+                            @case('menunggu konfirmasi') <span class=\"status status-pesan\">Menunggu Konfirmasi</span> @break
+                            @case('booking') <span class=\"status status-dibayar\">Booking</span> @break
+                            @case('selesai') <span class=\"status status-selesai\">Selesai</span> @break
+                            @case('canceled') <span class=\"status status-canceled\">Canceled</span> @break
                         @endswitch
                     </td>
                     <td>{{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') }}</td>

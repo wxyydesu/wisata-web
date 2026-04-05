@@ -147,7 +147,7 @@
                                 <td>{{ \Carbon\Carbon::parse($r->tgl_reservasi_wisata)->format('d M Y') }}</td>
                                 <td>Rp{{ number_format($r->total_bayar,0,',','.') }}</td>
                                 <td>
-                                  @if($r->status_reservasi == 'pesan')
+                                  @if($r->status_reservasi == 'menunggu konfirmasi')
                                       <div class="d-flex gap-1">
                                           <form method="POST" action="{{ route('reservasi.confirm', $r->id) }}">
                                               @csrf
@@ -166,10 +166,10 @@
                                       </div>
                                   @else
                                       <button class="btn btn-outline-secondary btn-sm" disabled>
-                                          @if($r->status_reservasi == 'dibayar')
-                                              <i class="mdi mdi-check-all"></i> Confirmed
-                                          @elseif($r->status_reservasi == 'ditolak')
-                                              <i class="mdi mdi-block-helper"></i> Rejected
+                                          @if($r->status_reservasi == 'booking')
+                                              <i class="mdi mdi-check-all"></i> Booking
+                                          @elseif($r->status_reservasi == 'canceled')
+                                              <i class="mdi mdi-block-helper"></i> Canceled
                                           @else
                                               <i class="mdi mdi-history"></i> {{ $r->status_reservasi }}
                                           @endif
@@ -292,18 +292,18 @@
                             <td>{{ \Carbon\Carbon::parse($r->tgl_reservasi_wisata)->format('d M Y') }}</td>
                             <td>Rp{{ number_format($r->total_bayar,0,',','.') }}</td>
                             <td>
-                              @if($r->status_reservasi == 'pesan')
-                                <div class="badge badge-opacity-warning">Menunggu</div>
-                              @elseif($r->status_reservasi == 'dibayar')
-                                <div class="badge badge-opacity-success">Dibayar</div>
+                              @if($r->status_reservasi == 'menunggu konfirmasi')
+                                <div class="badge badge-opacity-warning">Menunggu Konfirmasi</div>
+                              @elseif($r->status_reservasi == 'booking')
+                                <div class="badge badge-opacity-success">Booking</div>
                               @elseif($r->status_reservasi == 'selesai')
                                 <div class="badge badge-opacity-info">Selesai</div>
-                              @elseif($r->status_reservasi == 'ditolak')
-                                <div class="badge badge-opacity-danger">Ditolak</div>
+                              @elseif($r->status_reservasi == 'canceled')
+                                <div class="badge badge-opacity-danger">Canceled</div>
                               @endif
                             </td>
                             <td>
-                              @if($r->status_reservasi == 'pesan')
+                              @if($r->status_reservasi == 'menunggu konfirmasi')
                                 <form method="POST" action="{{ route('reservasi.confirm', $r->id) }}">
                                     @csrf
                                     @method('PUT')

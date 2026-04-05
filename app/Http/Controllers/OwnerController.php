@@ -21,13 +21,13 @@ class OwnerController extends Controller
      */
     public function index(Request $request)
     {
-        $totalPendapatan = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar');
-        $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->count();
-        $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'pesan')->count();
+        $totalPendapatan = Reservasi::whereIn('status_reservasi', ['booking', 'selesai'])->sum('total_bayar');
+        $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['booking', 'selesai'])->count();
+        $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'menunggu konfirmasi')->count();
         $totalReservasiSelesai = Reservasi::where('status_reservasi', 'selesai')->count();
 
         $paketLaris = Reservasi::selectRaw('id_paket, COUNT(*) as jumlah')
-            ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+            ->whereIn('status_reservasi', ['booking', 'selesai'])
             ->groupBy('id_paket')
             ->orderByDesc('jumlah')
             ->with('paketWisata')
@@ -40,7 +40,7 @@ class OwnerController extends Controller
         
         $paket = PaketWisata::all();
         $pendapatanBulanan = Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
-        ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+        ->whereIn('status_reservasi', ['booking', 'selesai'])
         ->groupBy('bulan')
         ->orderBy('bulan')
         ->get();
@@ -138,7 +138,7 @@ class OwnerController extends Controller
     public function confirm(Reservasi $reservasi)
     {
         try {
-            $reservasi->update(['status_reservasi' => 'dibayar']);
+            $reservasi->update(['status_reservasi' => 'booking']);
             return redirect()->back()->with('success', 'Reservasi berhasil dikonfirmasi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal mengkonfirmasi reservasi');
@@ -148,7 +148,7 @@ class OwnerController extends Controller
     public function reject(Reservasi $reservasi)
     {
         try {
-            $reservasi->update(['status_reservasi' => 'ditolak']);
+            $reservasi->update(['status_reservasi' => 'canceled']);
             return redirect()->back()->with('success', 'Reservasi berhasil ditolak!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menolak reservasi');
@@ -186,25 +186,25 @@ class OwnerController extends Controller
     public function exportPdf()
     {
         $data = [
-            'totalPendapatan' => Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar'),
+            'totalPendapatan' => Reservasi::whereIn('status_reservasi', ['booking', 'selesai'])->sum('total_bayar'),
             'paketLaris' => Reservasi::selectRaw('id_paket, COUNT(*) as jumlah')
-                ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+                ->whereIn('status_reservasi', ['booking', 'selesai'])
                 ->groupBy('id_paket')
                 ->orderByDesc('jumlah')
                 ->with('paketWisata')  // Changed from 'paket'
                 ->first(),
             'statistikPeserta' => Reservasi::selectRaw('id_paket, SUM(jumlah_peserta) as total_peserta')
-                ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+                ->whereIn('status_reservasi', ['booking', 'selesai'])
                 ->groupBy('id_paket')
                 ->with('paketWisata')  // Changed from 'paket'
                 ->get(),
             'grafikPendapatan' => Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
-                ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+                ->whereIn('status_reservasi', ['booking', 'selesai'])
                 ->groupBy('bulan')
                 ->orderBy('bulan')
                 ->get(),
             'reservasi' => Reservasi::with(['pelanggan', 'paketWisata'])  // Changed from 'paket'
-                ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+                ->whereIn('status_reservasi', ['booking', 'selesai'])
                 ->orderByDesc('created_at')
                 ->get(),
             'tanggalLaporan' => Carbon::now()->translatedFormat('d F Y'),

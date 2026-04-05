@@ -1,5 +1,5 @@
 {{-- filepath: c:\xampp\htdocs\LSP\wisata-web\resources\views\fe\slider.blade.php --}}
-<div class="banner">
+<div class="banner" style="animation: fadeInDown 0.8s ease-out;">
     <!-- start slider -->
     <div id="fwslider">
         @php
@@ -45,12 +45,12 @@
                 </div>
 
                 <!-- Texts container -->
-                <div class="slide_content">
-                    <div class="slide_content_wrap">
+                <div class="slide_content" style="background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);">
+                    <div class="slide_content_wrap" style="animation: slideInUp 0.8s ease-out;">
                         <!-- Text title -->
-                        <h1 class="title">{{ $title }}</h1>
+                        <h1 class="title" style="font-size: 3.5rem; font-weight: 800; text-shadow: 0 4px 12px rgba(0,0,0,0.3); letter-spacing: -1px;">{{ $title }}</h1>
                         <!-- /Text title -->
-                        <div class="button"><a href="{{ $route }}">Book Now</a></div>
+                        <div class="button"><a href="{{ $route }}" style="background: linear-gradient(135deg, #05C3FB 0%, #0a9fd4 100%); padding: 14px 40px; border-radius: 12px; font-weight: 700; transition: all 0.3s ease; box-shadow: 0 8px 20px rgba(5, 195, 251, 0.3);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 30px rgba(5, 195, 251, 0.4)'" onmouseout="this.style.transform='translateY(0)'">Jelajahi Sekarang ✨</a></div>
                     </div>
                 </div>
                 <!-- /Texts container -->

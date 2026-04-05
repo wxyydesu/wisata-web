@@ -10,8 +10,16 @@
         <div class="card-header bg-gradient-primary text-white">
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"><i class="fas fa-receipt me-2"></i>Detail Pesanan #{{ $reservasi->id }}</h4>
-                <span class="badge bg-{{ $reservasi->status_reservasi == 'pesan' ? 'warning' : ($reservasi->status_reservasi == 'selesai' ? 'success' : 'primary') }} fs-6">
-                    {{ ucfirst($reservasi->status_reservasi) }}
+                <span class="badge bg-{{ 
+                    $reservasi->status_reservasi === 'menunggu konfirmasi' ? 'warning' :
+                    ($reservasi->status_reservasi === 'booking' ? 'success' : 
+                    ($reservasi->status_reservasi === 'selesai' ? 'primary' : 'danger')) 
+                }} fs-6">
+                    {{ 
+                        $reservasi->status_reservasi === 'menunggu konfirmasi' ? 'Menunggu Konfirmasi' :
+                        ($reservasi->status_reservasi === 'booking' ? 'Booking Berhasil' :
+                        ($reservasi->status_reservasi === 'selesai' ? 'Selesai' : 'Dibatalkan'))
+                    }}
                 </span>
             </div>
         </div>
@@ -88,15 +96,26 @@
                                                 data-bs-toggle="modal" data-bs-target="#proofModal">
                                             <i class="fas fa-eye me-1"></i> Lihat Bukti Transfer
                                         </button>
-                                        @else
-                                        <p class="mb-0">Status: 
-                                            <span class="badge bg-warning">Belum Upload Bukti</span>
+                                        @elseif($reservasi->status_reservasi === 'menunggu konfirmasi')
+                                        <p class="mb-1">Status: 
+                                            <span class="badge bg-success">Pembayaran Berhasil</span>
                                         </p>
+                                        @elseif($reservasi->status_reservasi === 'booking')
+                                        <p class="mb-1">Status: 
+                                            <span class="badge bg-success">Pembayaran Berhasil</span>
+                                        </p>
+                                        {{-- <button type="button" class="btn btn-sm btn-outline-primary mt-2" 
+                                                data-bs-toggle="modal" data-bs-target="#proofModal">
+                                            <i class="fas fa-eye me-1"></i> Lihat Bukti Transfer
+                                        </button> --}}
+                                        {{-- <p class="mb-0">Status: 
+                                            <span class="badge bg-warning">Belum Upload Bukti</span>
+                                        </p> --}}
                                         @endif
                                     </div>
                                 </div>
                                 
-                                <div class="timeline-item">
+                                {{-- <div class="timeline-item">
                                     <div class="timeline-icon bg-secondary text-white">
                                         <i class="fas fa-info-circle"></i>
                                     </div>
@@ -108,7 +127,7 @@
                                         <p class="text-muted mb-0">Tidak ada catatan</p>
                                         @endif
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                             
                             <div class="alert alert-info mt-4">
@@ -130,12 +149,13 @@
                     <i class="fas fa-arrow-left me-2"></i> Kembali ke Daftar Pesanan
                 </a>
                 <div>
-                    @if($reservasi->status_reservasi == 'pesan' && !$reservasi->file_bukti_tf)
-                    <a href="#" class="btn btn-primary me-2">
-                        <i class="fas fa-upload me-1"></i> Upload Bukti Transfer
+                    @if($reservasi->status_reservasi === 'menunggu pembayaran')
+                    <a href="{{ route('pesanan.payment', $reservasi->id) }}" class="btn btn-success me-2">
+                        <i class="fas fa-credit-card me-1"></i> Lakukan Pembayaran
                     </a>
                     @endif
-                    <a href="{{ route('pesanan.print', $reservasi->id) }}" class="btn btn-success" target="_blank">
+                    
+                    <a href="{{ route('pesanan.print', $reservasi->id) }}" class="btn btn-outline-primary" target="_blank">
                         <i class="fas fa-print me-1"></i> Cetak Invoice
                     </a>
                 </div>

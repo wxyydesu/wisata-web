@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
 
         // Create an admin user
 
-       $adminUser = User::create([
+       $adminUser = User::updateOrCreate([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'no_hp' => '081234567890',
@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create corresponding karyawan record
-        Karyawan::create([
+        Karyawan::updateOrCreate([
             'nama_karyawan' => 'Admin',
             'alamat' => 'Jl. Admin No. 1',
             'no_hp' => '081234567890',
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
 
         // Create a Bendahara user
 
-        $bendaharaUser = User::create([
+        $bendaharaUser = User::updateOrCreate([
             'name' => 'Bendahara',
             'email' => 'bendahara@gmail.com',
             'no_hp' => '081234567891',
@@ -55,7 +55,7 @@ class DatabaseSeeder extends Seeder
             'level' => 'bendahara',
         ]);
 
-        Karyawan::create([
+        Karyawan::updateOrCreate([
             'nama_karyawan' => 'Bendahara - super',
             'alamat' => 'Jl. Bendahara No. 2',
             'no_hp' => '081234567891',
@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create an Owner user
-        $ownerUser = User::create([
+        $ownerUser = User::updateOrCreate([
             'name' => 'Owner',
             'email' => 'owner@gmail.com',
             'no_hp' => '081234567892',
@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
             'level' => 'owner',
         ]);
         
-        Karyawan::create([
+        Karyawan::updateOrCreate([
             'nama_karyawan' => 'Owner - super',
             'alamat' => 'Jl. Owner No. 3',
             'no_hp' => '081234567892',
@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create a Pelanggan user
-        $pelangganUser = User::create([
+        $pelangganUser = User::updateOrCreate([
             'name' => 'Pelanggan',
             'email' => 'pelanggan1@gmail.com',
             'no_hp' => '081234567893',
@@ -94,7 +94,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create corresponding pelanggan record
-        Pelanggan::create([
+        Pelanggan::updateOrCreate([
             'nama_lengkap' => 'Pelanggan - super',
             'no_hp' => '081234567893',
             'alamat' => 'Jl. Pelanggan No. 4',

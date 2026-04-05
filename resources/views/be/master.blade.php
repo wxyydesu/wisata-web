@@ -14,7 +14,12 @@
     <link rel="stylesheet" href="{{ asset('be/assets/vendors/feather/feather.css') }}">
     <link rel="stylesheet" href="{{ asset('be/assets/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('be/assets/vendors/ti-icons/css/themify-icons.css') }}">
-    <link rel="stylesheet" href="{{ asset('be/assets/vendors/font-awesome/css/font-awesome.min.css') }}">
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <script src="{{ asset('fe/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('fe/js/jquery-ui.min.js') }}"></script>
+    <script src="{{ asset('fe/js/fwslider.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('be/assets/vendors/typicons/typicons.css') }}">
     <link rel="stylesheet" href="{{ asset('be/assets/vendors/simple-line-icons/css/simple-line-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('be/assets/vendors/css/vendor.bundle.base.css') }}">
@@ -151,7 +156,7 @@
                   <p class="mb-1 mt-3 fw-semibold">{{ Auth::user()->name }}</p>
                   <p class="fw-light text-muted mb-0">{{ Auth::user()->level, Auth::user()->email}}</p>
                 </div>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile</a>
+                <a class="dropdown-item" href="{{ route('profile_index') }}"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile</a>
                 <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
               @if(session('loginId'))
                 <?php

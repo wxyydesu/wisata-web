@@ -9,6 +9,7 @@ use App\Models\PaketWisata;
 use App\Models\User;
 use App\Models\Bank;
 use App\Models\DiskonPaket;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -123,7 +124,7 @@ class ReservasiController extends Controller
             'jumlah_peserta' => 'required|integer|min:1',
             'diskon' => 'nullable|numeric|min:0|max:100',
             'file_bukti_tf' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'status_reservasi' => 'required|in:pesan,dibayar,ditolak,selesai',
+            'status_reservasi' => 'required|in:menunggu konfirmasi,booking,canceled,selesai',
         ]);
 
         // Dapatkan harga dari paket wisata
@@ -193,7 +194,7 @@ class ReservasiController extends Controller
             'timer' => 1500
         ]);
     } catch (\Exception $e) {
-            \Log::error('Delete failed: '.$e->getMessage());
+            // \Log::error('Delete failed: '.$e->getMessage());
             return back()->with('swal', [
                 'icon' => 'error',
                 'title' => 'Gagal',
@@ -290,7 +291,7 @@ class ReservasiController extends Controller
             'jumlah_peserta' => 'required|integer|min:1',
             'diskon' => 'nullable|numeric|min:0|max:100',
             'file_bukti_tf' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'status_reservasi' => 'required|in:pesan,dibayar,ditolak,selesai',
+            'status_reservasi' => 'required|in:menunggu konfirmasi,booking,canceled,selesai',
         ]);
 
         // Dapatkan harga dari paket wisata
@@ -341,7 +342,7 @@ class ReservasiController extends Controller
             'timer' => 1500
         ]);
     } catch (\Exception $e) {
-            \Log::error('Delete failed: '.$e->getMessage());
+            // \Log::error('Delete failed: '.$e->getMessage());
             return back()->with('swal', [
                 'icon' => 'error',
                 'title' => 'Gagal',
@@ -375,7 +376,7 @@ class ReservasiController extends Controller
             'timer' => 1500
         ]);
     } catch (\Exception $e) {
-            \Log::error('Delete failed: '.$e->getMessage());
+            // \Log::error('Delete failed: '.$e->getMessage());
             return back()->with('swal', [
                 'icon' => 'error',
                 'title' => 'Gagal',
@@ -395,7 +396,7 @@ class ReservasiController extends Controller
         }
 
         $reservasis = Auth::user()->pelanggan->reservasis()
-            ->where('status_reservasi', 'pesan')
+            ->where('status_reservasi', 'menunggu konfirmasi')
             ->with('paketWisata')
             ->get();
 
@@ -425,6 +426,139 @@ class ReservasiController extends Controller
             return 'Good Afternoon';
         } else {
             return 'Good Evening';
+        }
+    }
+
+    /**
+     * Show payment page with Midtrans Snap
+     */
+    public function payment(Reservasi $reservasi)
+    {
+        // Authorization check
+        if (Auth::user()->level === 'pelanggan' && $reservasi->id_pelanggan != Auth::user()->pelanggan->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Only allow payment for unpaid reservations (status 'menunggu konfirmasi')
+        if ($reservasi->status_reservasi === 'booking') {
+            return redirect()->route('reservasi.show', $reservasi)->with('swal', [
+                'icon' => 'warning',
+                'title' => 'Perhatian',
+                'text' => 'Reservasi ini sudah dibayar',
+                'timer' => 2000
+            ]);
+        }
+
+        $reservasi->load(['pelanggan.user', 'paketWisata']);
+        
+        $greeting = $this->getGreeting();
+        
+        return view('be.reservasi.payment', [
+            'title' => 'Payment Reservasi',
+            'reservasi' => $reservasi,
+            'greeting' => $greeting,
+            'midtrans_client_key' => config('midtrans.client_key')
+        ]);
+    }
+
+    /**
+     * Get Snap Token via AJAX
+     */
+    public function getSnapToken(Request $request, Reservasi $reservasi)
+    {
+        try {
+            // Authorization check
+            if (Auth::user()->level === 'pelanggan' && $reservasi->id_pelanggan != Auth::user()->pelanggan->id) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+
+            // Load relationships
+            $reservasi->load(['pelanggan.user', 'paketWisata']);
+
+            // Get active banks
+            $banks = Bank::where('aktif', true)->get();
+
+            // Create Midtrans Service and get snap token
+            $midtransService = new MidtransService();
+            $snapToken = $midtransService->createToken($reservasi, $reservasi->pelanggan, $banks);
+
+            // Store order ID for tracking
+            $reservasi->midtrans_order_id = 'RES-' . $reservasi->id . '-' . time();
+            $reservasi->save();
+
+            return response()->json([
+                'snap_token' => $snapToken,
+                'success' => true
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to get snap token: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Gagal membuat token pembayaran',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Handle Midtrans Callback
+     */
+    public function handleCallback(Request $request)
+    {
+        try {
+            $midtransService = new MidtransService();
+            
+            // Get notification data
+            $notif = $midtransService->parseNotification(json_encode($request->all()));
+            
+            // Extract order ID
+            $orderId = $notif->order_id ?? null;
+            
+            if (!$orderId) {
+                Log::warning('No order ID in callback');
+                return response()->json(['status' => 'error', 'message' => 'No order ID'], 400);
+            }
+
+            // Parse order ID to get reservasi ID
+            // Format: RES-{reservasi_id}-{timestamp}
+            $parts = explode('-', $orderId);
+            if (count($parts) < 2) {
+                Log::warning('Invalid order ID format: ' . $orderId);
+                return response()->json(['status' => 'error', 'message' => 'Invalid order ID format'], 400);
+            }
+
+            $reservasiId = $parts[1];
+            $reservasi = Reservasi::find($reservasiId);
+
+            if (!$reservasi) {
+                Log::warning('Reservasi not found for order ID: ' . $orderId);
+                return response()->json(['status' => 'error', 'message' => 'Reservasi not found'], 404);
+            }
+
+            // Handle payment callback
+            $callbackData = $midtransService->handleCallback($notif);
+            
+            // Update reservasi with Midtrans data
+            $reservasi->midtrans_transaction_id = $callbackData['transaction_id'];
+            $reservasi->midtrans_status = $callbackData['transaction_status'];
+            $reservasi->midtrans_payment_type = $callbackData['payment_type'];
+
+            // Map Midtrans status to application status
+            $appStatus = $midtransService->mapStatus($callbackData['transaction_status']);
+            $reservasi->status_reservasi = $appStatus;
+
+            $reservasi->save();
+
+            Log::info('Payment callback processed', [
+                'reservasi_id' => $reservasiId,
+                'order_id' => $orderId,
+                'transaction_status' => $callbackData['transaction_status'],
+                'app_status' => $appStatus
+            ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Payment processed']);
+        } catch (\Exception $e) {
+            Log::error('Error processing payment callback: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 }

@@ -175,9 +175,9 @@
                             <div class="form-group">
                                 <label for="status_reservasi">Status Reservasi</label>
                                 <select class="form-control" id="status_reservasi" name="status_reservasi" required>
-                                    <option value="pesan" {{ old('status_reservasi') == 'pesan' ? 'selected' : '' }}>Pesan</option>
-                                    <option value="dibayar" {{ old('status_reservasi') == 'dibayar' ? 'selected' : '' }}>Dibayar</option>
-                                    <option value="ditolak" {{ old('status_reservasi') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                    <option value="menunggu konfirmasi" {{ old('status_reservasi') == 'menunggu konfirmasi' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+                                    <option value="booking" {{ old('status_reservasi') == 'booking' ? 'selected' : '' }}>Booking</option>
+                                    <option value="canceled" {{ old('status_reservasi') == 'canceled' ? 'selected' : '' }}>Canceled</option>
                                     <option value="selesai" {{ old('status_reservasi') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                 </select>
                                 @error('status_reservasi')

@@ -32,8 +32,10 @@
                                     <tr>
                                         <th scope="col">No</th>
                                         <th scope="col">Bank Name</th>
+                                        <th scope="col">Bank Code</th>
                                         <th scope="col">Account Number</th>
                                         <th scope="col">Account Holder</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Action</th>
                                     </tr>
                                 </thead>
@@ -43,8 +45,16 @@
                                     <tr>
                                         <th scope="row">{{ $i+1 }}.</th>
                                         <td>{{ $bank->nama_bank }}</td>
+                                        <td><code>{{ strtoupper($bank->kode_bank ?? '-') }}</code></td>
                                         <td>{{ $bank->no_rekening }}</td>
-                                        <td>{{ $bank->atas_nama }}</td>
+                                        <td>{{ $bank->atas_nama ?? '-' }}</td>
+                                        <td>
+                                            @if($bank->aktif)
+                                                <span class="badge bg-success">Active</span>
+                                            @else
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('bank.edit', $bank->id) }}'">

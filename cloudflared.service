@@ -1,0 +1,37 @@
+[Unit]
+Description=Cloudflare Tunnel for Wisata Web
+Documentation=https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=root
+WorkingDirectory=/root/.cloudflared
+ExecStart=/usr/local/bin/cloudflared tunnel --config %h/.cloudflared/config.yml run wisata-web
+Restart=on-failure
+RestartSec=5s
+
+# Environment variables
+Environment="TUNNEL_CRED_FILE=%h/.cloudflared/YOUR-TUNNEL-ID.json"
+Environment="TUNNEL_CONFIG_FILE=%h/.cloudflared/config.yml"
+Environment="TUNNEL_LOGFILE=/var/log/cloudflared/tunnel.log"
+Environment="TUNNEL_LOGLEVEL=info"
+
+# Security
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Process management
+StandardError=journal
+StandardOutput=journal
+SyslogIdentifier=cloudflared
+
+# Timeout
+StartLimitInterval=60
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target

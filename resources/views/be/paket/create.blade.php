@@ -51,6 +51,15 @@
                             </div>
                             
                             <div class="form-group">
+                                <label for="kapasitas_orang">Capacity (Number of People)</label>
+                                <input type="number" class="form-control" id="kapasitas_orang" name="kapasitas_orang" 
+                                       value="{{ old('kapasitas_orang') }}" min="1" required>
+                                @error('kapasitas_orang')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            
+                            <div class="form-group">
                                 <label for="foto1">Main Image (Required)</label>
                                 <input type="file" class="form-control" id="foto1" name="foto1" required>
                                 @error('foto1')

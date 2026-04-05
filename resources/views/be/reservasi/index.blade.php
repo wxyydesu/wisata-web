@@ -22,13 +22,13 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header">Status Reservasi</h6></li>
                         <li>
-                            <a class="dropdown-item @if(request('status')=='pesan') active @endif" href="{{ route('reservasi.index', ['status'=>'pesan']) }}">
-                                <span class="badge bg-warning me-2">●</span>Pesan
+                            <a class="dropdown-item @if(request('status')=='menunggu konfirmasi') active @endif" href="{{ route('reservasi.index', ['status'=>'menunggu konfirmasi']) }}">
+                                <span class="badge bg-warning me-2">●</span>Menunggu Konfirmasi
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item @if(request('status')=='dibayar') active @endif" href="{{ route('reservasi.index', ['status'=>'dibayar']) }}">
-                                <span class="badge bg-success me-2">●</span>Dibayar
+                            <a class="dropdown-item @if(request('status')=='booking') active @endif" href="{{ route('reservasi.index', ['status'=>'booking']) }}">
+                                <span class="badge bg-success me-2">●</span>Booking
                             </a>
                         </li>
                         <li>
@@ -37,8 +37,8 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item @if(request('status')=='ditolak') active @endif" href="{{ route('reservasi.index', ['status'=>'ditolak']) }}">
-                                <span class="badge bg-danger me-2">●</span>Ditolak
+                            <a class="dropdown-item @if(request('status')=='canceled') active @endif" href="{{ route('reservasi.index', ['status'=>'canceled']) }}">
+                                <span class="badge bg-danger me-2">●</span>Canceled
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
@@ -94,6 +94,10 @@
                         </thead>
                         <tbody>
                             @forelse ($reservasi as $item)
+
+                            <?php
+                                $user = $item->id_pelanggan ? $item->pelanggan->user : null;
+                            ?>
                             <tr>
                                 <td>{{ ($reservasi->currentPage()-1) * $reservasi->perPage() + $loop->iteration }}</td>
                                 <td>
@@ -101,15 +105,17 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        @if($item->pelanggan->foto)
-                                        <img src="{{ asset('storage/' . $item->pelanggan->foto) }}" class="rounded-circle me-2" width="30" height="30" alt="Foto Profil">
-                                        @else
-                                        <div class="avatar-sm me-2">
-                                            <span class="avatar-title rounded-circle bg-light text-dark">
-                                                {{ substr($item->pelanggan->nama_lengkap, 0, 1) }}
-                                            </span>
-                                        </div>
-                                        @endif
+                                        @php
+                                        $photo = null;
+                                            if ($user->level == 'pelanggan' && $user->pelanggan && $user->pelanggan->foto) {
+                                        $photo = asset('storage/' . $user->pelanggan->foto);
+                                        } elseif ($user->karyawan && $user->karyawan->foto) {
+                                            $photo = asset('storage/' . $user->karyawan->foto);
+                                        } else {
+                                            $photo = asset('images/default-user.jpg');
+                                        }
+                                        @endphp
+                                        <img src="{{ $photo }}" class="rounded-circle me-2" width="30" height="30" alt="Foto Profil">
                                         <div>
                                             <strong>{{ $item->pelanggan->nama_lengkap }}</strong>
                                             <div class="text-muted small">{{ $item->pelanggan->no_hp }}</div>
@@ -129,34 +135,52 @@
                                 <td>
                                     @php
                                         $statusClasses = [
-                                            'pesan' => ['icon' => 'badge badge-warning'],
-                                            'dibayar' => ['icon' => 'badge badge-success'],
-                                            'selesai' => ['icon' => '"badge badge-primary'],
-                                            'ditolak' => ['icon' => 'badge badge-danger']
+                                            'menunggu konfirmasi' => ['icon' => 'badge badge-warning'],
+                                            'booking' => ['icon' => 'badge badge-success'],
+                                            'selesai' => ['icon' => 'badge badge-primary'],
+                                            'canceled' => ['icon' => 'badge badge-danger']
                                         ];
                                         $status = $item->status_reservasi;
-                                        $statusConfig = $statusClasses[$status] ?? ['icon' => 'badge badge-black'];
+                                        $statusConfig = $statusClasses[$status] ?? ['icon' => 'badge badge-secondary'];
                                     @endphp
                                     <span class="badge {{ $statusConfig['icon'] }}">
                                         {{ ucfirst($status) }}
                                     </span>
                                 </td>
                                 <td>
+                                    <div class="btn-group">
+                                        @if((Auth::user()->level == 'admin' || Auth::user()->level == 'owner') && $item->status_reservasi == 'menunggu konfirmasi')
+                                        <form action="{{ route('reservasi.confirm', $item->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="btn btn-success" title="Terima Reservasi">
+                                                Terima
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('reservasi.reject', $item->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="btn btn-warning" onclick="return confirm('Yakin ingin menolak reservasi ini?')" title="Tolak Reservasi">
+                                                Tolak
+                                            </button>
+                                        </form>
+                                        @endif
+                                    </div>
                                     <div class="btn-group" role="group">
                                         @if(Auth::user()->level == 'admin' || Auth::user()->level == 'owner')
                                         <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('reservasi.edit', $item->id) }}'">
                                             <i class="fa fa-pencil-square-o"></i> Edit
                                         </button>
                                         @endif
-                                        @if(Auth::user()->level == 'admin')
+                                        @if(Auth::user()->level == 'admin' || (Auth::user()->level == 'owner' && $item->status_reservasi == 'menunggu konfirmasi'))
                                         <form action="{{ route('reservasi.destroy', $item->id) }}" method="POST" id="deleteForm{{ $item->id }}" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="button" class="btn btn-danger btn-fw" onclick="deleteConfirm({{ $item->id }})">
+                                            <button type="button" class="btn btn-danger" onclick="deleteConfirm({{ $item->id }})">
                                                 <i class="fas fa-trash-alt me-1"></i>Delete
                                             </button>
                                         </form>
-                                        @endif
+                                        @endif  
                                         <button type="button" class="btn btn-success btn-sm" onClick="window.location.href='{{ route('reservasi.show', $item->id) }}'">
                                             <i class="fa fa-eye"></i> Detail
                                         </button>

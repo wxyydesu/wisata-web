@@ -14,10 +14,10 @@
                     <div class="input-group">
                         <select name="status" class="form-select" onchange="this.form.submit()">
                             <option value="">Semua Status</option>
-                            <option value="pesan" {{ request('status') == 'pesan' ? 'selected' : '' }}>Pesan</option>
-                            <option value="dibayar" {{ request('status') == 'dibayar' ? 'selected' : '' }}>Dibayar</option>
+                            <option value="menunggu konfirmasi" {{ request('status') == 'menunggu konfirmasi' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+                            <option value="booking" {{ request('status') == 'booking' ? 'selected' : '' }}>Booking</option>
 
-                            <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                            <option value="canceled" {{ request('status') == 'canceled' ? 'selected' : '' }}>Canceled</option>
                             <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                         </select>
                         <button type="submit" class="btn btn-outline-secondary d-none">Filter</button>
@@ -43,8 +43,11 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between">
                     <span class="fw-bold">#{{ $reservasi->id }}</span>
-                    <span class="badge bg-{{ $reservasi->status_reservasi == 'pesan' ? 'warning' : 'success' }}">
-                        {{ $reservasi->status_reservasi }}
+                    <span class="badge bg-{{ 
+                        $reservasi->status_reservasi === 'menunggu konfirmasi' ? 'warning' :
+                        ($reservasi->status_reservasi == 'menunggu konfirmasi' ? 'info' : 'success') 
+                    }}">
+                        {{ $reservasi->status_reservasi === 'menunggu konfirmasi' ? 'Menunggu Pembayaran' : ucfirst($reservasi->status_reservasi) }}
                     </span>
                 </div>
                 <div class="card-body">
@@ -65,6 +68,11 @@
                         <a href="{{ route('pesanan.detail', $reservasi->id) }}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-eye me-1"></i> Detail
                         </a>
+                        @if($reservasi->status_reservasi === 'menunggu konfirmasi')
+                        <a href="{{ route('pesanan.payment', $reservasi->id) }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-credit-card me-1"></i> Bayar
+                        </a>
+                        @endif
                         <a href="{{ route('pesanan.print', $reservasi->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-print me-1"></i> Cetak
                         </a>
@@ -82,8 +90,8 @@
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="50">ID</th>
-                                    <th>Paket Wisata</th>
+                                    {{-- <th width="50">ID</th> --}}
+                                    <th>Nama Paket</th>
                                     <th>Tanggal</th>
                                     <th>Peserta</th>
                                     <th>Total</th>
@@ -94,7 +102,7 @@
                             <tbody>
                                 @foreach($reservasis as $reservasi)
                                 <tr>
-                                    <td class="fw-bold">#{{ $reservasi->id }}</td>
+                                    {{-- <td class="fw-bold">#{{ $reservasi->id }}</td> --}}
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <img src="{{ asset('storage/' . $reservasi->paketWisata->foto1) }}" 
@@ -103,14 +111,18 @@
                                         </div>
                                     </td>
                                     <td>
-                                        {{ \Carbon\Carbon::parse($reservasi->tgl_mulai)->format('d M Y') }}<br>
-                                        <small class="text-muted">{{ $reservasi->lama_reservasi }} hari</small>
+                                        {{ \Carbon\Carbon::parse($reservasi->tgl_mulai)->format('d M Y') }} - {{ \Carbon\Carbon::parse($reservasi->tgl_akhir)->format('d M Y') }}<br
+                                        {{-- <small class="text-muted">{{ $reservasi->lama_reservasi }} hari</small> --}}
                                     </td>
                                     <td>{{ $reservasi->jumlah_peserta }} orang</td>
                                     <td class="fw-bold">Rp {{ number_format($reservasi->total_bayar, 0, ',', '.') }}</td>
                                     <td>
-                                        <span class="badge bg-{{ $reservasi->status_reservasi == 'pesan' ? 'warning' : ($reservasi->status_reservasi == 'ditolak' ? 'danger' : 'success')}}">
-                                            {{ $reservasi->status_reservasi }}
+                                        <span class="badge bg-{{ 
+                                            $reservasi->status_reservasi === 'pesan' ? 'warning' :
+                                            ($reservasi->status_reservasi == 'menunggu konfirmasi' ? 'info' : 
+                                            ($reservasi->status_reservasi == 'canceled' ? 'danger' : 'success'))
+                                        }}">
+                                            {{ $reservasi->status_reservasi === 'pesan' ? 'Menunggu Bayar' : ucfirst($reservasi->status_reservasi) }}
                                         </span>
                                     </td>
                                     <td>
@@ -120,6 +132,13 @@
                                                title="Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                            @if($reservasi->status_reservasi === 'pesan')
+                                            <a href="{{ route('pesanan.payment', $reservasi->id) }}" 
+                                               class="btn btn-sm btn-outline-success me-1"
+                                               title="Bayar">
+                                                <i class="fas fa-credit-card"></i>
+                                            </a>
+                                            @endif
                                             <a href="{{ route('pesanan.print', $reservasi->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary"
                                                title="Cetak">
                                                 <i class="fas fa-print"></i>

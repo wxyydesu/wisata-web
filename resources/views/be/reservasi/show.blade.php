@@ -80,8 +80,8 @@
                                                 <th>Status</th>
                                                 <td>
                                                     <span class="badge badge-{{ 
-                                                        $reservasi->status_reservasi == 'pesan' ? 'warning' : 
-                                                        ($reservasi->status_reservasi == 'dibayar' ? 'primary' : 'success') 
+                                                        $reservasi->status_reservasi == 'menunggu konfirmasi' ? 'warning' : 
+                                                        ($reservasi->status_reservasi == 'booking' ? 'primary' : 'success') 
                                                     }}">
                                                         {{ ucfirst($reservasi->status_reservasi) }}
                                                     </span>
@@ -168,6 +168,13 @@
                                 <i class="mdi mdi-arrow-left"></i> Kembali ke Daftar
                             </a>
                             <div>
+                                {{-- Payment Button for Unpaid Reservations --}}
+                                @if($reservasi->status_reservasi === 'pesan' && Auth::user()->level === 'pelanggan')
+                                    <a href="{{ route('reservasi.payment', $reservasi->id) }}" class="btn btn-success">
+                                        <i class="mdi mdi-credit-card"></i> Lakukan Pembayaran
+                                    </a>
+                                @endif
+                                
                                 @if(Auth::user()->level !== 'pelanggan' || $reservasi->status_reservasi == 'pesan')
                                     <a href="{{ route('reservasi.edit', $reservasi->id) }}" class="btn btn-warning">
                                         <i class="mdi mdi-pencil"></i> Edit Reservasi

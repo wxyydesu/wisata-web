@@ -17,10 +17,10 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">News Management</h4>
+                        {{-- <h4 class="card-title">News Management</h4>
                         <p class="card-description">
                             News Table <code>Add | Edit | Remove</code>
-                        </p>
+                        </p> --}}
                         
                         @if(session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>
@@ -72,24 +72,22 @@
                                         </td>
                                         <td>
                                             @if($item->berita)
-                                                {{ $item->berita }}
+                                                <span title="{{ $item->berita }}">{{ Str::limit($item->berita, 30) }}</span>
                                             @else
                                                 <span class="text-muted">No content</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-dark btn-sm" onClick="window.location.href='{{ route('berita.edit', $item->id) }}'">
-                                                    <i class="fa fa-pencil-square-o"></i> Edit
+                                            <a href="{{ route('berita.edit', $item->id) }}" class="btn btn-warning btn-sm me-2" title="Edit">
+                                                <i class="fa fa-pencil-square-o"></i>
+                                            </a>
+                                            <form action="{{ route('berita.destroy', $item->id) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this news?')" title="Delete">
+                                                    <i class="fa fa-trash"></i>
                                                 </button>
-                                                <form action="{{ route('berita.destroy', $item->id) }}" method="POST" style="display: inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
-                                                        <i class="fas fa-trash-alt"></i> Delete
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            </form>
                                         </td>
                                     </tr>
                                     @endforeach

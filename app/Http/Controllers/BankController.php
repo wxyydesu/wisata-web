@@ -24,11 +24,22 @@ class BankController extends Controller
     {
         $request->validate([
             'nama_bank' => 'required|string|max:100',
+            'kode_bank' => 'required|string|max:50|unique:banks,kode_bank',
             'no_rekening' => 'required|string|max:100',
             'atas_nama' => 'nullable|string|max:100',
+            'aktif' => 'nullable|boolean',
         ]);
-        Bank::create($request->all());
-        return redirect()->route('bank.index')->with('success', 'Bank berhasil ditambahkan!');
+
+        $data = $request->all();
+        $data['aktif'] = $request->has('aktif') ? true : true; // Default active
+        
+        Bank::create($data);
+        return redirect()->route('bank.index')->with('swal', [
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'text' => 'Bank berhasil ditambahkan!',
+            'timer' => 2000
+        ]);
     }
 
     public function edit($id)
@@ -43,11 +54,22 @@ class BankController extends Controller
         $bank = Bank::findOrFail($id);
         $request->validate([
             'nama_bank' => 'required|string|max:100',
+            'kode_bank' => 'required|string|max:50|unique:banks,kode_bank,' . $id,
             'no_rekening' => 'required|string|max:100',
             'atas_nama' => 'nullable|string|max:100',
+            'aktif' => 'nullable|boolean',
         ]);
-        $bank->update($request->all());
-        return redirect()->route('bank.index')->with('success', 'Bank berhasil diupdate!');
+
+        $data = $request->all();
+        $data['aktif'] = $request->has('aktif') ? true : false;
+        
+        $bank->update($data);
+        return redirect()->route('bank.index')->with('swal', [
+            'icon' => 'success',
+            'title' => 'Berhasil',
+            'text' => 'Bank berhasil diupdate!',
+            'timer' => 2000
+        ]);
     }
 
     public function destroy($id)

@@ -21,9 +21,9 @@ class BendaharaController extends Controller
      */
     public function index(Request $request)
     {
-        $totalPendapatan = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar');
-        $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->count();
-        $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'pesan')->count();
+        $totalPendapatan = Reservasi::whereIn('status_reservasi', ['booking', 'selesai'])->sum('total_bayar');
+        $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['booking', 'selesai'])->count();
+        $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'menunggu konfirmasi')->count();
         $totalReservasiSelesai = Reservasi::where('status_reservasi', 'selesai')->count();
 
         $paketLaris = Reservasi::selectRaw('id_paket, COUNT(*) as jumlah')

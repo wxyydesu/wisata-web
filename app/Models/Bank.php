@@ -10,8 +10,10 @@ class Bank extends Model
 
     protected $fillable = [
         'nama_bank',
+        'kode_bank',
         'no_rekening',
         'atas_nama',
+        'aktif',
     ];
 
     public function reservasi()

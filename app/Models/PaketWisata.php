@@ -16,6 +16,7 @@ class PaketWisata extends Model
         'deskripsi',
         'fasilitas',
         'harga_per_pack',
+        'kapasitas_orang',
         'foto1',
         'foto2',
         'foto3',

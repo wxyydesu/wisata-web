@@ -34,6 +34,7 @@ class PaketWisataController extends Controller
             'deskripsi' => 'required|string',
             'fasilitas' => 'required|string',
             'harga_per_pack' => 'required|integer',
+            'kapasitas_orang' => 'required|integer|min:1',
             'foto1' => 'required|image|mimes:jpeg,png,jpg,gif',
             'foto2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
@@ -76,6 +77,7 @@ class PaketWisataController extends Controller
             'deskripsi' => 'required|string',
             'fasilitas' => 'required|string',
             'harga_per_pack' => 'required|integer',
+            'kapasitas_orang' => 'required|integer|min:1',
             'foto1' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
@@ -137,7 +139,7 @@ class PaketWisataController extends Controller
         }
 
         if ($paket->$field) {
-            \Storage::disk('public')->delete($paket->$field);
+            Storage::disk('public')->delete($paket->$field);
             $paket->$field = null;
             $paket->save();
         }

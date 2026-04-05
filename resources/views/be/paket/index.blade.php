@@ -17,10 +17,10 @@
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Paket Wisata Management</h4>
+                    {{-- <h4 class="card-title">Paket Wisata Management</h4>
                     <p class="card-description">
                         Paket Wisata Table <code>Add | Edit | Remove</code>
-                    </p>
+                    </p> --}}
                     
                     @if(session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>

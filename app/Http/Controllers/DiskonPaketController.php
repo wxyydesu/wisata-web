@@ -38,30 +38,57 @@ class DiskonPaketController extends Controller
     // Tambahkan method updateAll untuk batch update diskon
     public function updateAll(Request $request)
     {
-        // Nonaktifkan diskon yang sudah lewat tanggal akhir
-        DiskonPaket::whereNotNull('tanggal_akhir')
-            ->where('tanggal_akhir', '<', Carbon::today())
-            ->where('aktif', 1)
-            ->update(['aktif' => 0]);
+        try {
+            // Validasi input
+            $request->validate([
+                'paket_id' => 'nullable|array',
+                'paket_id.*' => 'integer|exists:paket_wisatas,id',
+                'persen' => 'nullable|array',
+                'persen.*' => 'numeric|min:0|max:100',
+                'tanggal_mulai' => 'nullable|array',
+                'tanggal_akhir' => 'nullable|array',
+                'aktif' => 'nullable|array',
+            ]);
 
-        foreach ($request->paket_id as $id) {
-            $tanggalMulai = $request->tanggal_mulai[$id] ?? null;
-            $tanggalAkhir = $request->tanggal_akhir[$id] ?? null;
+            // Nonaktifkan diskon yang sudah lewat tanggal akhir
+            DiskonPaket::whereNotNull('tanggal_akhir')
+                ->where('tanggal_akhir', '<', Carbon::today())
+                ->where('aktif', 1)
+                ->update(['aktif' => 0]);
 
-            // Otomatis aktif jika tanggal mulai dan akhir terisi
-            $aktif = (!empty($tanggalMulai) && !empty($tanggalAkhir)) ? 1 : (in_array($id, $request->aktif ?? []) ? 1 : 0);
+            $paketIds = $request->paket_id ?? [];
+            $aktivList = $request->aktif ?? [];
 
-            DiskonPaket::updateOrCreate(
-                ['paket_id' => $id],
-                [
-                    'aktif' => $aktif,
-                    'persen' => $request->persen[$id] ?? 0,
-                    'tanggal_mulai' => $tanggalMulai,
-                    'tanggal_akhir' => $tanggalAkhir,
-                ]
-            );
+            foreach ($paketIds as $id) {
+                $persen = (float) ($request->persen[$id] ?? 0);
+                $tanggalMulai = $request->tanggal_mulai[$id] ?? null;
+                $tanggalAkhir = $request->tanggal_akhir[$id] ?? null;
+
+                // Tentukan status aktif dari checkbox
+                $aktif = in_array($id, $aktivList) ? 1 : 0;
+
+                // Jika tanggal tidak lengkap, non-aktifkan
+                if (empty($tanggalMulai) || empty($tanggalAkhir)) {
+                    $aktif = 0;
+                }
+
+                DiskonPaket::updateOrCreate(
+                    ['paket_id' => $id],
+                    [
+                        'persen' => $persen,
+                        'tanggal_mulai' => $tanggalMulai,
+                        'tanggal_akhir' => $tanggalAkhir,
+                        'aktif' => $aktif,
+                    ]
+                );
+            }
+
+            return back()->with('success', 'Diskon berhasil diperbarui!');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal menyimpan diskon: ' . $e->getMessage());
         }
-        return back()->with('success', 'Diskon berhasil diperbarui!');
     }
 
     private function getGreeting()

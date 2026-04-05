@@ -185,8 +185,9 @@
                             <div class="form-group">
                                 <label for="status_reservasi">Status Reservasi</label>
                                 <select class="form-control" id="status_reservasi" name="status_reservasi" required>
-                                    <option value="pesan" {{ $reservasi->status_reservasi == 'pesan' ? 'selected' : '' }}>Pesan</option>
-                                    <option value="dibayar" {{ $reservasi->status_reservasi == 'dibayar' ? 'selected' : '' }}>Dibayar</option>
+                                    <option value="menunggu konfirmasi" {{ $reservasi->status_reservasi == 'menunggu konfirmasi' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+                                    <option value="booking" {{ $reservasi->status_reservasi == 'booking' ? 'selected' : '' }}>Booking</option>
+                                    <option value="canceled" {{ $reservasi->status_reservasi == 'canceled' ? 'selected' : '' }}>Canceled</option>
                                     <option value="selesai" {{ $reservasi->status_reservasi == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                     <option value="ditolak" {{ $reservasi->status_reservasi == 'ditolak' ? 'selected' : '' }}>ditolak</option>
                                 </select>

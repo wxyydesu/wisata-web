@@ -20,13 +20,13 @@ class AdminController extends Controller
      */
     public function index(Request $request)
     {
-        $totalPendapatan = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->sum('total_bayar');
-        $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['dibayar', 'selesai'])->count();
-        $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'pesan')->count();
+        $totalPendapatan = Reservasi::whereIn('status_reservasi', ['booking', 'selesai'])->sum('total_bayar');
+        $totalReservasiDibayar = Reservasi::whereIn('status_reservasi', ['booking', 'selesai'])->count();
+        $totalReservasiMenunggu = Reservasi::where('status_reservasi', 'menunggu konfirmasi')->count();
         $totalReservasiSelesai = Reservasi::where('status_reservasi', 'selesai')->count();
 
         $paketLaris = Reservasi::selectRaw('id_paket, COUNT(*) as jumlah')
-            ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+            ->whereIn('status_reservasi', ['booking', 'selesai'])
             ->groupBy('id_paket')
             ->orderByDesc('jumlah')
             ->with('paketWisata')
@@ -42,7 +42,7 @@ class AdminController extends Controller
         // Ambil pendapatan hanya untuk bulan berjalan
         $now = Carbon::now();
         $pendapatanBulanan = Reservasi::selectRaw('DATE_FORMAT(tgl_reservasi, "%Y-%m") as bulan, SUM(total_bayar) as total')
-            ->whereIn('status_reservasi', ['dibayar', 'selesai'])
+            ->whereIn('status_reservasi', ['booking', 'selesai'])
             ->whereMonth('tgl_reservasi', $now->month)
             ->whereYear('tgl_reservasi', $now->year)
             ->groupBy('bulan')

@@ -24,7 +24,11 @@ class Reservasi extends Model
         'nilai_diskon',
         'total_bayar',
         'file_bukti_tf',
-        'status_reservasi'
+        'status_reservasi',
+        'midtrans_order_id',
+        'midtrans_transaction_id',
+        'midtrans_status',
+        'midtrans_payment_type'
     ];
 
     public function pelanggan()
