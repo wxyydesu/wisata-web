@@ -180,7 +180,7 @@ function processPayment() {
             }
         });
 
-        fetch('{{ route("penginapan.snap-token", "") }}/{{ $reservasi->id }}', {
+        fetch('{{ route("penginapan.snap-token", $reservasi->id) }}', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,

@@ -14,10 +14,18 @@ class BeritaSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get kategori IDs
-        $kategoriDestinasi = KategoriBerita::where('kategori_berita', 'Destinasi Wisata')->first()?->id ?? 1;
-        $kategoriEvent = KategoriBerita::where('kategori_berita', 'Event & Promo')->first()?->id ?? 2;
-        $kategoriTips = KategoriBerita::where('kategori_berita', 'Tips & Trik Traveling')->first()?->id ?? 3;
+        // Get or create kategori IDs (ensure they exist)
+        $kategoriDestinasi = KategoriBerita::firstOrCreate(
+            ['kategori_berita' => 'Destinasi Wisata']
+        )->id;
+        
+        $kategoriEvent = KategoriBerita::firstOrCreate(
+            ['kategori_berita' => 'Event & Promo']
+        )->id;
+        
+        $kategoriTips = KategoriBerita::firstOrCreate(
+            ['kategori_berita' => 'Tips & Trik Traveling']
+        )->id;
 
         $beritas = [
             [
