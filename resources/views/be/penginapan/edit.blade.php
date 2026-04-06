@@ -39,6 +39,36 @@
                                           placeholder="Masukkan fasilitas yang tersedia" required>{{ old('fasilitas', $penginapan->fasilitas) }}</textarea>
                             </div>
 
+                            <div class="form-group">
+                                <label>Lokasi</label>
+                                <input type="text" name="lokasi" class="form-control" 
+                                       value="{{ old('lokasi', $penginapan->lokasi) }}" 
+                                       placeholder="Masukkan lokasi penginapan" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Harga per Malam (Rp)</label>
+                                <input type="number" name="harga_per_malam" class="form-control" 
+                                       value="{{ old('harga_per_malam', $penginapan->harga_per_malam) }}" 
+                                       placeholder="Masukkan harga per malam" min="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kapasitas (Jumlah Kamar)</label>
+                                <input type="number" name="kapasitas" class="form-control" 
+                                       value="{{ old('kapasitas', $penginapan->kapasitas) }}" 
+                                       placeholder="Masukkan kapasitas kamar" min="1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="status" class="form-control" required>
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="tersedia" {{ old('status', $penginapan->status) === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                                    <option value="tidak tersedia" {{ old('status', $penginapan->status) === 'tidak tersedia' ? 'selected' : '' }}>Tidak Tersedia</option>
+                                </select>
+                            </div>
+
                             @for($i = 1; $i <= 5; $i++)
                                 @php 
                                     $foto = 'foto'.$i;

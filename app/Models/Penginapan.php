@@ -19,11 +19,26 @@ class Penginapan extends Model
         'foto2',
         'foto3',
         'foto4',
-        'foto5'
+        'foto5',
+        'harga_per_malam',
+        'kapasitas',
+        'lokasi',
+        'status'
     ];
 
     public function ulasan()
     {
         return $this->hasMany(Ulasan::class, 'penginapan_id');
+    }
+
+    public function reservasiPenginapan()
+    {
+        return $this->hasMany(PenginapanReservasi::class, 'id_penginapan');
+    }
+
+    public function reservasiPenginapanAktif()
+    {
+        return $this->hasMany(PenginapanReservasi::class, 'id_penginapan')
+            ->whereNotIn('status_reservasi', ['batal', 'selesai']);
     }
 }

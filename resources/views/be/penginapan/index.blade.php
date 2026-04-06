@@ -31,7 +31,10 @@
                                     <tr>
                                         <th scope="col">No</th>
                                         <th scope="col">Nama Penginapan</th>
-                                        <th scope="col">Fasilitas</th>
+                                        <th scope="col">Lokasi</th>
+                                        <th scope="col">Harga/Malam</th>
+                                        <th scope="col">Kapasitas</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Foto</th>
                                         <th scope="col">Aksi</th>
                                     </tr>
@@ -48,10 +51,35 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if (strlen($p->fasilitas) > 30)
-                                                {{ substr($p->fasilitas, 0, 30) . '...' }}
+                                            @if ($p->lokasi)
+                                                @if (strlen($p->lokasi) > 15)
+                                                    {{ substr($p->lokasi, 0, 15) . '...' }}
+                                                @else
+                                                    {{ $p->lokasi }}
+                                                @endif
                                             @else
-                                                {{ $p->fasilitas }}
+                                                <span class="badge bg-secondary">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($p->harga_per_malam)
+                                                <span class="badge bg-success">Rp {{ number_format($p->harga_per_malam, 0, ',', '.') }}</span>
+                                            @else
+                                                <span class="badge bg-secondary">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($p->kapasitas)
+                                                <span class="badge bg-info">{{ $p->kapasitas }} Kamar</span>
+                                            @else
+                                                <span class="badge bg-secondary">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($p->status === 'tersedia')
+                                                <span class="badge bg-success">Tersedia</span>
+                                            @else
+                                                <span class="badge bg-danger">Tidak Tersedia</span>
                                             @endif
                                         </td>
                                         <td>

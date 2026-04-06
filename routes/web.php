@@ -33,6 +33,11 @@ Route::get('/stay-cation', [App\Http\Controllers\HomeController::class, 'pengina
 Route::get('/stay-cation/{id}', [App\Http\Controllers\HomeController::class, 'detailPenginapan'])->name('detail.penginapan');
 Route::get('/objek-wisata', [App\Http\Controllers\HomeController::class, 'objekWisata'])->name('objekwisata.front');
 Route::get('/objek-wisata/{id}', [App\Http\Controllers\HomeController::class, 'detailObjekWisata'])->name('detail.objekwisata');
+
+// Ulasan Routes (Public, but requires auth)
+Route::post('/ulasan', [App\Http\Controllers\UlasanController::class, 'store'])->name('ulasan.store')->middleware('auth');
+Route::put('/ulasan/{ulasan}', [App\Http\Controllers\UlasanController::class, 'update'])->name('ulasan.update')->middleware('auth');
+Route::delete('/ulasan/{ulasan}', [App\Http\Controllers\UlasanController::class, 'destroy'])->name('ulasan.destroy')->middleware('auth');
 // Authenticated User Routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
@@ -48,6 +53,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/{id}/payment', [App\Http\Controllers\PesananController::class, 'payment'])->name('pesanan.payment');
     Route::post('/pesanan/{id}/snap-token', [App\Http\Controllers\PesananController::class, 'getSnapToken'])->name('pesanan.snap-token');
     Route::post('/pesanan/{id}/verify-payment', [App\Http\Controllers\PesananController::class, 'verifyPayment'])->name('pesanan.verify-payment');
+    
+    // Penginapan Checkout (Customer Booking)
+    Route::get('/checkout/penginapan/{penginapan}', [App\Http\Controllers\PenginapanReservasiController::class, 'customerCheckout'])->name('checkout.penginapan');
+    Route::post('/penginapan-reservasi/customer', [App\Http\Controllers\PenginapanReservasiController::class, 'customerStore'])->name('penginapan.customer.store');
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
@@ -75,11 +84,45 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
         return redirect()->route($user->level);
     })->name('dashboard');
 
+    Route::middleware(CheckUserLevel::class . ':owner,admin,bendahara')->group(function () {
+        Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index2'])->name('profile_index');
+        Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update2'])->name('profile_update');
+    });
+
+    // DOUBLE ROUTE ADMIN & OWNER (Content Management)
+    Route::middleware(CheckUserLevel::class . ':owner,admin')->group(function () {
+        // // Objek Wisata routes
+        Route::get('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'index'])->name('wisata.index');
+        Route::get('/objek-wisata/create', [App\Http\Controllers\ObyekWisataController::class, 'create'])->name('wisata.create');
+        Route::post('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'store'])->name('wisata.store');
+        Route::get('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'show'])->name('wisata.show');
+        Route::get('/objek-wisata/{obyekWisata}/edit', [App\Http\Controllers\ObyekWisataController::class, 'edit'])->name('wisata.edit');
+        Route::put('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'update'])->name('wisata.update');
+        Route::delete('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'destroy'])->name('wisata.destroy');
+
+         // Berita routes
+        Route::get('/berita', [App\Http\Controllers\BeritaController::class, 'index'])->name('berita.index');
+        Route::get('/berita/create', [App\Http\Controllers\BeritaController::class, 'create'])->name('berita.create');
+        Route::post('/berita', [App\Http\Controllers\BeritaController::class, 'store'])->name('berita.store');
+        Route::get('/berita/{id}/edit', [App\Http\Controllers\BeritaController::class, 'edit'])->name('berita.edit');
+        Route::put('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'update'])->name('berita.update');
+        Route::delete('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'destroy'])->name('berita.destroy');
+
+        // Penginapan routes
+        Route::get('/penginapan', [App\Http\Controllers\PenginapanController::class, 'index'])->name('penginapan.index');
+        Route::get('/penginapan/create', [App\Http\Controllers\PenginapanController::class, 'create'])->name('penginapan.create');
+        Route::post('/penginapan', [App\Http\Controllers\PenginapanController::class, 'store'])->name('penginapan.store');
+        Route::get('/penginapan/{penginapan}/edit', [App\Http\Controllers\PenginapanController::class, 'edit'])->name('penginapan.edit');
+        Route::put('/penginapan/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'update'])->name('penginapan.update');
+        Route::delete('/penginapan/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'destroy'])->name('penginapan.destroy');
+        Route::get('/penginapan/{penginapan}/detail', [App\Http\Controllers\PenginapanController::class, 'show'])->name('penginapan.show');
+    });
+
     // Admin Section
     Route::middleware(CheckUserLevel::class . ':admin')->group(function () {
         Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin');
-        Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index2'])->name('profile_index');
-        Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update2'])->name('profile_update');
+        // Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index2'])->name('profile_index');
+        // Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update2'])->name('profile_update');
             
         // User Management
         Route::prefix('users')->group(function () {
@@ -93,20 +136,20 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
         });
         
         // Content Management
-        Route::get('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'index'])->name('wisata.index');
-        Route::get('/objek-wisata/create', [App\Http\Controllers\ObyekWisataController::class, 'create'])->name('wisata.create');
-        Route::post('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'store'])->name('wisata.store');
-        Route::get('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'show'])->name('wisata.show');
-        Route::get('/objek-wisata/{obyekWisata}/edit', [App\Http\Controllers\ObyekWisataController::class, 'edit'])->name('wisata.edit');
-        Route::put('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'update'])->name('wisata.update');
-        Route::delete('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'destroy'])->name('wisata.destroy');
+        // Route::get('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'index'])->name('wisata.index');
+        // Route::get('/objek-wisata/create', [App\Http\Controllers\ObyekWisataController::class, 'create'])->name('wisata.create');
+        // Route::post('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'store'])->name('wisata.store');
+        // Route::get('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'show'])->name('wisata.show');
+        // Route::get('/objek-wisata/{obyekWisata}/edit', [App\Http\Controllers\ObyekWisataController::class, 'edit'])->name('wisata.edit');
+        // Route::put('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'update'])->name('wisata.update');
+        // Route::delete('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'destroy'])->name('wisata.destroy');
 
-        Route::get('/berita', [App\Http\Controllers\BeritaController::class, 'index'])->name('berita.index');
-        Route::get('/berita/create', [App\Http\Controllers\BeritaController::class, 'create'])->name('berita.create');
-        Route::post('/berita', [App\Http\Controllers\BeritaController::class, 'store'])->name('berita.store');
-        Route::get('/berita/{id}/edit', [App\Http\Controllers\BeritaController::class, 'edit'])->name('berita.edit');
-        Route::put('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'update'])->name('berita.update');
-        Route::delete('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'destroy'])->name('berita.destroy');
+        // Route::get('/berita', [App\Http\Controllers\BeritaController::class, 'index'])->name('berita.index');
+        // Route::get('/berita/create', [App\Http\Controllers\BeritaController::class, 'create'])->name('berita.create');
+        // Route::post('/berita', [App\Http\Controllers\BeritaController::class, 'store'])->name('berita.store');
+        // Route::get('/berita/{id}/edit', [App\Http\Controllers\BeritaController::class, 'edit'])->name('berita.edit');
+        // Route::put('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'update'])->name('berita.update');
+        // Route::delete('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'destroy'])->name('berita.destroy');
 
         Route::resource('kategori-berita', App\Http\Controllers\KategoriBeritaController::class)->except(['show'])->names([
             'index' => 'kategori-berita.index',
@@ -123,8 +166,8 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
     // Bendahara Section
     Route::middleware(CheckUserLevel::class . ':bendahara')->group(function () {
         Route::get('/bendahara', [App\Http\Controllers\BendaharaController::class, 'index'])->name('bendahara');
-        Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index2'])->name('profile_index');
-        Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update2'])->name('profile_update');
+        // Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index2'])->name('profile_index');
+        // Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update2'])->name('profile_update');
 
         // Financial Reports
         Route::get('/export-pdf', [App\Http\Controllers\OwnerController::class, 'exportPdf'])->name('exportPdf');
@@ -142,26 +185,17 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
     // Owner Section
     Route::middleware(CheckUserLevel::class . ':owner')->group(function () {
         Route::get('/owner', [App\Http\Controllers\OwnerController::class, 'index'])->name('owner');
-        Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index2'])->name('profile_index');
-        Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update2'])->name('profile_update');
+        // Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index2'])->name('profile_index');
+        // Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update2'])->name('profile_update');
         Route::resource('/bank', \App\Http\Controllers\BankController::class)->names('bank');
 
         // Berita routes
-        Route::get('/berita', [App\Http\Controllers\BeritaController::class, 'index'])->name('berita.index');
-        Route::get('/berita/create', [App\Http\Controllers\BeritaController::class, 'create'])->name('berita.create');
-        Route::post('/berita', [App\Http\Controllers\BeritaController::class, 'store'])->name('berita.store');
-        Route::get('/berita/{id}/edit', [App\Http\Controllers\BeritaController::class, 'edit'])->name('berita.edit');
-        Route::put('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'update'])->name('berita.update');
-        Route::delete('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'destroy'])->name('berita.destroy');
-
-        // Objek Wisata routes
-        Route::get('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'index'])->name('wisata.index');
-        Route::get('/objek-wisata/create', [App\Http\Controllers\ObyekWisataController::class, 'create'])->name('wisata.create');
-        Route::post('/objek-wisata', [App\Http\Controllers\ObyekWisataController::class, 'store'])->name('wisata.store');
-        Route::get('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'show'])->name('wisata.show');
-        Route::get('/objek-wisata/{obyekWisata}/edit', [App\Http\Controllers\ObyekWisataController::class, 'edit'])->name('wisata.edit');
-        Route::put('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'update'])->name('wisata.update');
-        Route::delete('/objek-wisata/{obyekWisata}', [App\Http\Controllers\ObyekWisataController::class, 'destroy'])->name('wisata.destroy');
+        // Route::get('/berita', [App\Http\Controllers\BeritaController::class, 'index'])->name('berita.index');
+        // Route::get('/berita/create', [App\Http\Controllers\BeritaController::class, 'create'])->name('berita.create');
+        // Route::post('/berita', [App\Http\Controllers\BeritaController::class, 'store'])->name('berita.store');
+        // Route::get('/berita/{id}/edit', [App\Http\Controllers\BeritaController::class, 'edit'])->name('berita.edit');
+        // Route::put('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'update'])->name('berita.update');
+        // Route::delete('/berita/{id}', [App\Http\Controllers\BeritaController::class, 'destroy'])->name('berita.destroy');
 
         Route::post('diskon/update-all', [App\Http\Controllers\DiskonPaketController::class, 'updateAll'])->name('diskon.updateAll');
         Route::resource('diskon', App\Http\Controllers\DiskonPaketController::class)->names([
@@ -173,14 +207,25 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
         Route::get('/export-excel', [App\Http\Controllers\OwnerController::class, 'exportExcel'])->name('exportExcel');
     });
 
-    // Common Dashboard Features
-    Route::get('/penginapan', [App\Http\Controllers\PenginapanController::class, 'index'])->name('penginapan.index');
-    Route::get('/penginapan/create', [App\Http\Controllers\PenginapanController::class, 'create'])->name('penginapan.create');
-    Route::post('/penginapan', [App\Http\Controllers\PenginapanController::class, 'store'])->name('penginapan.store');
-    Route::get('/penginapan/{penginapan}/edit', [App\Http\Controllers\PenginapanController::class, 'edit'])->name('penginapan.edit');
-    Route::put('/penginapan/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'update'])->name('penginapan.update');
-    Route::delete('/penginapan/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'destroy'])->name('penginapan.destroy');
-    Route::get('/penginapan/{penginapan}/detail', [App\Http\Controllers\PenginapanController::class, 'show'])->name('penginapan.show');
+    // // Common Dashboard Features
+    // Route::get('/penginapan', [App\Http\Controllers\PenginapanController::class, 'index'])->name('penginapan.index');
+    // Route::get('/penginapan/create', [App\Http\Controllers\PenginapanController::class, 'create'])->name('penginapan.create');
+    // Route::post('/penginapan', [App\Http\Controllers\PenginapanController::class, 'store'])->name('penginapan.store');
+    // Route::get('/penginapan/{penginapan}/edit', [App\Http\Controllers\PenginapanController::class, 'edit'])->name('penginapan.edit');
+    // Route::put('/penginapan/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'update'])->name('penginapan.update');
+    // Route::delete('/penginapan/{penginapan}', [App\Http\Controllers\PenginapanController::class, 'destroy'])->name('penginapan.destroy');
+    // Route::get('/penginapan/{penginapan}/detail', [App\Http\Controllers\PenginapanController::class, 'show'])->name('penginapan.show');
+
+    // Penginapan Reservasi Routes
+    Route::get('/penginapan-reservasi', [App\Http\Controllers\PenginapanReservasiController::class, 'index'])->name('penginapan_reservasi.index');
+    Route::get('/penginapan-reservasi/create', [App\Http\Controllers\PenginapanReservasiController::class, 'create'])->name('penginapan_reservasi.create');
+    Route::post('/penginapan-reservasi', [App\Http\Controllers\PenginapanReservasiController::class, 'store'])->name('penginapan_reservasi.store');
+    Route::get('/penginapan-reservasi/{penginapanReservasi}/show', [App\Http\Controllers\PenginapanReservasiController::class, 'show'])->name('penginapan_reservasi.show');
+    Route::get('/penginapan-reservasi/{penginapanReservasi}/edit', [App\Http\Controllers\PenginapanReservasiController::class, 'edit'])->name('penginapan_reservasi.edit');
+    Route::put('/penginapan-reservasi/{penginapanReservasi}', [App\Http\Controllers\PenginapanReservasiController::class, 'update'])->name('penginapan_reservasi.update');
+    Route::delete('/penginapan-reservasi/{penginapanReservasi}', [App\Http\Controllers\PenginapanReservasiController::class, 'destroy'])->name('penginapan_reservasi.destroy');
+    Route::get('/penginapan-reservasi/{penginapanReservasi}/payment', [App\Http\Controllers\PenginapanReservasiController::class, 'payment'])->name('penginapan_reservasi.payment');
+    Route::post('/penginapan-reservasi/api/{penginapanReservasi}/snap-token', [App\Http\Controllers\PenginapanReservasiController::class, 'processPayment'])->name('penginapan_reservasi.snap-token');
 
     Route::resource('paket-wisata', App\Http\Controllers\PaketWisataController::class)->names([
         'index' => 'paket.index',
@@ -214,3 +259,4 @@ Route::prefix('dashboard')->middleware('auth')->group(function () {
 
 // Midtrans Callback (public route, outside middleware)
 Route::post('/payment/callback', [App\Http\Controllers\ReservasiController::class, 'handleCallback'])->name('payment.callback');
+Route::post('/penginapan-reservation/callback', [App\Http\Controllers\PenginapanReservasiController::class, 'callback'])->name('penginapan_reservasi.callback');

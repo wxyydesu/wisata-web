@@ -24,7 +24,7 @@
                     <div class="card-body">
                         <div class="mb-4">
                             <h3>{{ $penginapan->nama_penginapan }}</h3>
-                            <p class="text-muted">{{ $penginapan->alamat }}</p>
+                            <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>{{ $penginapan->lokasi ?? $penginapan->alamat ?? '-' }}</p>
                         </div>
 
                         <div class="mb-4">
@@ -67,24 +67,24 @@
 
                 <div class="card mt-4">
                     <div class="card-body">
-                        <h5 class="mb-3">Informasi Tambahan</h5>
+                        <h5 class="mb-3">Informasi Booking</h5>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
+                                <span>Lokasi:</span>
+                                <span class="fw-bold">{{ $penginapan->lokasi ?? '-' }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
                                 <span>Harga per Malam:</span>
-                                <span class="fw-bold">Rp {{ number_format($penginapan->harga, 0, ',', '.') }}</span>
+                                <span class="fw-bold text-success">Rp {{ number_format($penginapan->harga_per_malam ?? 0, 0, ',', '.') }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
-                                <span>Kategori:</span>
-                                <span class="fw-bold">{{ $penginapan->kategori }}</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Kapasitas:</span>
-                                <span class="fw-bold">{{ $penginapan->kapasitas }} Orang</span>
+                                <span>Kapasitas Kamar:</span>
+                                <span class="fw-bold">{{ $penginapan->kapasitas ?? '-' }} Kamar</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Status:</span>
-                                <span class="badge bg-{{ $penginapan->status == 'tersedia' ? 'success' : 'danger' }}">
-                                    {{ ucfirst($penginapan->status) }}
+                                <span class="badge bg-{{ ($penginapan->status ?? 'tidak tersedia') === 'tersedia' ? 'success' : 'danger' }}">
+                                    {{ ucfirst($penginapan->status ?? 'tidak tersedia') }}
                                 </span>
                             </li>
                         </ul>

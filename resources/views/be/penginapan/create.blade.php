@@ -34,6 +34,30 @@
                             </div>
 
                             <div class="form-group">
+                                <label>Lokasi</label>
+                                    <input type="text" name="lokasi" class="form-control" placeholder="Masukkan lokasi penginapan" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Harga per Malam (Rp)</label>
+                                    <input type="number" name="harga_per_malam" class="form-control" placeholder="Masukkan harga per malam" min="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kapasitas (Jumlah Kamar)</label>
+                                    <input type="number" name="kapasitas" class="form-control" placeholder="Masukkan kapasitas kamar" min="1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Status</label>
+                                    <select name="status" class="form-control" required>
+                                        <option value="">-- Pilih Status --</option>
+                                        <option value="tersedia">Tersedia</option>
+                                        <option value="tidak tersedia">Tidak Tersedia</option>
+                                    </select>
+                            </div>
+
+                            <div class="form-group">
                                 <label>Upload Foto</label>
                                 <div class="row">
                                     @for($i = 1; $i <= 5; $i++)

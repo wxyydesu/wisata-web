@@ -79,7 +79,7 @@
                                         </td>
                                         <td>
                                             <a href="{{ route('berita.edit', $item->id) }}" class="btn btn-warning btn-sm me-2" title="Edit">
-                                                <i class="fa fa-pencil-square-o"></i>
+                                                <i class="fa fa-pencil-square-o"></i>Edit
                                             </a>
                                             <form action="{{ route('berita.destroy', $item->id) }}" method="POST" style="display: inline;">
                                                 @csrf

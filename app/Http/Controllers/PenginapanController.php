@@ -35,9 +35,13 @@ class PenginapanController extends Controller
     {
     try {
         $validated = $request->validate([
-            'nama_penginapan' => 'required|string|max:255',
+            'nama_penginapan' => 'required|string|max:255|unique:penginapans',
+            'lokasi' => 'nullable|string|max:255',
             'deskripsi' => 'required|string',
             'fasilitas' => 'required|string',
+            'harga_per_malam' => 'required|numeric|min:0',
+            'kapasitas' => 'required|integer|min:1',
+            'status' => 'required|in:tersedia,tidak tersedia',
             'foto1' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
@@ -47,9 +51,13 @@ class PenginapanController extends Controller
 
         // Map form fields to database columns
         $data = [
-            'nama_penginapan' => $validated['nama_penginapan'], // Map to correct column
+            'nama_penginapan' => $validated['nama_penginapan'],
+            'lokasi' => $validated['lokasi'],
             'deskripsi' => $validated['deskripsi'],
-            'fasilitas' => $validated['fasilitas']
+            'fasilitas' => $validated['fasilitas'],
+            'harga_per_malam' => $validated['harga_per_malam'],
+            'kapasitas' => $validated['kapasitas'],
+            'status' => $validated['status']
         ];
 
         // Handle file uploads
@@ -70,11 +78,11 @@ class PenginapanController extends Controller
             'timer' => 1500
         ]);
     } catch (\Exception $e) {
-            \Log::error('Delete failed: '.$e->getMessage());
+            \Log::error('Create penginapan failed: '.$e->getMessage());
             return back()->with('swal', [
                 'icon' => 'error',
                 'title' => 'Gagal',
-                'text' => 'Gagal Mebuat Penginapan',
+                'text' => 'Gagal Membuat Penginapan',
                 'timer' => 3000
             ]);
         }
@@ -109,9 +117,13 @@ class PenginapanController extends Controller
     try {
         $penginapan = Penginapan::findOrFail($id);
         $validated = $request->validate([
-            'nama_penginapan' => 'required|string|max:255',
+            'nama_penginapan' => 'required|string|max:255|unique:penginapans,nama_penginapan,' . $id,
+            'lokasi' => 'nullable|string|max:255',
             'deskripsi' => 'required|string',
             'fasilitas' => 'required|string',
+            'harga_per_malam' => 'required|numeric|min:0',
+            'kapasitas' => 'required|integer|min:1',
+            'status' => 'required|in:tersedia,tidak tersedia',
             'foto1' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'foto3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
@@ -126,14 +138,18 @@ class PenginapanController extends Controller
 
         $updateData = [
             'nama_penginapan' => $validated['nama_penginapan'],
+            'lokasi' => $validated['lokasi'],
             'deskripsi' => $validated['deskripsi'],
-            'fasilitas' => $validated['fasilitas']
+            'fasilitas' => $validated['fasilitas'],
+            'harga_per_malam' => $validated['harga_per_malam'],
+            'kapasitas' => $validated['kapasitas'],
+            'status' => $validated['status']
         ];
 
         // Handle photo updates
         for ($i = 1; $i <= 5; $i++) {
             $field = 'foto'.$i;
-            $deleteField = 'delete_foto'.$i; // <-- perbaiki dari hapus_foto ke delete_foto
+            $deleteField = 'delete_foto'.$i;
 
             // If delete checkbox is checked
             if ($request->has($deleteField) && $request->input($deleteField)) {
@@ -168,7 +184,7 @@ class PenginapanController extends Controller
             'timer' => 1500
         ]);
     } catch (\Exception $e) {
-            \Log::error('Delete failed: '.$e->getMessage());
+            \Log::error('Update penginapan failed: '.$e->getMessage());
             return back()->with('swal', [
                 'icon' => 'error',
                 'title' => 'Gagal',

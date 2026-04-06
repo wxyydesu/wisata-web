@@ -19,12 +19,12 @@
       @endif
       
       <!-- Profile Link (Common for all) -->
-      <li class="nav-item">
+      {{-- <li class="nav-item">
         <a class="nav-link" href="{{ route('profile_index') }}">
           <i class="menu-icon mdi mdi-account"></i>
           <span class="menu-title">My Profile</span>
         </a>
-      </li>
+      </li> --}}
       
       @if (Auth::check() && Auth::user()->level === 'admin')
       <li class="nav-item">
@@ -41,9 +41,10 @@
         </a>
         <div class="collapse" id="admin-menu">
           <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan.index') }}">Penginapan</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan.index') }}">Penginapan (Master)</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan_reservasi.index') }}">Penginapan Booking</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('wisata.index') }}">Objek Wisata</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Reservasi</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Paket Wisata Reservasi</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('berita.index') }}">Berita</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('kategori-wisata.index') }}">Kategori Wisata</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('kategori-berita.index') }}">Kategori Berita</a></li>
@@ -59,11 +60,12 @@
         </a>
         <div class="collapse" id="bendahara-menu">
           <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('paket.index') }}">Paket</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Reservasi</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('paket.index') }}">Paket Wisata</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Paket Wisata Reservasi</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan_reservasi.index') }}">Penginapan Booking</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('diskon.index') }}">Diskon</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('exportPdf') }}">Export PDF</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('exportExcel') }}">Export Excel</a></li>
+            {{-- <li class="nav-item"><a class="nav-link" href="{{ route('exportPdf') }}">Export PDF</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('exportExcel') }}">Export Excel</a></li> --}}
           </ul>
         </div>
       </li>
@@ -76,14 +78,16 @@
         </a>
         <div class="collapse" id="owner-menu">
           <ul class="nav flex-column sub-menu">
-            <li class="nav-item"><a class="nav-link" href="{{ route('paket.index') }}">Paket</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Reservasi</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan.index') }}">Penginapan (Master)</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('penginapan_reservasi.index') }}">Penginapan Booking</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('paket.index') }}">Paket Wisata</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('reservasi.index') }}">Paket Wisata Reservasi</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('diskon.index') }}">Diskon</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('berita.index') }}">Berita</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('wisata.index') }}">Objek Wisata</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ route('bank.index') }}">Bank</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('exportPdf') }}">Export PDF</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('exportExcel') }}">Export Excel</a></li>
+            {{-- <li class="nav-item"><a class="nav-link" href="{{ route('exportPdf') }}">Export PDF</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('exportExcel') }}">Export Excel</a></li> --}}
           </ul>
         </div>
       </li>

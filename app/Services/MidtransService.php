@@ -26,9 +26,13 @@ class MidtransService
     /**
      * Create Snap token for payment
      */
-    public function createToken($reservasi, $pelanggan, $banks = [])
+    public function createToken($reservasi, $pelanggan, $banks = [], $type = 'paket')
     {
-        $orderId = 'RES-' . $reservasi->id . '-' . time();
+        if ($type === 'penginapan') {
+            $orderId = 'PEN-' . $reservasi->id . '-' . time();
+        } else {
+            $orderId = 'RES-' . $reservasi->id . '-' . time();
+        }
 
         $transaction_details = [
             'order_id' => $orderId,
@@ -36,29 +40,40 @@ class MidtransService
         ];
 
         // Item details
-        $items = [
-            [
-                'id' => $reservasi->paketWisata->id,
-                'price' => (int)($reservasi->harga * $reservasi->jumlah_peserta),
-                'quantity' => $reservasi->jumlah_peserta,
-                'name' => $reservasi->paketWisata->nama_paket,
-            ]
-        ];
+        if ($type === 'penginapan') {
+            $items = [
+                [
+                    'id' => $reservasi->penginapan->id,
+                    'price' => (int)($reservasi->harga_per_malam * $reservasi->jumlah_kamar),
+                    'quantity' => $reservasi->lama_malam,
+                    'name' => $reservasi->penginapan->nama_penginapan . ' (' . $reservasi->jumlah_kamar . ' kamar)',
+                ]
+            ];
+        } else {
+            $items = [
+                [
+                    'id' => $reservasi->paketWisata->id,
+                    'price' => (int)($reservasi->harga * $reservasi->jumlah_peserta),
+                    'quantity' => $reservasi->jumlah_peserta,
+                    'name' => $reservasi->paketWisata->nama_paket,
+                ]
+            ];
+        }
 
         // If discount applied, add it as negative item
         if ($reservasi->nilai_diskon > 0) {
             $items[] = [
                 'id' => 'discount',
-                'price' => -$reservasi->nilai_diskon,
+                'price' => -(int)$reservasi->nilai_diskon,
                 'quantity' => 1,
                 'name' => 'Diskon',
             ];
         }
 
         $customer_details = [
-            'first_name' => $pelanggan->user->name,
+            'first_name' => $pelanggan->user->name ?? $pelanggan->nama_lengkap,
             'email' => $pelanggan->user->email,
-            'phone' => $pelanggan->no_telp ?? '',
+            'phone' => $pelanggan->no_hp ?? '',
         ];
 
         // Build enabled payments

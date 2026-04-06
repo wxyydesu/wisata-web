@@ -206,69 +206,84 @@
                 
                 <div class="tab-pane fade" id="reviews" role="tabpanel">
                     <div class="review-section">
+                        @if(Auth::check())
+                            {{-- Form Tambah Ulasan --}}
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>Berikan Ulasan Anda</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="formUlasanPaket" method="POST" action="{{ route('ulasan.store') }}">
+                                        @csrf
+                                        <input type="hidden" name="paket_wisata_id" value="{{ $paket->id }}">
+                                        <input type="hidden" name="user_id" value="{{ Auth::id() }}">
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="ratingPaket">Rating</label>
+                                            <div id="ratingStarsPaket" class="mb-2">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i class="bi bi-star-fill" data-rating="{{ $i }}" style="cursor: pointer; font-size: 2rem; color: #ddd; margin-right: 5px;"></i>
+                                                @endfor
+                                            </div>
+                                            <input type="hidden" id="ratingPaket" name="rating" value="0" required>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label for="komentarPaket">Komentar</label>
+                                            <textarea class="form-control" id="komentarPaket" name="komentar" rows="4" placeholder="Tulis ulasan Anda di sini..." required></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Kirim Ulasan</button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Rating Summary --}}
+                        @php
+                            $allUlasan = $paket->ulasan()->where('paket_wisata_id', $paket->id)->get();
+                            $rataRata = $allUlasan->avg('rating') ?? 0;
+                            $jumlahUlasan = $allUlasan->count();
+                        @endphp
+                        
                         <div class="review-summary text-center mb-5">
                             <div class="overall-rating">
-                                <span class="rating-number">4.5</span>
+                                <span class="rating-number">{{ number_format($rataRata, 1) }}</span>
                                 <div class="rating-stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="bi {{ $i <= round($rataRata) ? 'bi-star-fill' : 'bi-star' }}" style="color: #ffc107;"></i>
+                                    @endfor
                                 </div>
-                                <p class="text-muted">Berdasarkan 24 ulasan</p>
+                                <p class="text-muted">Berdasarkan {{ $jumlahUlasan }} ulasan</p>
                             </div>
                         </div>
                         
+                        {{-- Daftar Ulasan --}}
                         <div class="review-list">
-                            <!-- Sample Review Items -->
-                            <div class="review-item mb-4">
-                                <div class="review-header">
-                                    <div class="reviewer-info">
-                                        <img src="https://randomuser.me/api/portraits/women/32.jpg" class="reviewer-avatar" alt="Reviewer">
-                                        <div>
-                                            <h6 class="reviewer-name mb-0">Sarah Johnson</h6>
-                                            <div class="review-rating">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
+                            @forelse($allUlasan as $ulasan)
+                                <div class="review-item mb-4">
+                                    <div class="review-header">
+                                        <div class="reviewer-info">
+                                            <div>
+                                                <h6 class="reviewer-name mb-0">{{ $ulasan->user->name }}</h6>
+                                                <div class="review-rating">
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        <i class="bi {{ $i <= $ulasan->rating ? 'bi-star-fill' : 'bi-star' }}" style="color: #ffc107;"></i>
+                                                    @endfor
+                                                </div>
                                             </div>
                                         </div>
+                                        <span class="review-date">{{ $ulasan->created_at->diffForHumans() }}</span>
                                     </div>
-                                    <span class="review-date">2 minggu lalu</span>
-                                </div>
-                                <div class="review-body">
-                                    <p>Perjalanan yang sangat menyenangkan! Pemandu wisata sangat informatif dan ramah. Hotelnya nyaman dan lokasinya strategis. Pasti akan merekomendasikan ke teman-teman.</p>
-                                </div>
-                            </div>
-                            
-                            <div class="review-item mb-4">
-                                <div class="review-header">
-                                    <div class="reviewer-info">
-                                        <img src="https://randomuser.me/api/portraits/men/45.jpg" class="reviewer-avatar" alt="Reviewer">
-                                        <div>
-                                            <h6 class="reviewer-name mb-0">David Wilson</h6>
-                                            <div class="review-rating">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="far fa-star"></i>
-                                            </div>
-                                        </div>
+                                    <div class="review-body">
+                                        <p>{{ $ulasan->komentar }}</p>
                                     </div>
-                                    <span class="review-date">1 bulan lalu</span>
                                 </div>
-                                <div class="review-body">
-                                    <p>Pengalaman yang bagus secara keseluruhan. Transportasi nyaman dan itinerary terorganisir dengan baik. Hanya saja waktu di beberapa destinasi terasa sedikit terburu-buru.</p>
+                            @empty
+                                <div class="alert alert-info">
+                                    Belum ada ulasan. Jadilah yang pertama memberikan ulasan!
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center mt-4">
-                            <button class="btn btn-outline-primary">Lihat Semua Ulasan</button>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -731,6 +746,7 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function changeSlide(index) {
         const carousel = new bootstrap.Carousel(document.getElementById('packageCarousel'));
@@ -831,6 +847,81 @@
             endDateInput.disabled = true;
             endDateInput.value = '';
         }
+    });
+
+    // Rating Stars functionality
+    const starsPaket = document.querySelectorAll('#ratingStarsPaket i');
+    const ratingInputPaket = document.getElementById('ratingPaket');
+
+    starsPaket.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.dataset.rating;
+            ratingInputPaket.value = rating;
+            
+            starsPaket.forEach(s => {
+                if (s.dataset.rating <= rating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+
+        star.addEventListener('mouseover', function() {
+            const hoverRating = this.dataset.rating;
+            starsPaket.forEach(s => {
+                if (s.dataset.rating <= hoverRating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+    });
+
+    document.getElementById('ratingStarsPaket').addEventListener('mouseleave', function() {
+        const currentRating = ratingInputPaket.value;
+        starsPaket.forEach(s => {
+            if (s.dataset.rating <= currentRating) {
+                s.style.color = '#ffc107';
+            } else {
+                s.style.color = '#ddd';
+            }
+        });
+    });
+
+    // Form submission
+    document.getElementById('formUlasanPaket')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('{{ route("ulasan.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'Ulasan Anda telah disimpan!',
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire('Error', data.message || 'Gagal menyimpan ulasan', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'Terjadi kesalahan', 'error');
+        });
     });
 });
 </script>

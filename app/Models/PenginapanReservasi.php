@@ -5,21 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Reservasi extends Model
+class PenginapanReservasi extends Model
 {
     use HasFactory;
 
-    protected $table = 'reservasis';
+    protected $table = 'penginapan_reservasis';
     
     protected $fillable = [
         'id_pelanggan',
-        'id_paket',
+        'id_penginapan',
         'tgl_reservasi',
-        'tgl_mulai',
-        'tgl_akhir',
-        'lama_reservasi',
-        'harga',
-        'jumlah_peserta',
+        'tgl_check_in',
+        'tgl_check_out',
+        'lama_malam',
+        'harga_per_malam',
+        'jumlah_kamar',
         'diskon',
         'nilai_diskon',
         'total_bayar',
@@ -36,19 +36,14 @@ class Reservasi extends Model
         return $this->belongsTo(Pelanggan::class, 'id_pelanggan');
     }
 
-    public function paketWisata()
+    public function penginapan()
     {
-        return $this->belongsTo(PaketWisata::class, 'id_paket');
-    }
-
-    public function bank()
-    {
-        return $this->belongsTo(Bank::class, 'id_bank');
+        return $this->belongsTo(Penginapan::class, 'id_penginapan');
     }
 
     public function ulasan()
     {
-        return $this->hasMany(Ulasan::class, 'reservasi_id');
+        return $this->hasMany(Ulasan::class, 'penginapan_reservasi_id');
     }
 
     /**
@@ -57,7 +52,7 @@ class Reservasi extends Model
     public function isExpired()
     {
         return $this->status_reservasi === 'booking' 
-            && \Carbon\Carbon::now()->toDateString() > $this->tgl_akhir;
+            && \Carbon\Carbon::now()->toDateString() > $this->tgl_check_out;
     }
 
     /**
@@ -65,6 +60,6 @@ class Reservasi extends Model
      */
     public function getRemainingDays()
     {
-        return \Carbon\Carbon::parse($this->tgl_akhir)->diffInDays(\Carbon\Carbon::now());
+        return \Carbon\Carbon::parse($this->tgl_check_out)->diffInDays(\Carbon\Carbon::now());
     }
 }

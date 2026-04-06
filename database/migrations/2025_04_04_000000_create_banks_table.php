@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('banks', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_bank', 100);
-            $table->string('no_rekening', 100);
-            $table->string('atas_nama', 100)->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('banks')) {
+            Schema::create('banks', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama_bank', 100);
+                $table->string('no_rekening', 100);
+                $table->string('atas_nama', 100)->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
