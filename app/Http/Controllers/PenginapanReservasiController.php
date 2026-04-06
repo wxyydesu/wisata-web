@@ -477,20 +477,24 @@ class PenginapanReservasiController extends Controller
      */
     public function customerStore(Request $request)
     {
-        // Validate input
-        $validated = $request->validate([
-            'penginapan_id' => 'required|exists:penginapans,id',
-            'tgl_check_in' => 'required|date|after:today',
-            'tgl_check_out' => 'required|date|after:tgl_check_in',
-            'jumlah_kamar' => 'required|integer|min:1',
-        ]);
-
         try {
+            // Validate input
+            $validated = $request->validate([
+                'penginapan_id' => 'required|exists:penginapans,id',
+                'tgl_check_in' => 'required|date|after:today',
+                'tgl_check_out' => 'required|date|after:tgl_check_in',
+                'jumlah_kamar' => 'required|integer|min:1',
+            ]);
+
             // Get current user's pelanggan
             $user = Auth::user();
             
             if (!$user->pelanggan) {
-                return redirect()->back()->with('error', 'Profil pelanggan tidak ditemukan. Silakan perbarui profil Anda.');
+                $errorMsg = 'Profil pelanggan tidak ditemukan. Silakan perbarui profil Anda.';
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => $errorMsg], 422);
+                }
+                return redirect()->back()->with('error', $errorMsg);
             }
 
             $penginapan = Penginapan::findOrFail($request->penginapan_id);
@@ -529,16 +533,33 @@ class PenginapanReservasiController extends Controller
                 'reservasi_id' => $reservasi->id,
             ]);
 
-            // Redirect to checkout page
-            return redirect()->route('checkout.penginapan', [
+            // Prepare checkout URL
+            $checkoutUrl = route('checkout.penginapan', [
                 'penginapan' => $penginapan->id,
                 'check_in' => $checkIn->format('Y-m-d'),
                 'check_out' => $checkOut->format('Y-m-d'),
                 'jumlah_kamar' => $jumlahKamar,
-            ])->with('success', 'Reservasi berhasil dibuat! Silakan lanjutkan ke pembayaran.');
+            ]);
+
+            // Return JSON for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reservasi berhasil dibuat!',
+                    'redirect_url' => $checkoutUrl
+                ]);
+            }
+
+            // Redirect for regular form submission
+            return redirect()->to($checkoutUrl)->with('success', 'Reservasi berhasil dibuat! Silakan lanjutkan ke pembayaran.');
         } catch (\Exception $e) {
             Log::error('Customer booking error: '.$e->getMessage());
-            return redirect()->back()->with('error', 'Gagal membuat reservasi. ' . $e->getMessage());
+            $errorMsg = 'Gagal membuat reservasi. ' . $e->getMessage();
+            
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $errorMsg], 422);
+            }
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
 }

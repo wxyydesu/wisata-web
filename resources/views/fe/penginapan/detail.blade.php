@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
     checkOutInput.addEventListener('change', calculateTotal);
     jumlahKamarInput.addEventListener('change', calculateTotal);
 
-    // Form submission
+    // Form Ulasan submission
     document.getElementById('formUlasan')?.addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(this);
@@ -262,6 +262,71 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             Swal.fire('Error', 'Terjadi kesalahan', 'error');
+        });
+    });
+
+    // Form Pesan (Booking) submission with AJAX
+    document.getElementById('formPesan')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const checkIn = document.getElementById('tgl_check_in').value;
+        const checkOut = document.getElementById('tgl_check_out').value;
+        const jumlahKamar = document.getElementById('jumlah_kamar').value;
+        
+        // Validate dates
+        if (!checkIn || !checkOut) {
+            Swal.fire('Error', 'Silakan isi tanggal check-in dan check-out', 'error');
+            return;
+        }
+
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+
+        if (checkOutDate <= checkInDate) {
+            Swal.fire('Error', 'Tanggal check-out harus setelah tanggal check-in', 'error');
+            return;
+        }
+
+        // Show loading
+        Swal.fire({
+            title: 'Memproses...',
+            text: 'Mohon tunggu, sedang memproses pemesanan Anda',
+            icon: 'info',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const formData = new FormData(this);
+        
+        fetch('{{ route("penginapan.customer.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pemesanan Berhasil!',
+                    text: 'Sedang membawa Anda ke halaman pembayaran...',
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(() => {
+                    window.location.href = data.redirect_url;
+                });
+            } else {
+                Swal.fire('Error', data.message || 'Gagal membuat pemesanan', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'Gagal membuat pemesanan. Silakan coba lagi.', 'error');
         });
     });
 });
