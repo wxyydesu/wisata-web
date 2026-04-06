@@ -505,13 +505,29 @@ class PenginapanReservasiController extends Controller
 
             $penginapan = Penginapan::findOrFail($request->penginapan_id);
             
+            // Validate penginapan price
+            if (!$penginapan->harga_per_malam || $penginapan->harga_per_malam <= 0) {
+                throw new \Exception('Harga penginapan tidak valid: ' . ($penginapan->harga_per_malam ?? 'null'));
+            }
+            
             // Calculate duration and total
             $checkIn = Carbon::parse($request->tgl_check_in);
             $checkOut = Carbon::parse($request->tgl_check_out);
             $lamaMalam = $checkOut->diffInDays($checkIn);
+            
+            // Validate duration
+            if ($lamaMalam <= 0) {
+                throw new \Exception('Durasi menginap harus minimal 1 malam');
+            }
+            
             $hargaPerMalam = $penginapan->harga_per_malam;
             $jumlahKamar = $request->jumlah_kamar;
             $subtotal = $hargaPerMalam * $lamaMalam * $jumlahKamar;
+            
+            // Validate subtotal
+            if ($subtotal <= 0) {
+                throw new \Exception('Total harga harus lebih besar dari 0. Harga/malam: ' . $hargaPerMalam . ', Malam: ' . $lamaMalam . ', Kamar: ' . $jumlahKamar);
+            }
             
             // Create reservation
             $reservasi = PenginapanReservasi::create([
@@ -612,6 +628,23 @@ class PenginapanReservasiController extends Controller
             if (!$penginapanReservasi->pelanggan) {
                 Log::error('Pelanggan not found for reservasi ID: ' . $penginapanReservasi->id);
                 return response()->json(['success' => false, 'message' => 'Data pelanggan tidak ditemukan'], 422);
+            }
+
+            // Recalculate total_bayar if it's negative or invalid
+            if (!$penginapanReservasi->total_bayar || $penginapanReservasi->total_bayar <= 0) {
+                Log::warning('Invalid total_bayar for reservasi ' . $penginapanReservasi->id . ': ' . ($penginapanReservasi->total_bayar ?? 'null'));
+                
+                // Recalculate from reservation data
+                $subtotal = $penginapanReservasi->harga_per_malam * $penginapanReservasi->lama_malam * $penginapanReservasi->jumlah_kamar;
+                $total = $subtotal - $penginapanReservasi->nilai_diskon;
+                
+                if ($total <= 0) {
+                    throw new \Exception('Total pembayaran tidak valid setelah perhitungan ulang. Subtotal: ' . $subtotal . ', Diskon: ' . $penginapanReservasi->nilai_diskon);
+                }
+                
+                // Update the reservation with correct total
+                $penginapanReservasi->update(['total_bayar' => $total]);
+                $penginapanReservasi->refresh();
             }
 
             $midtransService = new MidtransService();
