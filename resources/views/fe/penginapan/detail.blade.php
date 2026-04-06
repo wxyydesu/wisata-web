@@ -214,6 +214,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkOutInput = document.getElementById('tgl_check_out');
     const jumlahKamarInput = document.getElementById('jumlah_kamar');
 
+    function updateCheckOutMinDate() {
+        if (checkInInput.value) {
+            const checkInDate = new Date(checkInInput.value);
+            const minCheckOutDate = new Date(checkInDate);
+            minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
+            
+            const minDateString = minCheckOutDate.toISOString().split('T')[0];
+            checkOutInput.min = minDateString;
+            
+            // If current checkout is before new minimum, reset it
+            if (checkOutInput.value && new Date(checkOutInput.value) <= checkInDate) {
+                checkOutInput.value = minDateString;
+            }
+            
+            calculateTotal();
+        }
+    }
+
     function calculateTotal() {
         const checkIn = new Date(checkInInput.value);
         const checkOut = new Date(checkOutInput.value);
@@ -227,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    checkInInput.addEventListener('change', calculateTotal);
+    checkInInput.addEventListener('change', updateCheckOutMinDate);
     checkOutInput.addEventListener('change', calculateTotal);
     jumlahKamarInput.addEventListener('change', calculateTotal);
 

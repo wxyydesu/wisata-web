@@ -517,7 +517,7 @@ class PenginapanReservasiController extends Controller
             
             // Validate duration
             if ($lamaMalam <= 0) {
-                throw new \Exception('Durasi menginap harus minimal 1 malam');
+                throw new \Exception('Durasi menginap harus minimal 1 malam. Tanggal check-in: ' . $checkIn->format('Y-m-d') . ', Check-out: ' . $checkOut->format('Y-m-d'));
             }
             
             $hargaPerMalam = $penginapan->harga_per_malam;
