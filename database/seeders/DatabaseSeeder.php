@@ -104,7 +104,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             KategoriWisataSeeder::class,
-            // Tambahkan seeder lainnya di sini
+            KategoriBeritaSeeder::class,
+            PaketWisataSeeder::class,
+            PenginapanSeeder::class,
+            BeritaSeeder::class,
         ]);
     }
 }

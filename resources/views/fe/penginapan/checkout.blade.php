@@ -143,8 +143,8 @@
             return;
         }
         
-        // Redirect to penginapan payment page  
-        window.location.href = '/dashboard/penginapan-reservasi/' + reservasiId + '/payment';
+        // Redirect to customer payment page (NOT admin dashboard)
+        window.location.href = '/penginapan-reservasi/' + reservasiId + '/payment';
     }
 
     function updateDisplay(data) {

@@ -568,4 +568,50 @@ class PenginapanReservasiController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }
     }
+
+    /**
+     * Customer Payment Page - Display customer-facing payment page
+     */
+    public function customerPayment(PenginapanReservasi $penginapanReservasi)
+    {
+        // Authorization check
+        if (Auth::user()->level === 'pelanggan' && $penginapanReservasi->id_pelanggan != Auth::user()->pelanggan->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Only allow payment for unpaid reservations
+        if (!in_array($penginapanReservasi->status_reservasi, ['menunggu konfirmasi', 'booking'])) {
+            abort(403, 'Reservasi tidak dapat dibayar');
+        }
+
+        $penginapanReservasi->load(['pelanggan', 'penginapan']);
+        $banks = Bank::all();
+        
+        return view('fe.penginapan.payment', [
+            'reservasi' => $penginapanReservasi,
+            'banks' => $banks,
+            'midtrans_client_key' => config('midtrans.client_key')
+        ]);
+    }
+
+    /**
+     * Get Snap Token for customer payment
+     */
+    public function customerSnapToken(Request $request, PenginapanReservasi $penginapanReservasi)
+    {
+        try {
+            // Authorization check
+            if (Auth::user()->level === 'pelanggan' && $penginapanReservasi->id_pelanggan != Auth::user()->pelanggan->id) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
+            $midtransService = new MidtransService();
+            $token = $midtransService->createToken('penginapan', $penginapanReservasi);
+
+            return response()->json(['success' => true, 'token' => $token]);
+        } catch (\Exception $e) {
+            Log::error('Snap token error: '.$e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal mendapatkan token pembayaran'], 422);
+        }
+    }
 }
