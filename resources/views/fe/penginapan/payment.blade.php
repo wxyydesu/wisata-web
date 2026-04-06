@@ -193,7 +193,7 @@ function processPayment() {
         .then(response => response.json())
         .then(data => {
             Swal.close();
-            if (data.token) {
+            if (data.success && data.token) {
                 snap.pay(data.token, {
                     onSuccess: function(result) {
                         Swal.fire({
@@ -217,7 +217,9 @@ function processPayment() {
                     }
                 });
             } else {
-                Swal.fire('Error', data.message || 'Gagal mendapatkan token pembayaran', 'error');
+                const errorMsg = data.message || 'Gagal mendapatkan token pembayaran';
+                console.error('Midtrans error:', data);
+                Swal.fire('Error', errorMsg, 'error');
             }
         })
         .catch(error => {

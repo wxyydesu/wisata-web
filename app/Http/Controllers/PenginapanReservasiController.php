@@ -608,6 +608,12 @@ class PenginapanReservasiController extends Controller
             // Load relationships
             $penginapanReservasi->load(['pelanggan', 'penginapan']);
 
+            // Verify pelanggan exists
+            if (!$penginapanReservasi->pelanggan) {
+                Log::error('Pelanggan not found for reservasi ID: ' . $penginapanReservasi->id);
+                return response()->json(['success' => false, 'message' => 'Data pelanggan tidak ditemukan'], 422);
+            }
+
             $midtransService = new MidtransService();
             // Call createToken with correct parameters: (reservasi, pelanggan, banks, type)
             $token = $midtransService->createToken($penginapanReservasi, $penginapanReservasi->pelanggan, [], 'penginapan');
@@ -615,7 +621,8 @@ class PenginapanReservasiController extends Controller
             return response()->json(['success' => true, 'token' => $token]);
         } catch (\Exception $e) {
             Log::error('Snap token error: '.$e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal mendapatkan token pembayaran'], 422);
+            Log::error('Stack trace: '.$e->getTraceAsString());
+            return response()->json(['success' => false, 'message' => 'Gagal mendapatkan token pembayaran: ' . $e->getMessage()], 422);
         }
     }
 }

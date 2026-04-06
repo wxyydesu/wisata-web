@@ -11,8 +11,15 @@ class MidtransService
 {
     public function __construct()
     {
-        Config::$serverKey = config('midtrans.server_key');
-        Config::$clientKey = config('midtrans.client_key');
+        $serverKey = config('midtrans.server_key');
+        $clientKey = config('midtrans.client_key');
+        
+        if (!$serverKey || !$clientKey) {
+            throw new \Exception('Midtrans credentials not configured properly. Check your .env file.');
+        }
+        
+        Config::$serverKey = $serverKey;
+        Config::$clientKey = $clientKey;
         Config::$isSanitized = true;
         Config::$is3ds = true;
 
@@ -34,6 +41,11 @@ class MidtransService
             $orderId = 'RES-' . $reservasi->id . '-' . time();
         }
 
+        // Validate total_bayar
+        if (!isset($reservasi->total_bayar) || (int)$reservasi->total_bayar <= 0) {
+            throw new \Exception('Total pembayaran harus lebih besar dari 0. Current: ' . ($reservasi->total_bayar ?? 'null'));
+        }
+
         $transaction_details = [
             'order_id' => $orderId,
             'gross_amount' => (int)$reservasi->total_bayar,
@@ -41,9 +53,13 @@ class MidtransService
 
         // Item details
         if ($type === 'penginapan') {
+            if (!isset($reservasi->penginapan) || !$reservasi->penginapan) {
+                throw new \Exception('Data penginapan tidak ditemukan untuk reservasi ini');
+            }
+            
             $items = [
                 [
-                    'id' => $reservasi->penginapan->id,
+                    'id' => (string)$reservasi->penginapan->id,
                     'price' => (int)($reservasi->harga_per_malam * $reservasi->jumlah_kamar),
                     'quantity' => $reservasi->lama_malam,
                     'name' => $reservasi->penginapan->nama_penginapan . ' (' . $reservasi->jumlah_kamar . ' kamar)',
@@ -52,7 +68,7 @@ class MidtransService
         } else {
             $items = [
                 [
-                    'id' => $reservasi->paketWisata->id,
+                    'id' => (string)$reservasi->paketWisata->id,
                     'price' => (int)($reservasi->harga * $reservasi->jumlah_peserta),
                     'quantity' => $reservasi->jumlah_peserta,
                     'name' => $reservasi->paketWisata->nama_paket,
@@ -70,11 +86,20 @@ class MidtransService
             ];
         }
 
+        // Validate customer details
+        if (!$pelanggan || !isset($pelanggan->user)) {
+            throw new \Exception('Data pelanggan atau user tidak ditemukan');
+        }
+
         $customer_details = [
             'first_name' => $pelanggan->user->name ?? $pelanggan->nama_lengkap,
-            'email' => $pelanggan->user->email,
+            'email' => $pelanggan->user->email ?? '',
             'phone' => $pelanggan->no_hp ?? '',
         ];
+
+        if (!$customer_details['email']) {
+            throw new \Exception('Email pelanggan tidak ditemukan');
+        }
 
         // Build enabled payments
         $enabled_payments = ['credit_card', 'gcg_wallet'];
