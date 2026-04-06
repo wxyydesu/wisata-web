@@ -489,12 +489,18 @@ class PenginapanReservasiController extends Controller
             // Get current user's pelanggan
             $user = Auth::user();
             
+            // Auto-create pelanggan profile if it doesn't exist
             if (!$user->pelanggan) {
-                $errorMsg = 'Profil pelanggan tidak ditemukan. Silakan perbarui profil Anda.';
-                if ($request->expectsJson()) {
-                    return response()->json(['success' => false, 'message' => $errorMsg], 422);
-                }
-                return redirect()->back()->with('error', $errorMsg);
+                Pelanggan::create([
+                    'id_user' => $user->id,
+                    'nama_lengkap' => $user->name,
+                    'no_hp' => $user->no_hp,
+                    'alamat' => $user->alamat,
+                    'foto' => $user->foto,
+                ]);
+                
+                // Refresh user to get the newly created pelanggan
+                $user = $user->fresh();
             }
 
             $penginapan = Penginapan::findOrFail($request->penginapan_id);
