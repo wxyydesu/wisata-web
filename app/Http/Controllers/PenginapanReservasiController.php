@@ -715,9 +715,9 @@ class PenginapanReservasiController extends Controller
             if (in_array($transactionStatus, ['settlement', 'capture'])) {
                 // Payment successful - update reservation status
                 $penginapanReservasi->update([
-                    'status_reservasi' => 'terkonfirmasi',
-                    'payment_method' => $paymentType,
-                    'payment_status' => 'paid'
+                    'status_reservasi' => 'booking',
+                    'midtrans_transaction_id' => $transactionStatus,
+                    'midtrans_payment_type' => $paymentType
                 ]);
                 
                 return response()->json([
@@ -737,8 +737,8 @@ class PenginapanReservasiController extends Controller
             } elseif (in_array($transactionStatus, ['deny', 'cancel', 'expire'])) {
                 // Payment denied, cancelled or expired
                 $penginapanReservasi->update([
-                    'status_reservasi' => 'pembayaran ditolak',
-                    'payment_status' => 'failed'
+                    'status_reservasi' => 'batal',
+                    'midtrans_status' => $transactionStatus
                 ]);
                 
                 return response()->json([
@@ -761,5 +761,32 @@ class PenginapanReservasiController extends Controller
             Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json(['success' => false, 'message' => 'Gagal memverifikasi pembayaran: ' . $e->getMessage()], 422);
         }
+    }
+
+    /**
+     * Customer History - Show customer's penginapan reservations
+     */
+    public function customerHistory()
+    {
+        if (!Auth::check() || Auth::user()->level !== 'pelanggan') {
+            abort(403, 'Akses ditolak');
+        }
+
+        $user = Auth::user();
+        $status = request('status');
+        
+        $query = $user->pelanggan->penginapanReservasis()->with('penginapan')->latest();
+        
+        if ($status) {
+            $query->where('status_reservasi', $status);
+        }
+        
+        $reservasis = $query->paginate(10)->appends(request()->all());
+        
+        return view('fe.penginapan.riwayat', [
+            'title' => 'Riwayat Pemesanan Penginapan',
+            'reservasis' => $reservasis,
+            'user' => $user,
+        ]);
     }
 }

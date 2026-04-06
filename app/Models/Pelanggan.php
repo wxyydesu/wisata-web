@@ -28,4 +28,9 @@ class Pelanggan extends Model
     {
         return $this->hasMany(Reservasi::class, 'id_pelanggan');
     }
+
+    public function penginapanReservasis()
+    {
+        return $this->hasMany(PenginapanReservasi::class, 'id_pelanggan');
+    }
 }

@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/penginapan-reservasi/{penginapanReservasi}/payment', [App\Http\Controllers\PenginapanReservasiController::class, 'customerPayment'])->name('penginapan.customer.payment');
     Route::post('/penginapan-reservasi/{penginapanReservasi}/snap-token', [App\Http\Controllers\PenginapanReservasiController::class, 'customerSnapToken'])->name('penginapan.snap-token');
     Route::post('/penginapan-reservasi/{penginapanReservasi}/verify-payment', [App\Http\Controllers\PenginapanReservasiController::class, 'verifyPayment'])->name('penginapan.verify-payment');
+    Route::get('/riwayat-penginapan', [App\Http\Controllers\PenginapanReservasiController::class, 'customerHistory'])->name('penginapan.riwayat')->middleware('auth');
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');

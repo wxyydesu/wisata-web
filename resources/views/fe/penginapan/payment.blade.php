@@ -211,7 +211,7 @@ function verifyPayment(orderId, reservasiId) {
                 showConfirmButton: false,
                 timer: 2000
             }).then(() => {
-                window.location.href = '{{ route("penginapan") }}';
+                window.location.href = '{{ route("pesanan.index", ["tab" => "penginapan"]) }}';
             });
         } else if (data.success && data.status === 'pending') {
             // Payment still pending
@@ -250,7 +250,7 @@ function verifyPayment(orderId, reservasiId) {
             showConfirmButton: false,
             timer: 3000
         }).then(() => {
-            window.location.href = '{{ route("penginapan") }}';
+            window.location.href = '{{ route("pesanan.index", ["tab" => "penginapan"]) }}';
         });
     });
 }

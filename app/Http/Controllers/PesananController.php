@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Reservasi;
+use App\Models\PenginapanReservasi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\PaketWisata;
@@ -19,19 +20,36 @@ class PesananController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $query = Reservasi::with(['paketWisata', 'bank'])
+        $status = request('status');
+        $tab = request('tab', 'paket'); // Default tab adalah paket
+        
+        // Query for package reservations (Paket Wisata)
+        $queryPaket = Reservasi::with(['paketWisata', 'bank'])
             ->where('id_pelanggan', $user->pelanggan->id);
 
-        if (request('status')) {
-            $query->where('status_reservasi', request('status'));
+        if ($status && $tab === 'paket') {
+            $queryPaket->where('status_reservasi', $status);
         }
 
-        $reservasis = $query->latest()->paginate(10)->appends(request()->all());
+        $reservasis = $queryPaket->latest()->paginate(10, ['*'], 'page_paket')->appends(request()->all());
+
+        // Query for accommodation reservations (Penginapan)
+        $queryPenginapan = PenginapanReservasi::with(['penginapan'])
+            ->where('id_pelanggan', $user->pelanggan->id);
+
+        if ($status && $tab === 'penginapan') {
+            $queryPenginapan->where('status_reservasi', $status);
+        }
+
+        $penginapanReservasis = $queryPenginapan->latest()->paginate(10, ['*'], 'page_penginapan')->appends(request()->all());
 
         return view('fe.pesanan.index', [
             'title' => 'Pesanan Saya',
             'reservasis' => $reservasis,
+            'penginapanReservasis' => $penginapanReservasis,
             'user' => $user,
+            'tab' => $tab,
+            'status' => $status,
         ]);
     }
 
