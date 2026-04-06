@@ -481,7 +481,7 @@ class PenginapanReservasiController extends Controller
             // Validate input
             $validated = $request->validate([
                 'penginapan_id' => 'required|exists:penginapans,id',
-                'tgl_check_in' => 'required|date|after:today',
+                'tgl_check_in' => 'required|date|after_or_equal:today',
                 'tgl_check_out' => 'required|date|after:tgl_check_in',
                 'jumlah_kamar' => 'required|integer|min:1',
             ]);
