@@ -123,6 +123,28 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $midtrans_client_key }}"></script>
 <script>
+// Ensure Snap is loaded
+var snapToken = null;
+var snapReady = false;
+
+// Check if Snap is loaded
+window.addEventListener('load', function() {
+    if (window.snap) {
+        snapReady = true;
+        console.log('Snap script loaded successfully');
+    } else {
+        console.error('Snap script failed to load');
+    }
+});
+
+// Fallback check after 3 seconds
+setTimeout(function() {
+    if (!snapReady && window.snap) {
+        snapReady = true;
+        console.log('Snap loaded (after timeout)');
+    }
+}, 3000);
+
 document.addEventListener('DOMContentLoaded', function() {
     // Show/hide bank details based on selection
     document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
@@ -163,12 +185,88 @@ function loadBankDetails() {
     @endif
 }
 
+function verifyPayment(orderId, reservasiId) {
+    // Send order_id to backend to verify payment status with Midtrans
+    fetch('{{ route("penginapan.verify-payment", "") }}/' + reservasiId, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            order_id: orderId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        Swal.close();
+        console.log('Payment verification:', data);
+        
+        if (data.success && (data.status === 'settlement' || data.status === 'capture')) {
+            // Payment successful
+            Swal.fire({
+                icon: 'success',
+                title: 'Pembayaran Berhasil!',
+                text: 'Terima kasih telah melakukan pembayaran. Reservasi Anda telah dikonfirmasi.',
+                showConfirmButton: false,
+                timer: 2000
+            }).then(() => {
+                window.location.href = '{{ route("penginapan") }}';
+            });
+        } else if (data.success && data.status === 'pending') {
+            // Payment still pending
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pembayaran Tertunda',
+                text: 'Status pembayaran Anda sedang diproses. Anda akan menerima notifikasi ketika pembayaran dikonfirmasi.',
+                showConfirmButton: true
+            });
+        } else if (data.success && data.status === 'deny') {
+            // Payment denied
+            Swal.fire({
+                icon: 'error',
+                title: 'Pembayaran Ditolak',
+                text: 'Pembayaran Anda ditolak oleh sistem pembayaran. Silakan coba lagi dengan metode pembayaran lain.',
+                showConfirmButton: true
+            });
+        } else {
+            // Unknown status or error
+            Swal.fire({
+                icon: 'error',
+                title: 'Verifikasi Gagal',
+                text: data.message || 'Terjadi kesalahan saat memverifikasi pembayaran.',
+                showConfirmButton: true
+            });
+        }
+    })
+    .catch(error => {
+        Swal.close();
+        console.error('Verification error:', error);
+        // If verification fails, still show success since Snap already processed it
+        Swal.fire({
+            icon: 'warning',
+            title: 'Pembayaran Mungkin Berhasil',
+            text: 'Pembayaran Anda telah diproses. Kami sedang memverifikasi status. Anda akan menerima notifikasi segera.',
+            showConfirmButton: false,
+            timer: 3000
+        }).then(() => {
+            window.location.href = '{{ route("penginapan") }}';
+        });
+    });
+}
+
 function processPayment() {
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
     const reservasiId = '{{ $reservasi->id }}';
     const totalBayar = {{ $reservasi->total_bayar }};
 
     if (paymentMethod === 'midtrans') {
+        // Check if Snap is loaded
+        if (!window.snap) {
+            Swal.fire('Error', 'Snap payment script belum siap. Silakan refresh halaman dan coba lagi.', 'error');
+            return;
+        }
+
         // Process via Midtrans
         Swal.fire({
             title: 'Memproses Pembayaran...',
@@ -190,30 +288,47 @@ function processPayment() {
                 reservation_id: reservasiId
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP error, status = ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             Swal.close();
+            console.log('Token response:', data);
+            
             if (data.success && data.token) {
-                snap.pay(data.token, {
+                // Use snap.pay to open modal
+                window.snap.pay(data.token, {
                     onSuccess: function(result) {
+                        console.log('Payment success result:', result);
+                        
+                        // Verify transaction on backend before confirming
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Pembayaran Berhasil!',
-                            text: 'Terima kasih telah melakukan pembayaran.',
-                            showConfirmButton: false,
-                            timer: 2000
-                        }).then(() => {
-                            window.location.href = '{{ route("penginapan") }}';
+                            title: 'Memverifikasi Pembayaran...',
+                            html: 'Harap tunggu sebentar',
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
                         });
+                        
+                        // Verify the transaction status from Midtrans
+                        verifyPayment(result.order_id, '{{ $reservasi->id }}');
                     },
                     onPending: function(result) {
-                        Swal.fire('Pembayaran Tertunda', 'Mohon selesaikan pembayaran Anda', 'warning');
+                        console.log('Payment pending:', result);
+                        Swal.fire('Pembayaran Tertunda', 'Status pembayaran masih tertunda. Anda akan menerima notifikasi ketika pembayaran dikonfirmasi.', 'warning');
                     },
                     onError: function(result) {
-                        Swal.fire('Pembayaran Gagal', 'Terjadi kesalahan saat memproses pembayaran', 'error');
+                        console.log('Payment error:', result);
+                        Swal.fire('Pembayaran Gagal', 'Terjadi kesalahan saat memproses pembayaran. ' + (result.status_message || ''), 'error');
                     },
                     onClose: function() {
-                        Swal.fire('Pembayaran Dibatalkan', 'Anda membatalkan proses pembayaran', 'info');
+                        console.log('Payment modal closed without completing transaction');
+                        Swal.fire('Pembayaran Dibatalkan', 'Anda menutup halaman pembayaran tanpa menyelesaikan transaksi.', 'info');
                     }
                 });
             } else {
@@ -223,8 +338,9 @@ function processPayment() {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            Swal.fire('Error', 'Terjadi kesalahan saat memproses pembayaran', 'error');
+            Swal.close();
+            console.error('API Error:', error);
+            Swal.fire('Error', 'Terjadi kesalahan saat memproses pembayaran: ' + error.message, 'error');
         });
     } else if (paymentMethod === 'transfer') {
         // Manual transfer instructions

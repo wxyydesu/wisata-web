@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/penginapan-reservasi/customer', [App\Http\Controllers\PenginapanReservasiController::class, 'customerStore'])->name('penginapan.customer.store');
     Route::get('/penginapan-reservasi/{penginapanReservasi}/payment', [App\Http\Controllers\PenginapanReservasiController::class, 'customerPayment'])->name('penginapan.customer.payment');
     Route::post('/penginapan-reservasi/{penginapanReservasi}/snap-token', [App\Http\Controllers\PenginapanReservasiController::class, 'customerSnapToken'])->name('penginapan.snap-token');
+    Route::post('/penginapan-reservasi/{penginapanReservasi}/verify-payment', [App\Http\Controllers\PenginapanReservasiController::class, 'verifyPayment'])->name('penginapan.verify-payment');
     
     // Profile
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');

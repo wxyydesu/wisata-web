@@ -135,8 +135,7 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="tgl_check_out">Tanggal Check Out</label>
-                                    <input type="date" class="form-control" id="tgl_check_out" name="tgl_check_out" 
-                                        min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
+                                    <input type="date" class="form-control" id="tgl_check_out" name="tgl_check_out" required>
                                 </div>
                             </div>
                         </div>
@@ -230,6 +229,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             calculateTotal();
         }
+    }
+
+    // Set initial checkout minimum when page loads
+    if (checkOutInput) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        checkOutInput.min = tomorrow.toISOString().split('T')[0];
     }
 
     function calculateTotal() {

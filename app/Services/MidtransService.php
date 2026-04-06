@@ -101,13 +101,35 @@ class MidtransService
             throw new \Exception('Email pelanggan tidak ditemukan');
         }
 
-        // Build enabled payments
-        $enabled_payments = ['credit_card', 'gcg_wallet'];
-
-        // Add bank transfer if banks provided
-        if (!empty($banks)) {
-            $enabled_payments[] = 'bank_transfer';
-        }
+        // Build enabled payments - only include valid Midtrans payment codes
+        $enabled_payments = [
+            // Credit & Debit Cards
+            'credit_card',
+            'debit_card',
+            
+            // Bank Virtual Accounts (E-Channel)
+            'bank_transfer',
+            'bca_va',              // BCA Virtual Account
+            'bni_va',              // BNI Virtual Account
+            'mandiri_va',          // Mandiri Virtual Account
+            'permata_va',          // Permata Virtual Account
+            'cimb_va',             // CIMB Virtual Account
+            
+            // Bank Online
+            'echannel',            // Mandiri e-channel
+            'cimb_clicks',         // CIMB Clicks
+            'danamon_online',      // Danamon Online
+            
+            // Buy Now Pay Later
+            'akulaku',
+            
+            // E-Wallets
+            'gopay',
+            'ovo',
+            'linkaja',             // Dana/LINKAJA
+            'shopeepay',
+            'grab_pay',
+        ];
 
         $param = [
             'transaction_details' => $transaction_details,
@@ -127,10 +149,25 @@ class MidtransService
             $param['bank_transfer'] = $bank_transfer;
         }
 
+        // Log the payload for debugging
+        \Illuminate\Support\Facades\Log::debug('Midtrans Snap payload:', [
+            'order_id' => $transaction_details['order_id'],
+            'gross_amount' => $transaction_details['gross_amount'],
+            'item_count' => count($items),
+            'enabled_payments_count' => count($enabled_payments),
+            'customer_email' => $customer_details['email'],
+            'has_bank_transfer' => !empty($banks)
+        ]);
+
         try {
             $snapToken = Snap::getSnapToken($param);
             return $snapToken;
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Midtrans token creation failed:', [
+                'error' => $e->getMessage(),
+                'order_id' => $transaction_details['order_id'],
+                'trace' => $e->getTraceAsString()
+            ]);
             throw new \Exception('Failed to create Snap token: ' . $e->getMessage());
         }
     }

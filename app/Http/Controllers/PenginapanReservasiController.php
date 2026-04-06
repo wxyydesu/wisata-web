@@ -452,7 +452,7 @@ class PenginapanReservasiController extends Controller
                     ->with('error', 'Tanggal check-out harus setelah tanggal check-in.');
             }
 
-            $lamaMalam = $checkOutDate->diffInDays($checkInDate);
+            $lamaMalam = $checkInDate->diffInDays($checkOutDate);  // Changed from $checkOutDate->diffInDays($checkInDate)
             $hargaPerMalam = $penginapan->harga_per_malam;
             $total = $hargaPerMalam * $lamaMalam * $jumlahKamar;
 
@@ -510,14 +510,31 @@ class PenginapanReservasiController extends Controller
                 throw new \Exception('Harga penginapan tidak valid: ' . ($penginapan->harga_per_malam ?? 'null'));
             }
             
-            // Calculate duration and total
-            $checkIn = Carbon::parse($request->tgl_check_in);
-            $checkOut = Carbon::parse($request->tgl_check_out);
-            $lamaMalam = $checkOut->diffInDays($checkIn);
+            // Log the received dates for debugging
+            Log::info('Booking request received', [
+                'tgl_check_in' => $request->tgl_check_in,
+                'tgl_check_out' => $request->tgl_check_out,
+                'jumlah_kamar' => $request->jumlah_kamar,
+                'penginapan_id' => $request->penginapan_id
+            ]);
             
-            // Validate duration
-            if ($lamaMalam <= 0) {
-                throw new \Exception('Durasi menginap harus minimal 1 malam. Tanggal check-in: ' . $checkIn->format('Y-m-d') . ', Check-out: ' . $checkOut->format('Y-m-d'));
+            // Calculate duration and total
+            $checkIn = Carbon::createFromFormat('Y-m-d', $request->tgl_check_in)->startOfDay();
+            $checkOut = Carbon::createFromFormat('Y-m-d', $request->tgl_check_out)->startOfDay();
+            $lamaMalam = $checkIn->diffInDays($checkOut);  // Changed from $checkOut->diffInDays($checkIn)
+            
+            Log::info('Duration calculation', [
+                'check_in' => $checkIn->toDateString(),
+                'check_out' => $checkOut->toDateString(),
+                'lama_malam' => $lamaMalam,
+                'check_in_timestamp' => $checkIn->timestamp,
+                'check_out_timestamp' => $checkOut->timestamp
+            ]);
+            
+            // Validate duration - must have at least 1 night between check-in and check-out
+            if ($lamaMalam < 1) {
+                Log::warning('Invalid duration calculation: check-in=' . $request->tgl_check_in . ', check-out=' . $request->tgl_check_out . ', calculated days=' . $lamaMalam);
+                throw new \Exception('Durasi menginap harus minimal 1 malam. Anda memilih check-in ' . $checkIn->format('d/m/Y') . ' dan check-out ' . $checkOut->format('d/m/Y') . ' (' . $lamaMalam . ' hari)');
             }
             
             $hargaPerMalam = $penginapan->harga_per_malam;
@@ -647,15 +664,102 @@ class PenginapanReservasiController extends Controller
                 $penginapanReservasi->refresh();
             }
 
+            // Load banks for payment methods
+            $banks = Bank::all();
+
             $midtransService = new MidtransService();
             // Call createToken with correct parameters: (reservasi, pelanggan, banks, type)
-            $token = $midtransService->createToken($penginapanReservasi, $penginapanReservasi->pelanggan, [], 'penginapan');
+            $token = $midtransService->createToken($penginapanReservasi, $penginapanReservasi->pelanggan, $banks, 'penginapan');
 
             return response()->json(['success' => true, 'token' => $token]);
         } catch (\Exception $e) {
             Log::error('Snap token error: '.$e->getMessage());
             Log::error('Stack trace: '.$e->getTraceAsString());
             return response()->json(['success' => false, 'message' => 'Gagal mendapatkan token pembayaran: ' . $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Verify payment status from Midtrans
+     */
+    public function verifyPayment(Request $request, PenginapanReservasi $penginapanReservasi)
+    {
+        try {
+            // Authorization check
+            if (Auth::user()->level === 'pelanggan' && $penginapanReservasi->id_pelanggan != Auth::user()->pelanggan->id) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
+            $orderId = $request->input('order_id');
+            
+            if (!$orderId) {
+                return response()->json(['success' => false, 'message' => 'Order ID tidak ditemukan'], 400);
+            }
+
+            // Get transaction status from Midtrans
+            $midtransService = new MidtransService();
+            $status = $midtransService->getStatus($orderId);
+            
+            if (!$status) {
+                Log::warning('Payment status not found for order: ' . $orderId);
+                return response()->json(['success' => false, 'message' => 'Status pembayaran tidak ditemukan'], 404);
+            }
+
+            // Check transaction status
+            $transactionStatus = $status->transaction_status;
+            $paymentType = $status->payment_type ?? 'unknown';
+            
+            Log::info('Payment verification for order ' . $orderId . ': ' . $transactionStatus);
+
+            // Update reservation status based on transaction status
+            if (in_array($transactionStatus, ['settlement', 'capture'])) {
+                // Payment successful - update reservation status
+                $penginapanReservasi->update([
+                    'status_reservasi' => 'terkonfirmasi',
+                    'payment_method' => $paymentType,
+                    'payment_status' => 'paid'
+                ]);
+                
+                return response()->json([
+                    'success' => true,
+                    'status' => 'settlement',
+                    'message' => 'Pembayaran berhasil dikonfirmasi',
+                    'transaction_status' => $transactionStatus
+                ]);
+            } elseif ($transactionStatus === 'pending') {
+                // Payment pending - wait for confirmation
+                return response()->json([
+                    'success' => true,
+                    'status' => 'pending',
+                    'message' => 'Pembayaran masih tertunda',
+                    'transaction_status' => $transactionStatus
+                ]);
+            } elseif (in_array($transactionStatus, ['deny', 'cancel', 'expire'])) {
+                // Payment denied, cancelled or expired
+                $penginapanReservasi->update([
+                    'status_reservasi' => 'pembayaran ditolak',
+                    'payment_status' => 'failed'
+                ]);
+                
+                return response()->json([
+                    'success' => true,
+                    'status' => 'deny',
+                    'message' => 'Pembayaran Anda ditolak atau kadaluarsa',
+                    'transaction_status' => $transactionStatus
+                ]);
+            } else {
+                // Unknown status
+                return response()->json([
+                    'success' => true,
+                    'status' => $transactionStatus,
+                    'message' => 'Status pembayaran: ' . $transactionStatus,
+                    'transaction_status' => $transactionStatus
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Payment verification error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json(['success' => false, 'message' => 'Gagal memverifikasi pembayaran: ' . $e->getMessage()], 422);
         }
     }
 }
