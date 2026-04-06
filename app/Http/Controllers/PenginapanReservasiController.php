@@ -605,8 +605,12 @@ class PenginapanReservasiController extends Controller
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
             }
 
+            // Load relationships
+            $penginapanReservasi->load(['pelanggan', 'penginapan']);
+
             $midtransService = new MidtransService();
-            $token = $midtransService->createToken('penginapan', $penginapanReservasi);
+            // Call createToken with correct parameters: (reservasi, pelanggan, banks, type)
+            $token = $midtransService->createToken($penginapanReservasi, $penginapanReservasi->pelanggan, [], 'penginapan');
 
             return response()->json(['success' => true, 'token' => $token]);
         } catch (\Exception $e) {
